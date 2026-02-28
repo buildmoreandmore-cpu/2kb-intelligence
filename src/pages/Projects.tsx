@@ -1,13 +1,30 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
 import { useNavigate } from 'react-router-dom';
-import { FolderOpen, Plus, Search, Filter, MoreVertical } from 'lucide-react';
+import { FolderOpen, Plus, Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CompletenessBar } from '@/components/CompletenessBar';
+import { getFreshnessStatus } from '@/lib/freshness';
 
 export function Projects() {
   const projects = useStore(state => state.projects);
   const organizations = useStore(state => state.organizations);
+  const moduleLastUpdated = useStore(state => state.moduleLastUpdated);
+  const freshnessConfig = useStore(state => state.freshnessConfig);
   const navigate = useNavigate();
+
+  const getProjectWorstFreshness = (projectId: string): 'fresh' | 'amber' | 'red' => {
+    let worst: 'fresh' | 'amber' | 'red' = 'fresh';
+    for (const config of freshnessConfig) {
+      const key = `${projectId}-${config.module}`;
+      const lastUpdated = moduleLastUpdated[key];
+      if (!lastUpdated) continue;
+      const status = getFreshnessStatus(lastUpdated, config);
+      if (status === 'red') return 'red';
+      if (status === 'amber') worst = 'amber';
+    }
+    return worst;
+  };
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
@@ -69,14 +86,31 @@ export function Projects() {
                 <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-emerald-600 transition-colors">{project.name}</h3>
                 <p className="text-sm text-[#7A8BA8] mb-6">{org?.name}</p>
                 
-                <div className="mt-auto pt-4 border-t border-[#1E2A45] grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="block text-xs font-medium text-[#7A8BA8] uppercase tracking-wider mb-1">ESCO</span>
-                    <span className="text-sm text-[#9AA5B8]">{project.esco}</span>
+                <div className="mt-auto pt-4 border-t border-[#1E2A45] space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="block text-xs font-medium text-[#7A8BA8] uppercase tracking-wider mb-1">ESCO</span>
+                      <span className="text-sm text-[#9AA5B8]">{project.esco}</span>
+                    </div>
+                    <div>
+                      <span className="block text-xs font-medium text-[#7A8BA8] uppercase tracking-wider mb-1">Value</span>
+                      <span className="text-sm text-[#9AA5B8] font-mono">${(project.value / 1000000).toFixed(1)}M</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-xs font-medium text-[#7A8BA8] uppercase tracking-wider mb-1">Value</span>
-                    <span className="text-sm text-[#9AA5B8] font-mono">${(project.value / 1000000).toFixed(1)}M</span>
+                  <div className="flex items-center gap-2">
+                    {(() => {
+                      const freshness = getProjectWorstFreshness(project.id);
+                      if (freshness === 'fresh') return null;
+                      return (
+                        <span className={cn(
+                          "w-2 h-2 rounded-full flex-shrink-0",
+                          freshness === 'red' ? 'bg-red-500' : 'bg-amber-500'
+                        )} title={`Data ${freshness === 'red' ? 'overdue' : 'stale'}`} />
+                      );
+                    })()}
+                    <div className="flex-1" onClick={e => e.stopPropagation()}>
+                      <CompletenessBar projectId={project.id} />
+                    </div>
                   </div>
                 </div>
               </div>

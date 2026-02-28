@@ -1,16 +1,25 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { BarChart3, DollarSign, Plus, Calendar, TrendingUp, AlertTriangle, Zap, Download, FileText, ChevronRight } from 'lucide-react';
+import { BarChart3, DollarSign, Plus, Calendar, TrendingUp, AlertTriangle, Zap, Download, FileText, ChevronRight, HardDrive, Leaf, CheckCircle2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EditableField } from '@/components/EditableField';
+import { AuditTrailPanel } from '@/components/AuditTrailPanel';
+import { FreshnessBadge } from '@/components/FreshnessBadge';
+import { LockIndicator } from '@/components/LockIndicator';
 
 export function Benchmarking({ projectId }: { projectId?: string }) {
   const buildings = useStore(state => state.buildings);
   const utilityBills = useStore(state => state.utilityBills);
   const assets = useStore(state => state.assets);
   const projects = useStore(state => state.projects);
+  const lockRecords = useStore(state => state.lockRecords);
+
+  const addImportRecord = useStore(state => state.addImportRecord);
 
   const [activeTab, setActiveTab] = useState<'energy' | 'capital'>('energy');
   const [selectedBuildingId, setSelectedBuildingId] = useState(buildings[0].id);
+  const [importModal, setImportModal] = useState<'drive' | 'energystar' | null>(null);
+  const [importStatus, setImportStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
   let displayBuildings = buildings;
   if (projectId) {
@@ -83,13 +92,26 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
         <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Facility Assessment & Benchmarking</h1>
+              <h1 className="text-2xl font-bold text-white tracking-tight inline-flex items-center gap-3">
+                Facility Assessment & Benchmarking
+                {projectId && <FreshnessBadge projectId={projectId} module="Utility Bills" showTimestamp />}
+              </h1>
               <p className="text-sm text-[#7A8BA8] mt-1">Ingest utility data, normalize for weather, calculate EUI and capital exposure.</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors duration-150">
-                <DollarSign className="w-4 h-4" />
-                Upload Bills (CSV)
+              <button
+                onClick={() => { setImportModal('drive'); setImportStatus('idle'); }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors duration-150"
+              >
+                <HardDrive className="w-4 h-4" />
+                Import from Google Drive
+              </button>
+              <button
+                onClick={() => { setImportModal('energystar'); setImportStatus('idle'); }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors duration-150"
+              >
+                <Leaf className="w-4 h-4" />
+                Import from ENERGY STAR
               </button>
               <button className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-emerald-700">
                 <Plus className="w-4 h-4" />
@@ -258,17 +280,65 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#1E2A45] stagger-rows">
-                    {buildingBills.map((bill) => (
-                      <tr key={bill.id} className="hover:bg-[#1A2544] transition-colors duration-100">
-                        <td className="px-6 py-4 font-medium text-white">{bill.month}</td>
-                        <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">{bill.electricKwh.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">{bill.peakKw}</td>
-                        <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${bill.electricCost.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">{bill.gasTherms.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${bill.gasCost.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-white font-mono font-semibold">${(bill.electricCost + bill.gasCost).toLocaleString()}</td>
-                      </tr>
-                    ))}
+                    {buildingBills.map((bill) => {
+                      const lock = lockRecords.find(l => l.entityType === 'utilityBill' && l.entityId === bill.id);
+                      return (
+                        <tr key={bill.id} className="hover:bg-[#1A2544] transition-colors duration-100">
+                          <td className="px-6 py-4 font-medium text-white">{bill.month}</td>
+                          <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">
+                            {lock ? (
+                              <span className="inline-flex items-center gap-1.5 justify-end">
+                                {bill.electricKwh.toLocaleString()}
+                                <LockIndicator lock={lock} />
+                              </span>
+                            ) : (
+                              <EditableField value={bill.electricKwh} entityType="utilityBill" entityId={bill.id} field="electricKwh" type="number" formatter={(v) => Number(v).toLocaleString()} />
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">
+                            {lock ? (
+                              <span className="inline-flex items-center gap-1.5 justify-end">
+                                {bill.peakKw}
+                                <LockIndicator lock={lock} />
+                              </span>
+                            ) : (
+                              <EditableField value={bill.peakKw} entityType="utilityBill" entityId={bill.id} field="peakKw" type="number" formatter={(v) => Number(v).toLocaleString()} />
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">
+                            {lock ? (
+                              <span className="inline-flex items-center gap-1.5 justify-end">
+                                ${bill.electricCost.toLocaleString()}
+                                <LockIndicator lock={lock} />
+                              </span>
+                            ) : (
+                              <EditableField value={bill.electricCost} entityType="utilityBill" entityId={bill.id} field="electricCost" type="number" formatter={(v) => `$${Number(v).toLocaleString()}`} />
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">
+                            {lock ? (
+                              <span className="inline-flex items-center gap-1.5 justify-end">
+                                {bill.gasTherms.toLocaleString()}
+                                <LockIndicator lock={lock} />
+                              </span>
+                            ) : (
+                              <EditableField value={bill.gasTherms} entityType="utilityBill" entityId={bill.id} field="gasTherms" type="number" formatter={(v) => Number(v).toLocaleString()} />
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">
+                            {lock ? (
+                              <span className="inline-flex items-center gap-1.5 justify-end">
+                                ${bill.gasCost.toLocaleString()}
+                                <LockIndicator lock={lock} />
+                              </span>
+                            ) : (
+                              <EditableField value={bill.gasCost} entityType="utilityBill" entityId={bill.id} field="gasCost" type="number" formatter={(v) => `$${Number(v).toLocaleString()}`} />
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right text-white font-mono font-semibold">${(bill.electricCost + bill.gasCost).toLocaleString()}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -473,6 +543,105 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
           </>
         )}
       </div>
+
+      {/* Import Simulation Modal */}
+      {importModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop" onClick={() => setImportModal(null)}>
+          <div className="modal-panel bg-[#121C35] border border-[#1E2A45] rounded-xl shadow-2xl w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-[#1E2A45] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {importModal === 'drive' ? <HardDrive className="w-5 h-5 text-[#7A8BA8]" /> : <Leaf className="w-5 h-5 text-emerald-400" />}
+                <h3 className="text-base font-semibold text-white">
+                  {importModal === 'drive' ? 'Import from Google Drive' : 'Import from ENERGY STAR'}
+                </h3>
+              </div>
+              <button onClick={() => setImportModal(null)} className="text-[#5A6B88] hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-6">
+              {importStatus === 'idle' && (
+                <div className="space-y-4">
+                  <div className="bg-[#0F1829] border border-[#1E2A45] rounded-lg p-4">
+                    <p className="text-sm text-[#9AA5B8]">
+                      {importModal === 'drive'
+                        ? 'Select utility bill files from your connected Google Drive folder.'
+                        : 'Pull building benchmark data from your ENERGY STAR Portfolio Manager account.'}
+                    </p>
+                    <div className="mt-3 space-y-2">
+                      {importModal === 'drive' ? (
+                        <>
+                          <div className="flex items-center gap-2 text-xs text-[#7A8BA8]">
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>2024_Utility_Bills_Lincoln_Elementary.xlsx</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-[#7A8BA8]">
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>CityHall_Energy_Data_2024.csv</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2 text-xs text-[#7A8BA8]">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span>Lincoln Elementary — ENERGY STAR Score: 72</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-[#7A8BA8]">
+                            <span className="w-2 h-2 rounded-full bg-amber-500" />
+                            <span>City Hall Annex — ENERGY STAR Score: 45</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setImportStatus('loading');
+                      setTimeout(() => {
+                        setImportStatus('success');
+                        addImportRecord({
+                          type: importModal === 'drive' ? 'Utility Bills' : 'Benchmarks',
+                          source: importModal === 'drive' ? 'Google Drive' : 'ENERGY STAR',
+                          date: new Date().toISOString(),
+                          records: importModal === 'drive' ? 24 : 4,
+                          status: 'Success',
+                          user: 'Martin',
+                        });
+                      }, 1500);
+                    }}
+                    className="w-full px-4 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+                  >
+                    {importModal === 'drive' ? 'Import Selected Files' : 'Sync Building Data'}
+                  </button>
+                </div>
+              )}
+              {importStatus === 'loading' && (
+                <div className="flex flex-col items-center py-8">
+                  <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
+                  <p className="text-sm text-[#9AA5B8]">
+                    {importModal === 'drive' ? 'Importing files...' : 'Syncing with ENERGY STAR...'}
+                  </p>
+                </div>
+              )}
+              {importStatus === 'success' && (
+                <div className="flex flex-col items-center py-8">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-500 mb-3" />
+                  <p className="text-sm font-medium text-white mb-1">Import Successful</p>
+                  <p className="text-xs text-[#7A8BA8]">
+                    {importModal === 'drive' ? '24 records imported from Google Drive' : '4 building benchmarks synced'}
+                  </p>
+                  <button
+                    onClick={() => setImportModal(null)}
+                    className="mt-4 px-4 py-2 bg-[#1E2A45] border border-[#2A3A5C] text-[#9AA5B8] text-sm font-medium rounded-lg hover:bg-[#2A3A5C] transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

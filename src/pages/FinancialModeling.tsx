@@ -3,11 +3,16 @@ import { useStore } from '@/store';
 import { Calculator, TrendingUp, AlertTriangle, CheckCircle2, DollarSign, Leaf, Search, Filter, Plus } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
+import { EditableField } from '@/components/EditableField';
+import { AuditTrailPanel } from '@/components/AuditTrailPanel';
+import { FreshnessBadge } from '@/components/FreshnessBadge';
+import { LockIndicator } from '@/components/LockIndicator';
 
 export function FinancialModeling({ projectId }: { projectId?: string }) {
   const projects = useStore(state => state.projects);
   const ecms = useStore(state => state.ecms);
   const pricingReview = useStore(state => state.pricingReview);
+  const lockRecords = useStore(state => state.lockRecords);
 
   const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[1].id); // Default to project with ECMs
   const [term, setTerm] = useState(15);
@@ -53,7 +58,10 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
         <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Financial Modeling & ESPC Structuring</h1>
+              <h1 className="text-2xl font-bold text-white tracking-tight inline-flex items-center gap-3">
+                Financial Modeling & ESPC Structuring
+                {projectId && <FreshnessBadge projectId={projectId} module="Financial" showTimestamp />}
+              </h1>
               <p className="text-sm text-[#7A8BA8] mt-1">Build ECM bundles, model cash flows, and analyze guarantee risk.</p>
             </div>
             <div className="flex items-center gap-3">
@@ -124,9 +132,15 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
                           {ecm.category}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${ecm.cost.toLocaleString()}</td>
-                      <td className="px-6 py-4 text-right text-emerald-600 font-mono">${ecm.savings.toLocaleString()}</td>
-                      <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">{(ecm.cost / ecm.savings).toFixed(1)} yrs</td>
+                      <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">
+                        <EditableField value={ecm.cost} entityType="ecm" entityId={ecm.id} field="cost" projectId={selectedProjectId} type="number" formatter={(v) => `$${Number(v).toLocaleString()}`} />
+                      </td>
+                      <td className="px-6 py-4 text-right text-emerald-600 font-mono">
+                        <EditableField value={ecm.savings} entityType="ecm" entityId={ecm.id} field="savings" projectId={selectedProjectId} type="number" formatter={(v) => `$${Number(v).toLocaleString()}`} />
+                      </td>
+                      <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">
+                        <EditableField value={ecm.life} entityType="ecm" entityId={ecm.id} field="life" projectId={selectedProjectId} type="number" formatter={(v) => `${v} yrs`} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -302,13 +316,23 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
                       {items.map(item => {
                         const status = getStatus(item);
                         const variance = ((item.escoCost - item.benchMid) / item.benchMid) * 100;
+                        const pricingLock = lockRecords.find(l => l.entityType === 'pricingReview' && l.entityId === item.id);
                         return (
                           <tr key={item.id} className="hover:bg-[#1A2544] transition-colors">
                             <td className="px-6 py-4">
                               <p className="font-medium text-white">{item.description}</p>
                               <p className="text-xs text-[#5A6B88] mt-1 italic">{item.internalNote}</p>
                             </td>
-                            <td className="px-6 py-4 text-right font-mono text-white">${item.escoCost.toLocaleString()}</td>
+                            <td className="px-6 py-4 text-right font-mono text-white">
+                              {pricingLock ? (
+                                <span className="inline-flex items-center gap-1.5 justify-end">
+                                  ${item.escoCost.toLocaleString()}
+                                  <LockIndicator lock={pricingLock} />
+                                </span>
+                              ) : (
+                                <EditableField value={item.escoCost} entityType="pricingReview" entityId={item.id} field="escoCost" projectId={selectedProjectId} type="number" formatter={(v) => `$${Number(v).toLocaleString()}`} />
+                              )}
+                            </td>
                             <td className="px-6 py-4 text-right font-mono text-[#7A8BA8]">${item.benchLow.toLocaleString()}</td>
                             <td className="px-6 py-4 text-right font-mono text-[#7A8BA8]">${item.benchMid.toLocaleString()}</td>
                             <td className="px-6 py-4 text-right font-mono text-[#7A8BA8]">${item.benchHigh.toLocaleString()}</td>

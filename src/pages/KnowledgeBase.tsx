@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useStore } from '@/store';
 import { BookOpen, Search, Filter, Lightbulb, TrendingDown, DollarSign, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EditableField } from '@/components/EditableField';
+import { AuditTrailPanel } from '@/components/AuditTrailPanel';
 
 export function KnowledgeBase() {
   const benchmarks = useStore(state => state.benchmarks);
@@ -100,13 +102,32 @@ export function KnowledgeBase() {
                     <tr key={benchmark.id} className="hover:bg-[#1A2544] transition-colors">
                       <td className="px-6 py-4 font-medium text-white">{benchmark.category}</td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{benchmark.buildingType}</td>
-                      <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${benchmark.unitCostMid.toLocaleString()}</td>
+                      <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">
+                        <EditableField
+                          value={benchmark.unitCostMid}
+                          entityType="benchmark"
+                          entityId={benchmark.id}
+                          field="unitCostMid"
+                          type="number"
+                          formatter={(v) => `$${Number(v).toLocaleString()}`}
+                        />
+                      </td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{benchmark.unit}</td>
-                      <td className="px-6 py-4 text-right text-emerald-500 font-mono">{benchmark.savingsMid}%</td>
+                      <td className="px-6 py-4 text-right text-emerald-500 font-mono">
+                        <EditableField
+                          value={benchmark.savingsMid}
+                          entityType="benchmark"
+                          entityId={benchmark.id}
+                          field="savingsMid"
+                          type="number"
+                          formatter={(v) => `${v}%`}
+                        />
+                      </td>
                       <td className="px-6 py-4 text-[#9AA5B8]">
                         <span className="px-2.5 py-1 rounded bg-[#1E2A45] text-xs font-medium border border-[#2A3A5C]">
                           {benchmark.source}
                         </span>
+                        <AuditTrailPanel entityType="benchmark" entityId={benchmark.id} />
                       </td>
                     </tr>
                   ))}
@@ -137,12 +158,29 @@ export function KnowledgeBase() {
                 <div className="space-y-4 flex-1">
                   <div>
                     <h4 className="text-xs font-medium text-[#7A8BA8] uppercase tracking-wider mb-1">Description</h4>
-                    <p className="text-sm text-[#9AA5B8] leading-relaxed">{lesson.description}</p>
+                    <p className="text-sm text-[#9AA5B8] leading-relaxed">
+                      <EditableField
+                        value={lesson.description}
+                        entityType="lesson"
+                        entityId={lesson.id}
+                        field="description"
+                        type="text"
+                      />
+                    </p>
                   </div>
                   <div>
                     <h4 className="text-xs font-medium text-[#7A8BA8] uppercase tracking-wider mb-1">Recommendation</h4>
-                    <p className="text-sm text-emerald-600 leading-relaxed bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20">{lesson.recommendation}</p>
+                    <p className="text-sm text-emerald-600 leading-relaxed bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20">
+                      <EditableField
+                        value={lesson.recommendation}
+                        entityType="lesson"
+                        entityId={lesson.id}
+                        field="recommendation"
+                        type="text"
+                      />
+                    </p>
                   </div>
+                  <AuditTrailPanel entityType="lesson" entityId={lesson.id} />
                 </div>
               </div>
             ))}

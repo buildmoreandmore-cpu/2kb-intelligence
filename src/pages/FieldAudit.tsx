@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useStore } from '@/store';
 import { Camera, Upload, Mic, AlertTriangle, Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EditableField } from '@/components/EditableField';
+import { AuditTrailPanel } from '@/components/AuditTrailPanel';
+import { FreshnessBadge } from '@/components/FreshnessBadge';
 
 const ASSET_IMAGES: Record<string, string> = {
   'Chiller': '/assets/chiller.jpg',
@@ -50,7 +53,10 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
         <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Field Audit & Asset Intelligence</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-white tracking-tight">Field Audit & Asset Intelligence</h1>
+                {projectId && <FreshnessBadge projectId={projectId} module="Assets" showTimestamp />}
+              </div>
               <p className="text-sm text-[#7A8BA8] mt-1">Capture equipment data, transcribe notes, and flag deficiencies.</p>
             </div>
             <div className="flex items-center gap-3">
@@ -136,24 +142,42 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
                         <h3 className="text-lg font-semibold text-white group-hover:text-emerald-600 transition-colors">{asset.type}</h3>
                         <p className="text-sm text-[#7A8BA8]">{buildings.find(b => b.id === asset.buildingId)?.name}</p>
                       </div>
-                      <span className={cn(
-                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
-                        asset.condition === 'Good' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                        asset.condition === 'Poor' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                        "bg-red-500/10 text-red-500 border-red-500/20"
-                      )}>
-                        {asset.condition}
-                      </span>
+                      <EditableField
+                        value={asset.condition}
+                        entityType="asset"
+                        entityId={asset.id}
+                        field="condition"
+                        projectId={projectId}
+                        type="select"
+                        options={['Good', 'Fair', 'Poor', 'Critical']}
+                        formatter={(val) => String(val)}
+                      />
                     </div>
-                    
+
                     <div className="mt-4 grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
                       <div>
-                        <span className="block text-[#7A8BA8] text-xs font-medium uppercase tracking-wider mb-1">Make/Model</span>
-                        <span className="text-[#9AA5B8] font-medium">{asset.manufacturer} {asset.model}</span>
+                        <span className="block text-[#7A8BA8] text-xs font-medium uppercase tracking-wider mb-1">Manufacturer</span>
+                        <span className="text-[#9AA5B8] font-medium">
+                          <EditableField value={asset.manufacturer} entityType="asset" entityId={asset.id} field="manufacturer" projectId={projectId} />
+                        </span>
                       </div>
                       <div>
                         <span className="block text-[#7A8BA8] text-xs font-medium uppercase tracking-wider mb-1">Year</span>
-                        <span className="text-[#9AA5B8] font-medium">{asset.year}</span>
+                        <span className="text-[#9AA5B8] font-medium">
+                          <EditableField value={asset.year} entityType="asset" entityId={asset.id} field="year" projectId={projectId} type="number" />
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-[#7A8BA8] text-xs font-medium uppercase tracking-wider mb-1">Model</span>
+                        <span className="text-[#9AA5B8] font-medium">
+                          <EditableField value={asset.model} entityType="asset" entityId={asset.id} field="model" projectId={projectId} />
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-[#7A8BA8] text-xs font-medium uppercase tracking-wider mb-1">Remaining Life</span>
+                        <span className="text-[#9AA5B8] font-medium">
+                          <EditableField value={asset.remainingLife} entityType="asset" entityId={asset.id} field="remainingLife" projectId={projectId} type="number" formatter={(v) => `${v} yrs`} />
+                        </span>
                       </div>
                     </div>
 
@@ -168,6 +192,8 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
                         </div>
                       </div>
                     )}
+
+                    <AuditTrailPanel entityType="asset" entityId={asset.id} />
                   </div>
                 </div>
               ))}

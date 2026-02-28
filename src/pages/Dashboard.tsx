@@ -5,8 +5,9 @@ import { cn } from '@/lib/utils';
 import {
   BarChart3, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2,
   DollarSign, Leaf, Activity, Clock, FileText, ArrowUpRight,
-  ChevronRight, Zap, ShieldAlert, CircleDot
+  ChevronRight, Zap, ShieldAlert, CircleDot, Database
 } from 'lucide-react';
+import { getFreshnessStatus, daysSinceUpdate } from '@/lib/freshness';
 
 const PHASE_ORDER = ['Prospect', 'Audit', 'IGEA', 'RFP', 'Contract', 'Construction', 'M&V', 'Closeout'] as const;
 
@@ -24,6 +25,8 @@ export function Dashboard() {
   const contractObligations = useStore(s => s.contractObligations);
   const inspectionFindings = useStore(s => s.inspectionFindings);
   const ecms = useStore(s => s.ecms);
+  const moduleLastUpdated = useStore(s => s.moduleLastUpdated);
+  const freshnessConfig = useStore(s => s.freshnessConfig);
 
   // Computed KPIs
   const totalValue = projects.reduce((sum, p) => sum + p.value, 0);
@@ -116,6 +119,28 @@ export function Dashboard() {
     ];
     return null;
   }, [mode, assets, ecms, avgAchievement, driftDetected, reports, reportsDue, highRisks, inspectionFindings]);
+
+  // Data Health — stale modules
+  const staleModules = useMemo(() => {
+    const items: { projectName: string; module: string; daysStale: number; severity: 'amber' | 'red' }[] = [];
+    for (const p of projects) {
+      for (const config of freshnessConfig) {
+        const key = `${p.id}-${config.module}`;
+        const lastUpdated = moduleLastUpdated[key];
+        if (!lastUpdated) continue;
+        const status = getFreshnessStatus(lastUpdated, config);
+        if (status !== 'fresh') {
+          items.push({
+            projectName: p.name.split(' ').slice(0, 2).join(' '),
+            module: config.module,
+            daysStale: daysSinceUpdate(lastUpdated),
+            severity: status,
+          });
+        }
+      }
+    }
+    return items.sort((a, b) => b.daysStale - a.daysStale);
+  }, [projects, freshnessConfig, moduleLastUpdated]);
 
   // Extended activity feed
   const feedItems = useMemo(() => {
@@ -216,6 +241,39 @@ export function Dashboard() {
                   alert.severity === 'red' ? 'bg-red-500' : 'bg-amber-500'
                 )} />
                 <span className="text-xs font-medium text-[#CBD2DF] flex-1">{alert.project}: {alert.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Data Health — stale module alerts */}
+      {staleModules.length > 0 && (
+        <div className="bg-[#121C35] border border-[#1E2A45] rounded-lg overflow-hidden">
+          <div className="px-4 py-2 flex items-center gap-2 border-b border-[#1E2A45]">
+            <Database className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider">Data Health</span>
+            <span className="bg-[#1E2A45] text-[#7A8BA8] px-1.5 py-0.5 rounded border border-[#2A3A5C] font-mono text-[10px]">
+              {staleModules.length}
+            </span>
+          </div>
+          <div className="divide-y divide-[#1E2A45]">
+            {staleModules.slice(0, 5).map((item, i) => (
+              <div key={i} className="px-4 py-2.5 flex items-center gap-3">
+                <div className={cn(
+                  "w-1.5 h-1.5 rounded-full flex-shrink-0",
+                  item.severity === 'red' ? 'bg-red-500' : 'bg-amber-500'
+                )} />
+                <span className="text-xs text-[#CBD2DF] flex-1">
+                  <span className="font-medium text-white">{item.projectName}</span>
+                  {' — '}{item.module} data is {item.daysStale} days old
+                </span>
+                <span className={cn(
+                  "text-[10px] font-medium px-1.5 py-0.5 rounded",
+                  item.severity === 'red' ? 'bg-red-500/10 text-red-400' : 'bg-amber-500/10 text-amber-400'
+                )}>
+                  {item.severity === 'red' ? 'Overdue' : 'Stale'}
+                </span>
               </div>
             ))}
           </div>

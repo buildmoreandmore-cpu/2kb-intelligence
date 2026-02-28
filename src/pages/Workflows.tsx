@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useStore } from '@/store';
 import { CheckCircle2, Clock, AlertCircle, Plus, Filter, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EditableField } from '@/components/EditableField';
+import { AuditTrailPanel } from '@/components/AuditTrailPanel';
 
 export function Workflows() {
   const tasks = useStore(state => state.tasks);
@@ -117,8 +119,15 @@ export function Workflows() {
                       </td>
                       <td className="px-6 py-4 font-medium text-white">
                         <span className={task.status === 'Completed' ? "line-through text-[#5A6B88]" : ""}>
-                          {task.title}
+                          <EditableField
+                            value={task.title}
+                            entityType="task"
+                            entityId={task.id}
+                            field="title"
+                            projectId={task.projectId}
+                          />
                         </span>
+                        <AuditTrailPanel entityType="task" entityId={task.id} />
                       </td>
                       <td className="px-6 py-4 text-[#9AA5B8]">
                         {projects.find(p => p.id === task.projectId)?.name || 'General'}
@@ -130,19 +139,26 @@ export function Workflows() {
                             "font-mono",
                             isOverdue ? "text-red-500 font-medium" : "text-[#9AA5B8]"
                           )}>
-                            {task.dueDate}
+                            <EditableField
+                              value={task.dueDate}
+                              entityType="task"
+                              entityId={task.id}
+                              field="dueDate"
+                              projectId={task.projectId}
+                            />
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={cn(
-                          "px-2.5 py-1 rounded text-xs font-medium border",
-                          task.priority === 'High' ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                          task.priority === 'Medium' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                          "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                        )}>
-                          {task.priority.toUpperCase()}
-                        </span>
+                        <EditableField
+                          value={task.priority}
+                          entityType="task"
+                          entityId={task.id}
+                          field="priority"
+                          projectId={task.projectId}
+                          type="select"
+                          options={['Low', 'Medium', 'High']}
+                        />
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -151,7 +167,13 @@ export function Workflows() {
                               {task.assignedTo.substring(0, 2).toUpperCase()}
                             </span>
                           </div>
-                          <span className="text-[#9AA5B8]">{task.assignedTo}</span>
+                          <EditableField
+                            value={task.assignedTo}
+                            entityType="task"
+                            entityId={task.id}
+                            field="assignedTo"
+                            projectId={task.projectId}
+                          />
                         </div>
                       </td>
                     </tr>

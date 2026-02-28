@@ -2,6 +2,33 @@ import { create } from 'zustand';
 
 export type Phase = 'Prospect' | 'Audit' | 'IGEA' | 'RFP' | 'Contract' | 'Construction' | 'M&V' | 'Closeout';
 export type ServiceLineMode = 'Full' | 'Audit' | 'OR' | 'Construction';
+export type UserRole = 'Engineer' | 'Project Lead' | 'Admin';
+
+export interface User {
+  id: string; name: string; initials: string; email: string;
+  defaultRole: UserRole;
+  projectRoles: Record<string, UserRole>;
+}
+
+export interface AuditEntry {
+  id: string;
+  entityType: string; entityId: string; field: string;
+  oldValue: string; newValue: string;
+  userId: string; userName: string; reason: string;
+  timestamp: string; projectId?: string;
+}
+
+export interface LockRecord {
+  entityType: string; entityId: string;
+  lockType: 'approval' | 'baseline' | 'signed' | 'immutable';
+  lockedBy: string; lockedAt: string; reason: string;
+}
+
+export interface FreshnessConfig {
+  module: string;
+  amberThresholdDays: number;
+  redThresholdDays: number;
+}
 
 export const seedData = {
   serviceLineMode: 'Full' as ServiceLineMode,
@@ -327,7 +354,74 @@ export const seedData = {
     { id: 'tc2', projectId: 'p3', name: 'Martin Francis', role: 'Principal / Technical Lead', email: 'martin@2kbenergyservices.com', phone: '(404) 555-2KB1' },
     { id: 'tc3', projectId: 'p2', name: 'Sarah Kim', role: 'Project Engineer', email: 'sarah@2kbenergyservices.com', phone: '(404) 555-2KB2' },
     { id: 'tc4', projectId: 'p2', name: 'Martin Francis', role: 'Principal / Technical Lead', email: 'martin@2kbenergyservices.com', phone: '(404) 555-2KB1' }
-  ]
+  ],
+  // ─── Edit Controls & Data Freshness ───
+  currentUserId: 'user1',
+  users: [
+    { id: 'user1', name: 'Martin Francis', initials: 'MF', email: 'martin@2kbenergyservices.com', defaultRole: 'Admin' as UserRole, projectRoles: {} },
+    { id: 'user2', name: 'Sarah Kim', initials: 'SK', email: 'sarah@2kbenergyservices.com', defaultRole: 'Engineer' as UserRole, projectRoles: { p2: 'Project Lead' as UserRole } },
+    { id: 'user3', name: 'David Chen', initials: 'DC', email: 'david@2kbenergyservices.com', defaultRole: 'Engineer' as UserRole, projectRoles: { p3: 'Project Lead' as UserRole } },
+  ] as User[],
+  auditTrail: [] as AuditEntry[],
+  lockRecords: [
+    { entityType: 'report', entityId: 'rep1', lockType: 'approval' as const, lockedBy: 'Martin', lockedAt: '2024-03-20T15:00:00Z', reason: 'Approved IGEA Report — locked for client delivery.' },
+    { entityType: 'changeOrder', entityId: 'c1', lockType: 'signed' as const, lockedBy: 'Henry County', lockedAt: '2024-02-15T00:00:00Z', reason: 'Signed change order — legally binding.' },
+    { entityType: 'utilityBill', entityId: 'u1', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u2', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u3', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u4', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u5', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u6', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u7', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u8', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u9', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u10', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u11', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'utilityBill', entityId: 'u12', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-03-01T00:00:00Z', reason: 'Baseline utility data — used for M&V calculations.' },
+    { entityType: 'pricingReview', entityId: 'pr1', lockType: 'immutable' as const, lockedBy: 'System', lockedAt: '2024-03-20T00:00:00Z', reason: 'ESCO proposed cost — contractual reference value.' },
+    { entityType: 'pricingReview', entityId: 'pr2', lockType: 'immutable' as const, lockedBy: 'System', lockedAt: '2024-03-20T00:00:00Z', reason: 'ESCO proposed cost — contractual reference value.' },
+    { entityType: 'mvData', entityId: 'mv1', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-12-31T00:00:00Z', reason: 'Guaranteed values per contract — cannot be modified.' },
+    { entityType: 'mvData', entityId: 'mv2', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-12-31T00:00:00Z', reason: 'Guaranteed values per contract — cannot be modified.' },
+    { entityType: 'mvData', entityId: 'mv3', lockType: 'baseline' as const, lockedBy: 'Martin', lockedAt: '2024-12-31T00:00:00Z', reason: 'Guaranteed values per contract — cannot be modified.' },
+  ] as LockRecord[],
+  freshnessConfig: [
+    { module: 'Utility Bills', amberThresholdDays: 45, redThresholdDays: 75 },
+    { module: 'Assets', amberThresholdDays: 90, redThresholdDays: 90 },
+    { module: 'M&V', amberThresholdDays: 45, redThresholdDays: 75 },
+    { module: 'Financial', amberThresholdDays: 180, redThresholdDays: 180 },
+    { module: 'Risk', amberThresholdDays: 30, redThresholdDays: 30 },
+    { module: 'Inspection', amberThresholdDays: 14, redThresholdDays: 14 },
+  ] as FreshnessConfig[],
+  moduleLastUpdated: {
+    'p1-Utility Bills': '2024-12-15T00:00:00Z',
+    'p1-Assets': '2024-11-20T00:00:00Z',
+    'p1-M&V': '2025-01-10T00:00:00Z',
+    'p1-Financial': '2024-08-01T00:00:00Z',
+    'p1-Risk': '2025-02-20T00:00:00Z',
+    'p1-Inspection': '2025-02-25T00:00:00Z',
+    'p2-Utility Bills': '2025-02-01T00:00:00Z',
+    'p2-Assets': '2025-01-15T00:00:00Z',
+    'p2-M&V': '2024-10-01T00:00:00Z',
+    'p2-Financial': '2025-02-10T00:00:00Z',
+    'p2-Risk': '2025-02-18T00:00:00Z',
+    'p2-Inspection': '2025-01-05T00:00:00Z',
+    'p3-Utility Bills': '2025-01-20T00:00:00Z',
+    'p3-Assets': '2025-02-10T00:00:00Z',
+    'p3-M&V': '2025-02-15T00:00:00Z',
+    'p3-Financial': '2025-01-05T00:00:00Z',
+    'p3-Risk': '2025-01-25T00:00:00Z',
+    'p3-Inspection': '2025-02-14T00:00:00Z',
+  } as Record<string, string>,
+  notificationPreferences: { email: true, inApp: true, calendar: false },
+  importHistory: [
+    { id: 'imp1', type: 'Utility Bills', source: 'CSV Upload', date: '2024-12-15T10:30:00Z', records: 12, status: 'Success', user: 'Martin' },
+    { id: 'imp2', type: 'Assets', source: 'AI Extraction', date: '2024-11-20T14:00:00Z', records: 8, status: 'Success', user: 'Sarah' },
+    { id: 'imp3', type: 'Utility Bills', source: 'Google Drive', date: '2025-02-01T09:00:00Z', records: 24, status: 'Success', user: 'Martin' },
+  ],
+  exportHistory: [
+    { id: 'exp1', type: 'Capital Plan Report', format: 'PDF', date: '2025-01-15T16:00:00Z', user: 'Martin' },
+    { id: 'exp2', type: 'Utility Data', format: 'CSV', date: '2025-02-05T11:00:00Z', user: 'Sarah' },
+  ],
 };
 
 type StoreType = typeof seedData & {
@@ -345,6 +439,17 @@ type StoreType = typeof seedData & {
   toggleQAItem: (reportId: string, itemId: string) => void;
   addQAComment: (reportId: string, comment: any) => void;
   approveReport: (reportId: string, approver: string) => void;
+  // Edit Controls & Data Freshness
+  setCurrentUser: (userId: string) => void;
+  addAuditEntry: (entry: AuditEntry) => void;
+  editField: (entityType: string, entityId: string, field: string, newValue: string, reason: string, projectId?: string) => void;
+  isLocked: (entityType: string, entityId: string) => boolean;
+  getLockInfo: (entityType: string, entityId: string) => LockRecord | undefined;
+  addLock: (lock: LockRecord) => void;
+  requestUnlock: (entityType: string, entityId: string) => void;
+  updateModuleTimestamp: (projectId: string, module: string) => void;
+  toggleNotificationPreference: (channel: 'email' | 'inApp' | 'calendar') => void;
+  addImportRecord: (record: any) => void;
 };
 
 export const useStore = create<StoreType>((set) => ({
@@ -380,5 +485,78 @@ export const useStore = create<StoreType>((set) => ({
       approvedBy: approver,
       approvedAt: new Date().toISOString()
     } : r)
-  }))
+  })),
+  // ─── Edit Controls & Data Freshness Actions ───
+  setCurrentUser: (userId) => set({ currentUserId: userId }),
+  addAuditEntry: (entry) => set((state) => ({ auditTrail: [entry, ...state.auditTrail] })),
+  editField: (entityType, entityId, field, newValue, reason, projectId) => set((state) => {
+    const user = state.users.find(u => u.id === state.currentUserId);
+    if (!user) return {};
+    // Find the entity in the matching array and get old value
+    const arrayMap: Record<string, any[]> = {
+      asset: state.assets, utilityBill: state.utilityBills, ecm: state.ecms,
+      milestone: state.milestones, risk: state.risks, changeOrder: state.changeOrders,
+      inspectionFinding: state.inspectionFindings, task: state.tasks,
+      benchmark: state.benchmarks, lesson: state.lessonsLearned,
+      pricingReview: state.pricingReview, mvData: state.mvData,
+      contractObligation: state.contractObligations,
+    };
+    const keyMap: Record<string, string> = {
+      asset: 'assets', utilityBill: 'utilityBills', ecm: 'ecms',
+      milestone: 'milestones', risk: 'risks', changeOrder: 'changeOrders',
+      inspectionFinding: 'inspectionFindings', task: 'tasks',
+      benchmark: 'benchmarks', lesson: 'lessonsLearned',
+      pricingReview: 'pricingReview', mvData: 'mvData',
+      contractObligation: 'contractObligations',
+    };
+    const arr = arrayMap[entityType];
+    const storeKey = keyMap[entityType];
+    if (!arr || !storeKey) return {};
+    const entity = arr.find((e: any) => e.id === entityId);
+    if (!entity) return {};
+    const oldValue = String((entity as any)[field] ?? '');
+    const entry: AuditEntry = {
+      id: `ae${Date.now()}`,
+      entityType, entityId, field,
+      oldValue, newValue: String(newValue),
+      userId: user.id, userName: user.name, reason,
+      timestamp: new Date().toISOString(),
+      projectId,
+    };
+    // Parse numeric values if the original was a number
+    const parsedValue = typeof (entity as any)[field] === 'number' ? Number(newValue) : newValue;
+    return {
+      [storeKey]: arr.map((e: any) => e.id === entityId ? { ...e, [field]: parsedValue } : e),
+      auditTrail: [entry, ...state.auditTrail],
+    };
+  }),
+  isLocked: (entityType, entityId) => {
+    const state = useStore.getState();
+    return state.lockRecords.some(l => l.entityType === entityType && l.entityId === entityId);
+  },
+  getLockInfo: (entityType, entityId) => {
+    const state = useStore.getState();
+    return state.lockRecords.find(l => l.entityType === entityType && l.entityId === entityId);
+  },
+  addLock: (lock) => set((state) => ({ lockRecords: [...state.lockRecords, lock] })),
+  requestUnlock: (entityType, entityId) => set((state) => {
+    const user = state.users.find(u => u.id === state.currentUserId);
+    const entry: AuditEntry = {
+      id: `ae${Date.now()}`,
+      entityType, entityId, field: '_unlock_request',
+      oldValue: 'locked', newValue: 'unlock requested',
+      userId: user?.id || '', userName: user?.name || '', reason: 'Unlock requested by user',
+      timestamp: new Date().toISOString(),
+    };
+    return { auditTrail: [entry, ...state.auditTrail] };
+  }),
+  updateModuleTimestamp: (projectId, module) => set((state) => ({
+    moduleLastUpdated: { ...state.moduleLastUpdated, [`${projectId}-${module}`]: new Date().toISOString() },
+  })),
+  toggleNotificationPreference: (channel) => set((state) => ({
+    notificationPreferences: { ...state.notificationPreferences, [channel]: !state.notificationPreferences[channel] },
+  })),
+  addImportRecord: (record) => set((state) => ({
+    importHistory: [{ ...record, id: `imp${Date.now()}` }, ...state.importHistory],
+  })),
 }));

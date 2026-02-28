@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useStore } from '@/store';
 import { cn } from '@/lib/utils';
-import { Calendar, Diamond, ChevronDown } from 'lucide-react';
+import { Calendar, Diamond, ChevronDown, CalendarPlus } from 'lucide-react';
+import { downloadICS } from '@/lib/ics';
 
 const STATUS_COLORS: Record<string, { bar: string; text: string; dot: string }> = {
   completed:     { bar: 'bg-emerald-500', text: 'text-emerald-700', dot: 'bg-emerald-500' },
@@ -156,7 +157,7 @@ export function Timeline({ projectId }: { projectId?: string }) {
                 <div
                   key={item.id}
                   className={cn(
-                    "flex items-center border-b border-[#1E2A45] last:border-b-0 hover:bg-[#0F1829]/50 transition-colors",
+                    "flex items-center border-b border-[#1E2A45] last:border-b-0 hover:bg-[#0F1829]/50 transition-colors group",
                     idx % 2 === 0 ? 'bg-[#121C35]' : 'bg-[#0F1829]/30'
                   )}
                 >
@@ -164,10 +165,17 @@ export function Timeline({ projectId }: { projectId?: string }) {
                   <div className="w-64 flex-shrink-0 border-r border-[#1E2A45] px-4 py-3">
                     <div className="flex items-center gap-2">
                       <div className={cn('w-2 h-2 rounded-full flex-shrink-0', colors.dot)} />
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-white truncate">{item.name}</p>
                         <p className="text-[11px] text-[#5A6B88]">{item.phase}</p>
                       </div>
+                      <button
+                        onClick={() => downloadICS(item.name, item.startDate, `${item.phase} — ${item.name} (${item.status})`)}
+                        className="p-1 text-[#5A6B88] hover:text-emerald-400 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
+                        title="Add to Calendar"
+                      >
+                        <CalendarPlus className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                   {/* Bar area */}

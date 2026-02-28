@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
 import { ArrowLeft, Camera, BarChart3, Calculator, ShieldCheck, HardHat, LineChart, FileText, MapPin, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CompletenessBar } from '@/components/CompletenessBar';
+import { FreshnessBadge } from '@/components/FreshnessBadge';
 import { FieldAudit } from './FieldAudit';
 import { Benchmarking } from './Benchmarking';
 import { FinancialModeling } from './FinancialModeling';
@@ -25,14 +27,14 @@ export function ProjectDetail() {
   }
 
   const tabs = [
-    { id: 'audit', label: 'Audit', icon: Camera },
-    { id: 'drawings', label: 'Drawings', icon: MapPin },
-    { id: 'energy', label: 'Energy', icon: BarChart3 },
-    { id: 'financial', label: 'Financial', icon: Calculator },
-    { id: 'governance', label: 'Governance', icon: ShieldCheck },
-    { id: 'construction', label: 'Construction', icon: HardHat },
-    { id: 'mv', label: 'M&V', icon: LineChart },
-    { id: 'timeline', label: 'Timeline', icon: Calendar },
+    { id: 'audit', label: 'Audit', icon: Camera, freshnessModule: 'Assets' as string | null },
+    { id: 'drawings', label: 'Drawings', icon: MapPin, freshnessModule: null },
+    { id: 'energy', label: 'Energy', icon: BarChart3, freshnessModule: 'Utility Bills' },
+    { id: 'financial', label: 'Financial', icon: Calculator, freshnessModule: 'Financial' },
+    { id: 'governance', label: 'Governance', icon: ShieldCheck, freshnessModule: 'Risk' },
+    { id: 'construction', label: 'Construction', icon: HardHat, freshnessModule: 'Inspection' },
+    { id: 'mv', label: 'M&V', icon: LineChart, freshnessModule: 'M&V' },
+    { id: 'timeline', label: 'Timeline', icon: Calendar, freshnessModule: null },
   ];
 
   return (
@@ -49,7 +51,12 @@ export function ProjectDetail() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight">{project.name}</h1>
-            <p className="text-sm text-[#7A8BA8] mt-1">{org?.name} • {project.esco} • ${(project.value / 1000000).toFixed(1)}M</p>
+            <div className="flex items-center gap-4 mt-1">
+              <p className="text-sm text-[#7A8BA8]">{org?.name} • {project.esco} • ${(project.value / 1000000).toFixed(1)}M</p>
+              <div className="w-32">
+                <CompletenessBar projectId={project.id} />
+              </div>
+            </div>
           </div>
           <span className={cn(
             "px-3 py-1.5 rounded text-sm font-medium border",
@@ -75,6 +82,9 @@ export function ProjectDetail() {
             >
               <tab.icon className="w-4 h-4" />
               {tab.label}
+              {tab.freshnessModule && (
+                <FreshnessBadge projectId={project.id} module={tab.freshnessModule} />
+              )}
             </button>
           ))}
         </div>

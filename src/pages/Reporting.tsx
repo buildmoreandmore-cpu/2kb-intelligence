@@ -7,6 +7,8 @@ import {
   CircleDot, CheckCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AuditTrailPanel } from '@/components/AuditTrailPanel';
+import { LockIndicator } from '@/components/LockIndicator';
 
 const REPORT_TYPES = [
   'IGEA Report',
@@ -385,6 +387,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
   const toggleQAItem = useStore(state => state.toggleQAItem);
   const addQAComment = useStore(state => state.addQAComment);
   const approveReport = useStore(state => state.approveReport);
+  const lockRecords = useStore(state => state.lockRecords);
 
   const [activeTab, setActiveTab] = useState<'generate' | 'history' | 'qa'>('generate');
   const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[1].id);
@@ -585,27 +588,39 @@ export function Reporting({ projectId }: { projectId?: string }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#1E2A45] stagger-rows">
-                  {reports.map((report) => (
+                  {reports.map((report) => {
+                    const reportLock = lockRecords.find(l => l.entityType === 'report' && l.entityId === report.id);
+                    return (
                     <tr key={report.id} className="hover:bg-[#1A2544] transition-colors duration-100">
                       <td className="px-6 py-4 font-medium text-white">
-                        <div>
-                          <span>{report.type}</span>
-                          <span className="block text-xs text-[#7A8BA8] font-normal mt-0.5">
-                            {projects.find(p => p.id === report.projectId)?.name}
-                          </span>
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <span>{report.type}</span>
+                            <span className="block text-xs text-[#7A8BA8] font-normal mt-0.5">
+                              {projects.find(p => p.id === report.projectId)?.name}
+                            </span>
+                          </div>
+                          {reportLock && <LockIndicator lock={reportLock} />}
                         </div>
+                        <AuditTrailPanel entityType="report" entityId={report.id} />
                       </td>
                       <td className="px-6 py-4 text-[#9AA5B8] font-mono">{report.version}</td>
                       <td className="px-6 py-4 text-[#9AA5B8] font-mono text-xs">{report.date}</td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{report.by}</td>
-                      <td className="px-6 py-4"><StatusBadge status={report.status} /></td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={report.status} />
+                          {reportLock && <LockIndicator lock={reportLock} />}
+                        </div>
+                      </td>
                       <td className="px-6 py-4">
                         <button className="p-1.5 text-[#7A8BA8] hover:text-white hover:bg-[#1E2A45] rounded transition-colors duration-150">
                           <Download className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -623,13 +638,17 @@ export function Reporting({ projectId }: { projectId?: string }) {
               const completedCount = qaItems.filter((q: any) => q.checked).length;
               const progress = qaItems.length > 0 ? (completedCount / qaItems.length) * 100 : 0;
               const showComments = expandedComments[report.id];
+              const qaReportLock = lockRecords.find(l => l.entityType === 'report' && l.entityId === report.id);
 
               return (
                 <div key={report.id} className="card-hover bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
                   {/* Header */}
                   <div className="p-6 border-b border-[#1E2A45] bg-[#0F1829] flex items-start justify-between">
                     <div>
-                      <h3 className="text-base font-bold text-white">{report.type}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-bold text-white">{report.type}</h3>
+                        {qaReportLock && <LockIndicator lock={qaReportLock} />}
+                      </div>
                       <p className="text-xs text-[#7A8BA8] mt-1">
                         {projects.find(p => p.id === report.projectId)?.name} • {report.version} • By {report.by} on {report.date}
                       </p>
@@ -775,6 +794,9 @@ export function Reporting({ projectId }: { projectId?: string }) {
                         </p>
                       </div>
                     )}
+
+                    {/* Audit Trail */}
+                    <AuditTrailPanel entityType="report" entityId={report.id} />
                   </div>
 
                   {/* Footer Actions */}

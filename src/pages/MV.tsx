@@ -2,10 +2,15 @@ import { useState } from 'react';
 import { useStore } from '@/store';
 import { LineChart, AlertTriangle, CheckCircle2, TrendingDown, Leaf, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EditableField } from '@/components/EditableField';
+import { AuditTrailPanel } from '@/components/AuditTrailPanel';
+import { FreshnessBadge } from '@/components/FreshnessBadge';
+import { LockIndicator } from '@/components/LockIndicator';
 
 export function MV({ projectId }: { projectId?: string }) {
   const projects = useStore(state => state.projects);
   const mvData = useStore(state => state.mvData);
+  const lockRecords = useStore(state => state.lockRecords);
 
   const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[2].id); // Default to construction/M&V project
   const projectMvData = mvData.filter(d => d.projectId === selectedProjectId);
@@ -23,7 +28,10 @@ export function MV({ projectId }: { projectId?: string }) {
         <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Measurement & Verification</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-white tracking-tight">Measurement & Verification</h1>
+                {projectId && <FreshnessBadge module="M&V" entityId={projectId} />}
+              </div>
               <p className="text-sm text-[#7A8BA8] mt-1">Track post-retrofit savings vs guarantee and detect performance drift.</p>
             </div>
             <div className="flex items-center gap-3">
@@ -166,12 +174,38 @@ export function MV({ projectId }: { projectId?: string }) {
                   {projectMvData.map((data) => {
                     const variance = data.calculated - data.guaranteed;
                     const isShortfall = variance < 0;
-                    
+                    const mvLock = lockRecords?.find(
+                      (lr: any) => lr.entityType === 'mvData' && lr.entityId === data.id
+                    );
+
                     return (
-                      <tr key={data.year} className="hover:bg-[#1A2544] transition-colors">
+                      <tr key={data.year} className="hover:bg-[#1A2544] transition-colors align-top">
                         <td className="px-6 py-4 font-medium text-white">Year {data.year}</td>
-                        <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${data.guaranteed.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${data.calculated.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-right font-mono">
+                          {mvLock ? (
+                            <div className="flex items-center justify-end gap-2">
+                              <span className="text-[#9AA5B8]">${data.guaranteed.toLocaleString()}</span>
+                              <LockIndicator lock={mvLock} />
+                            </div>
+                          ) : (
+                            <EditableField
+                              entityType="mvData"
+                              entityId={data.id}
+                              field="guaranteed"
+                              value={data.guaranteed}
+                              type="number"
+                            />
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-right font-mono">
+                          <EditableField
+                            entityType="mvData"
+                            entityId={data.id}
+                            field="calculated"
+                            value={data.calculated}
+                            type="number"
+                          />
+                        </td>
                         <td className={`px-6 py-4 text-right font-mono ${isShortfall ? 'text-amber-500' : 'text-emerald-500'}`}>
                           {isShortfall ? '' : '+'}${variance.toLocaleString()}
                         </td>

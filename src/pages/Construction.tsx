@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useStore } from '@/store';
 import { HardHat, AlertTriangle, CheckCircle2, Search, Filter, Plus, ClipboardList, Hammer } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EditableField } from '@/components/EditableField';
+import { AuditTrailPanel } from '@/components/AuditTrailPanel';
+import { FreshnessBadge } from '@/components/FreshnessBadge';
 
 export function Construction({ projectId }: { projectId?: string }) {
   const projects = useStore(state => state.projects);
@@ -24,7 +27,10 @@ export function Construction({ projectId }: { projectId?: string }) {
         <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Construction Oversight</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-white tracking-tight">Construction Oversight</h1>
+                {projectId && <FreshnessBadge module="Inspection" entityId={projectId} />}
+              </div>
               <p className="text-sm text-[#7A8BA8] mt-1">Track installation progress, inspections, and scope deviations.</p>
             </div>
             <div className="flex items-center gap-3">
@@ -183,29 +189,40 @@ export function Construction({ projectId }: { projectId?: string }) {
                 </thead>
                 <tbody className="divide-y divide-[#1E2A45]">
                   {projectFindings.map((finding) => (
-                    <tr key={finding.id} className="hover:bg-[#1A2544] transition-colors">
+                    <tr key={finding.id} className="hover:bg-[#1A2544] transition-colors align-top">
                       <td className="px-6 py-4 text-[#9AA5B8] font-mono">{finding.date}</td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{finding.ecm}</td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{finding.type}</td>
                       <td className="px-6 py-4">
-                        <span className={cn(
-                          "px-2.5 py-1 rounded text-xs font-medium border",
-                          finding.severity === 'Critical' ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                          finding.severity === 'Major' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                          "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                        )}>
-                          {finding.severity.toUpperCase()}
-                        </span>
+                        <EditableField
+                          entityType="inspectionFinding"
+                          entityId={finding.id}
+                          field="severity"
+                          value={finding.severity}
+                          type="select"
+                          options={['Low', 'Medium', 'High', 'Critical']}
+                        />
                       </td>
-                      <td className="px-6 py-4 font-medium text-white max-w-md truncate">{finding.description}</td>
+                      <td className="px-6 py-4 max-w-md">
+                        <EditableField
+                          entityType="inspectionFinding"
+                          entityId={finding.id}
+                          field="description"
+                          value={finding.description}
+                        />
+                      </td>
                       <td className="px-6 py-4">
-                        <span className={cn(
-                          "px-2.5 py-1 rounded text-xs font-medium border",
-                          finding.status === 'Resolved' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                          "bg-[#1E2A45] text-[#7A8BA8] border-[#2A3A5C]"
-                        )}>
-                          {finding.status.toUpperCase()}
-                        </span>
+                        <EditableField
+                          entityType="inspectionFinding"
+                          entityId={finding.id}
+                          field="status"
+                          value={finding.status}
+                          type="select"
+                          options={['Open', 'In Review', 'Resolved', 'Deferred']}
+                        />
+                        <div className="mt-2">
+                          <AuditTrailPanel entityType="inspectionFinding" entityId={finding.id} />
+                        </div>
                       </td>
                     </tr>
                   ))}

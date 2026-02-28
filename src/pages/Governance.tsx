@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { ShieldCheck, Calendar, FileText, AlertTriangle, GitPullRequest, FileCheck, Plus, Filter } from 'lucide-react';
+import { ShieldCheck, Calendar, FileText, AlertTriangle, GitPullRequest, FileCheck, Plus, Filter, CalendarPlus } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
+import { EditableField } from '@/components/EditableField';
+import { AuditTrailPanel } from '@/components/AuditTrailPanel';
+import { LockIndicator } from '@/components/LockIndicator';
+import { downloadICS } from '@/lib/ics';
 
 export function Governance({ projectId }: { projectId?: string }) {
   const projects = useStore(state => state.projects);
@@ -11,6 +15,7 @@ export function Governance({ projectId }: { projectId?: string }) {
   const changeOrders = useStore(state => state.changeOrders);
   const submittals = useStore(state => state.submittals);
   const contractObligations = useStore(state => state.contractObligations);
+  const lockRecords = useStore(state => state.lockRecords);
 
   const [activeTab, setActiveTab] = useState<'pipeline' | 'milestones' | 'risks' | 'co' | 'submittals' | 'obligations'>('pipeline');
   const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[0].id);
@@ -126,30 +131,37 @@ export function Governance({ projectId }: { projectId?: string }) {
                     <th className="px-6 py-4 font-medium">Due Date</th>
                     <th className="px-6 py-4 font-medium">Status</th>
                     <th className="px-6 py-4 font-medium">Assigned To</th>
+                    <th className="px-6 py-4 font-medium w-10"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#1E2A45]">
                   {milestones.filter(m => m.projectId === selectedProjectId).map((milestone) => (
                     <tr key={milestone.id} className="hover:bg-[#1A2544] transition-colors">
-                      <td className="px-6 py-4 font-medium text-white">{milestone.name}</td>
-                      <td className="px-6 py-4 text-[#9AA5B8] font-mono">{milestone.dueDate}</td>
+                      <td className="px-6 py-4 font-medium text-white">
+                        <EditableField value={milestone.name} entityType="milestone" entityId={milestone.id} field="name" projectId={selectedProjectId} />
+                        <AuditTrailPanel entityType="milestone" entityId={milestone.id} />
+                      </td>
+                      <td className="px-6 py-4 text-[#9AA5B8] font-mono">
+                        <EditableField value={milestone.dueDate} entityType="milestone" entityId={milestone.id} field="dueDate" projectId={selectedProjectId} />
+                      </td>
                       <td className="px-6 py-4">
-                        <span className={cn(
-                          "px-2.5 py-1 rounded text-xs font-medium border",
-                          milestone.status === 'completed' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                          milestone.status === 'overdue' ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                          milestone.status === 'in progress' ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
-                          "bg-[#1E2A45] text-[#7A8BA8] border-[#2A3A5C]"
-                        )}>
-                          {milestone.status.toUpperCase()}
-                        </span>
+                        <EditableField value={milestone.status} entityType="milestone" entityId={milestone.id} field="status" projectId={selectedProjectId} type="select" options={['pending', 'in-progress', 'completed', 'overdue']} />
                       </td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{milestone.assignedTo}</td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => downloadICS(milestone.name, milestone.dueDate, `Milestone: ${milestone.name} — Assigned to: ${milestone.assignedTo}`)}
+                          className="p-1 text-[#5A6B88] hover:text-emerald-400 transition-colors"
+                          title="Add to Calendar"
+                        >
+                          <CalendarPlus className="w-4 h-4" />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {milestones.filter(m => m.projectId === selectedProjectId).length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-6 py-8 text-center text-[#7A8BA8]">No milestones found for this project.</td>
+                      <td colSpan={5} className="px-6 py-8 text-center text-[#7A8BA8]">No milestones found for this project.</td>
                     </tr>
                   )}
                 </tbody>
@@ -181,26 +193,88 @@ export function Governance({ projectId }: { projectId?: string }) {
                 <tbody className="divide-y divide-[#1E2A45]">
                   {risks.filter(r => r.projectId === selectedProjectId).map((risk) => (
                     <tr key={risk.id} className="hover:bg-[#1A2544] transition-colors">
-                      <td className="px-6 py-4 font-medium text-white max-w-md truncate">{risk.description}</td>
+                      <td className="px-6 py-4 font-medium text-white max-w-md">
+                        <EditableField value={risk.description} entityType="risk" entityId={risk.id} field="description" projectId={selectedProjectId} />
+                        <AuditTrailPanel entityType="risk" entityId={risk.id} />
+                      </td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{risk.category}</td>
                       <td className="px-6 py-4">
-                        <span className={cn(
-                          "px-2.5 py-1 rounded text-xs font-medium border",
-                          risk.severity === 'Critical' ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                          risk.severity === 'High' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                          risk.severity === 'Medium' ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
-                          "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                        )}>
-                          {risk.severity.toUpperCase()}
-                        </span>
+                        <EditableField value={risk.severity} entityType="risk" entityId={risk.id} field="severity" projectId={selectedProjectId} type="select" options={['Low', 'Medium', 'High', 'Critical']} />
                       </td>
-                      <td className="px-6 py-4 text-[#9AA5B8]">{risk.status}</td>
+                      <td className="px-6 py-4 text-[#9AA5B8]">
+                        <EditableField value={risk.status} entityType="risk" entityId={risk.id} field="status" projectId={selectedProjectId} type="select" options={['Open', 'Mitigated', 'Closed']} />
+                      </td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{risk.owner}</td>
                     </tr>
                   ))}
                   {risks.filter(r => r.projectId === selectedProjectId).length === 0 && (
                     <tr>
                       <td colSpan={5} className="px-6 py-8 text-center text-[#7A8BA8]">No risks logged for this project.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'co' && (
+          <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
+            <div className="p-6 border-b border-[#1E2A45] flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-white">Change Orders</h3>
+              <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-600 border border-transparent rounded-lg text-xs font-medium text-white hover:bg-emerald-700 transition-colors">
+                <Plus className="w-3.5 h-3.5" />
+                Add Change Order
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-neutral-400 uppercase bg-[#0F1829] border-b border-[#1E2A45]">
+                  <tr>
+                    <th className="px-6 py-4 font-medium">CO #</th>
+                    <th className="px-6 py-4 font-medium">Description</th>
+                    <th className="px-6 py-4 font-medium">Requested By</th>
+                    <th className="px-6 py-4 font-medium">Cost</th>
+                    <th className="px-6 py-4 font-medium">Days</th>
+                    <th className="px-6 py-4 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#1E2A45]">
+                  {changeOrders.filter(co => co.projectId === selectedProjectId).map((co) => {
+                    const coLock = lockRecords.find(l => l.entityType === 'changeOrder' && l.entityId === co.id);
+                    return (
+                      <tr key={co.id} className="hover:bg-[#1A2544] transition-colors">
+                        <td className="px-6 py-4 font-mono text-[#9AA5B8]">{co.number}</td>
+                        <td className="px-6 py-4 font-medium text-white">
+                          {coLock ? (
+                            <span className="inline-flex items-center gap-2">
+                              {co.description}
+                              <LockIndicator lock={coLock} />
+                            </span>
+                          ) : (
+                            <EditableField value={co.description} entityType="changeOrder" entityId={co.id} field="description" projectId={selectedProjectId} />
+                          )}
+                          <AuditTrailPanel entityType="changeOrder" entityId={co.id} />
+                        </td>
+                        <td className="px-6 py-4 text-[#9AA5B8]">{co.requestedBy}</td>
+                        <td className="px-6 py-4 text-[#9AA5B8] font-mono">${co.cost.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-[#9AA5B8]">{co.days}</td>
+                        <td className="px-6 py-4">
+                          <span className={cn(
+                            "px-2.5 py-1 rounded text-xs font-medium border",
+                            co.status === 'Approved' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+                            co.status === 'Rejected' ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                            "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                          )}>
+                            {co.status.toUpperCase()}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {changeOrders.filter(co => co.projectId === selectedProjectId).length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center text-[#7A8BA8]">No change orders found for this project.</td>
                     </tr>
                   )}
                 </tbody>
@@ -338,18 +412,16 @@ export function Governance({ projectId }: { projectId?: string }) {
                         <tr key={o.id} className="hover:bg-[#1A2544] transition-colors">
                           <td className="px-6 py-4">
                             <p className="font-medium text-white max-w-sm">{o.description}</p>
-                            {o.evidence && <p className="text-[10px] text-[#5A6B88] mt-0.5">{o.evidence}</p>}
+                            <div className="text-[10px] text-[#5A6B88] mt-0.5">
+                              <EditableField value={o.evidence || ''} entityType="contractObligation" entityId={o.id} field="evidence" projectId={selectedProjectId} />
+                            </div>
+                            <AuditTrailPanel entityType="contractObligation" entityId={o.id} />
                           </td>
                           <td className="px-6 py-4"><span className="px-2.5 py-1 rounded bg-[#1E2A45] text-xs font-medium border border-[#2A3A5C]">{o.category}</span></td>
                           <td className="px-6 py-4 text-[#9AA5B8]">{o.responsibleParty}</td>
                           <td className="px-6 py-4 text-[#9AA5B8] font-mono text-xs">{o.dueDate || 'Ongoing'}</td>
                           <td className="px-6 py-4">
-                            <span className={cn('px-2.5 py-1 rounded text-xs font-medium border',
-                              o.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                              o.status === 'Overdue' ? 'bg-red-50 text-red-600 border-red-200' :
-                              o.status === 'Coming Due' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                              'bg-[#0F1829] text-[#7A8BA8] border-[#1E2A45]'
-                            )}>{o.status}</span>
+                            <EditableField value={o.status} entityType="contractObligation" entityId={o.id} field="status" projectId={selectedProjectId} type="select" options={['On Track', 'At Risk', 'Overdue', 'Complete']} />
                           </td>
                           <td className="px-6 py-4 text-xs text-[#5A6B88]">{o.contractRef}</td>
                         </tr>
