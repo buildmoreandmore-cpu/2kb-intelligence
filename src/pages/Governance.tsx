@@ -18,17 +18,17 @@ export function Governance({ projectId }: { projectId?: string }) {
   return (
     <div className="flex flex-col h-full">
       {!projectId && (
-        <div className="flex-shrink-0 border-b border-[#1C2030] bg-[#12151C] px-8 py-6">
+        <div className="flex-shrink-0 border-b border-[#EAEDF3] bg-[#FFFFFF] px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Owner's Rep Governance</h1>
-              <p className="text-sm text-neutral-400 mt-1">Track project phases, milestones, documents, and risks.</p>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Owner's Rep Governance</h1>
+              <p className="text-sm text-gray-500 mt-1">Track project phases, milestones, documents, and risks.</p>
             </div>
             <div className="flex items-center gap-3">
               <select 
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="bg-[#1C2030] border border-[#252A3A] text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
+                className="bg-[#EAEDF3] border border-[#D4D8E2] text-gray-700 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -37,7 +37,7 @@ export function Governance({ projectId }: { projectId?: string }) {
             </div>
           </div>
 
-          <div className="flex space-x-6 border-b border-[#1C2030]">
+          <div className="flex space-x-6 border-b border-[#EAEDF3]">
             {[
               { id: 'pipeline', label: 'Pipeline', icon: GitPullRequest },
               { id: 'milestones', label: 'Milestones', icon: Calendar },
@@ -51,8 +51,8 @@ export function Governance({ projectId }: { projectId?: string }) {
                 className={cn(
                 "pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
                 activeTab === tab.id 
-                  ? "border-emerald-500 text-emerald-500" 
-                  : "border-transparent text-neutral-400 hover:text-white hover:border-[#252A3A]"
+                  ? "border-emerald-500 text-emerald-600"
+                  : "border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300"
               )}
             >
               <tab.icon className="w-4 h-4" />
@@ -70,18 +70,18 @@ export function Governance({ projectId }: { projectId?: string }) {
               {phases.map(phase => {
                 const phaseProjects = projects.filter(p => p.phase === phase);
                 return (
-                  <div key={phase} className="flex-shrink-0 w-80 bg-[#12151C] border border-[#1C2030] rounded-xl flex flex-col h-[calc(100vh-250px)]">
-                    <div className="p-4 border-b border-[#1C2030] flex items-center justify-between bg-[#0E1118] rounded-t-xl">
-                      <h3 className="text-sm font-semibold text-white uppercase tracking-wider">{phase}</h3>
-                      <span className="px-2 py-0.5 rounded-full bg-[#1C2030] text-xs font-medium text-neutral-400">
+                  <div key={phase} className="flex-shrink-0 w-80 bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl flex flex-col h-[calc(100vh-250px)]">
+                    <div className="p-4 border-b border-[#EAEDF3] flex items-center justify-between bg-[#F8FAFB] rounded-t-xl">
+                      <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">{phase}</h3>
+                      <span className="px-2 py-0.5 rounded-full bg-[#EAEDF3] text-xs font-medium text-gray-500">
                         {phaseProjects.length}
                       </span>
                     </div>
                     <div className="p-4 flex-1 overflow-y-auto space-y-3">
                       {phaseProjects.map(project => (
-                        <div key={project.id} className="bg-[#181C25] border border-[#252A3A] rounded-lg p-4 hover:border-emerald-500/50 transition-colors cursor-pointer group">
+                        <div key={project.id} className="bg-[#F0F2F6] border border-[#D4D8E2] rounded-lg p-4 hover:border-emerald-500/50 transition-colors cursor-pointer group">
                           <div className="flex justify-between items-start mb-2">
-                            <h4 className="text-sm font-medium text-white group-hover:text-emerald-400 transition-colors">{project.name}</h4>
+                            <h4 className="text-sm font-medium text-gray-900 group-hover:text-emerald-600 transition-colors">{project.name}</h4>
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
                               project.riskScore > 60 ? 'bg-red-500/20 text-red-500' :
                               project.riskScore > 40 ? 'bg-amber-500/20 text-amber-500' :
@@ -90,10 +90,10 @@ export function Governance({ projectId }: { projectId?: string }) {
                               {project.riskScore}
                             </div>
                           </div>
-                          <div className="text-xs text-neutral-500 space-y-1">
-                            <p>ESCO: <span className="text-neutral-300">{project.esco}</span></p>
-                            <p>Value: <span className="text-neutral-300 font-mono">${(project.value / 1000000).toFixed(1)}M</span></p>
-                            <p>Lead: <span className="text-neutral-300">{project.engineer}</span></p>
+                          <div className="text-xs text-gray-500 space-y-1">
+                            <p>ESCO: <span className="text-gray-600">{project.esco}</span></p>
+                            <p>Value: <span className="text-gray-600 font-mono">${(project.value / 1000000).toFixed(1)}M</span></p>
+                            <p>Lead: <span className="text-gray-600">{project.engineer}</span></p>
                           </div>
                         </div>
                       ))}
@@ -106,9 +106,9 @@ export function Governance({ projectId }: { projectId?: string }) {
         )}
 
         {activeTab === 'milestones' && (
-          <div className="bg-[#12151C] border border-[#1C2030] rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-[#1C2030] flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Project Milestones</h3>
+          <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
+            <div className="p-6 border-b border-[#EAEDF3] flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-900">Project Milestones</h3>
               <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-600 border border-transparent rounded-lg text-xs font-medium text-white hover:bg-emerald-700 transition-colors">
                 <Plus className="w-3.5 h-3.5" />
                 Add Milestone
@@ -116,7 +116,7 @@ export function Governance({ projectId }: { projectId?: string }) {
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-neutral-400 uppercase bg-[#0E1118] border-b border-[#1C2030]">
+                <thead className="text-xs text-neutral-400 uppercase bg-[#F8FAFB] border-b border-[#EAEDF3]">
                   <tr>
                     <th className="px-6 py-4 font-medium">Milestone</th>
                     <th className="px-6 py-4 font-medium">Due Date</th>
@@ -124,28 +124,28 @@ export function Governance({ projectId }: { projectId?: string }) {
                     <th className="px-6 py-4 font-medium">Assigned To</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1C2030]">
+                <tbody className="divide-y divide-[#EAEDF3]">
                   {milestones.filter(m => m.projectId === selectedProjectId).map((milestone) => (
-                    <tr key={milestone.id} className="hover:bg-[#181C25] transition-colors">
-                      <td className="px-6 py-4 font-medium text-white">{milestone.name}</td>
-                      <td className="px-6 py-4 text-neutral-300 font-mono">{milestone.dueDate}</td>
+                    <tr key={milestone.id} className="hover:bg-[#F0F2F6] transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-900">{milestone.name}</td>
+                      <td className="px-6 py-4 text-gray-600 font-mono">{milestone.dueDate}</td>
                       <td className="px-6 py-4">
                         <span className={cn(
                           "px-2.5 py-1 rounded text-xs font-medium border",
                           milestone.status === 'completed' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
                           milestone.status === 'overdue' ? "bg-red-500/10 text-red-500 border-red-500/20" :
                           milestone.status === 'in progress' ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
-                          "bg-[#1C2030] text-neutral-400 border-[#252A3A]"
+                          "bg-[#EAEDF3] text-gray-500 border-[#D4D8E2]"
                         )}>
                           {milestone.status.toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-neutral-300">{milestone.assignedTo}</td>
+                      <td className="px-6 py-4 text-gray-600">{milestone.assignedTo}</td>
                     </tr>
                   ))}
                   {milestones.filter(m => m.projectId === selectedProjectId).length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-6 py-8 text-center text-neutral-500">No milestones found for this project.</td>
+                      <td colSpan={4} className="px-6 py-8 text-center text-gray-500">No milestones found for this project.</td>
                     </tr>
                   )}
                 </tbody>
@@ -155,9 +155,9 @@ export function Governance({ projectId }: { projectId?: string }) {
         )}
 
         {activeTab === 'risks' && (
-          <div className="bg-[#12151C] border border-[#1C2030] rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-[#1C2030] flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Risk Log</h3>
+          <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
+            <div className="p-6 border-b border-[#EAEDF3] flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-900">Risk Log</h3>
               <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-600 border border-transparent rounded-lg text-xs font-medium text-white hover:bg-emerald-700 transition-colors">
                 <Plus className="w-3.5 h-3.5" />
                 Log Risk
@@ -165,7 +165,7 @@ export function Governance({ projectId }: { projectId?: string }) {
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-neutral-400 uppercase bg-[#0E1118] border-b border-[#1C2030]">
+                <thead className="text-xs text-neutral-400 uppercase bg-[#F8FAFB] border-b border-[#EAEDF3]">
                   <tr>
                     <th className="px-6 py-4 font-medium">Description</th>
                     <th className="px-6 py-4 font-medium">Category</th>
@@ -174,11 +174,11 @@ export function Governance({ projectId }: { projectId?: string }) {
                     <th className="px-6 py-4 font-medium">Owner</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1C2030]">
+                <tbody className="divide-y divide-[#EAEDF3]">
                   {risks.filter(r => r.projectId === selectedProjectId).map((risk) => (
-                    <tr key={risk.id} className="hover:bg-[#181C25] transition-colors">
-                      <td className="px-6 py-4 font-medium text-white max-w-md truncate">{risk.description}</td>
-                      <td className="px-6 py-4 text-neutral-300">{risk.category}</td>
+                    <tr key={risk.id} className="hover:bg-[#F0F2F6] transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-900 max-w-md truncate">{risk.description}</td>
+                      <td className="px-6 py-4 text-gray-600">{risk.category}</td>
                       <td className="px-6 py-4">
                         <span className={cn(
                           "px-2.5 py-1 rounded text-xs font-medium border",
@@ -190,13 +190,13 @@ export function Governance({ projectId }: { projectId?: string }) {
                           {risk.severity.toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-neutral-300">{risk.status}</td>
-                      <td className="px-6 py-4 text-neutral-300">{risk.owner}</td>
+                      <td className="px-6 py-4 text-gray-600">{risk.status}</td>
+                      <td className="px-6 py-4 text-gray-600">{risk.owner}</td>
                     </tr>
                   ))}
                   {risks.filter(r => r.projectId === selectedProjectId).length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-neutral-500">No risks logged for this project.</td>
+                      <td colSpan={5} className="px-6 py-8 text-center text-gray-500">No risks logged for this project.</td>
                     </tr>
                   )}
                 </tbody>

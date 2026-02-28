@@ -80,14 +80,14 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
   return (
     <div className="flex flex-col h-full">
       {!projectId && (
-        <div className="flex-shrink-0 border-b border-[#1C2030] bg-[#12151C] px-8 py-6">
+        <div className="flex-shrink-0 border-b border-[#EAEDF3] bg-[#FFFFFF] px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Facility Assessment & Benchmarking</h1>
-              <p className="text-sm text-neutral-400 mt-1">Ingest utility data, normalize for weather, calculate EUI and capital exposure.</p>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Facility Assessment & Benchmarking</h1>
+              <p className="text-sm text-gray-500 mt-1">Ingest utility data, normalize for weather, calculate EUI and capital exposure.</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#1C2030] border border-[#252A3A] rounded-lg text-sm font-medium text-white hover:bg-[#252A3A] transition-colors duration-150">
+              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-gray-600 hover:bg-[#D4D8E2] transition-colors duration-150">
                 <DollarSign className="w-4 h-4" />
                 Upload Bills (CSV)
               </button>
@@ -109,8 +109,8 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                 className={cn(
                   "tab-btn px-4 pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
                   activeTab === tab.id
-                    ? "border-emerald-500 text-emerald-500 active"
-                    : "border-transparent text-neutral-400 hover:text-white"
+                    ? "border-emerald-500 text-emerald-600 active"
+                    : "border-transparent text-gray-500 hover:text-gray-900"
                 )}
               >
                 <tab.icon className="w-4 h-4" />
@@ -127,7 +127,7 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
           <select
             value={selectedBuilding?.id}
             onChange={(e) => setSelectedBuildingId(e.target.value)}
-            className="bg-[#12151C] border border-[#1C2030] text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5 transition-colors duration-150"
+            className="bg-[#FFFFFF] border border-[#EAEDF3] text-gray-700 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5 transition-colors duration-150"
           >
             {displayBuildings.map(b => (
               <option key={b.id} value={b.id}>{b.name}</option>
@@ -144,69 +144,69 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
         {activeTab === 'energy' && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-children">
-              <div className="kpi-card bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-                <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">Energy Use Intensity (EUI)</h3>
+              <div className="kpi-card bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6">
+                <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Energy Use Intensity (EUI)</h3>
                 <div className="flex items-end gap-2">
-                  <span className="text-4xl font-bold text-white animate-stat-pop">{eui}</span>
-                  <span className="text-sm text-neutral-500 mb-1">kBtu/sqft/yr</span>
+                  <span className="text-4xl font-bold text-gray-900 animate-stat-pop">{eui}</span>
+                  <span className="text-sm text-gray-500 mb-1">kBtu/sqft/yr</span>
                 </div>
-                <div className="mt-4 pt-4 border-t border-[#1C2030] space-y-2">
+                <div className="mt-4 pt-4 border-t border-[#EAEDF3] space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-neutral-400">Portfolio Median</span>
-                    <span className="text-emerald-400 font-medium">65.2</span>
+                    <span className="text-gray-500">Portfolio Median</span>
+                    <span className="text-emerald-600 font-medium">65.2</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-neutral-400">National Median</span>
-                    <span className="text-neutral-300 font-medium">72.4</span>
+                    <span className="text-gray-500">National Median</span>
+                    <span className="text-gray-600 font-medium">72.4</span>
                   </div>
                 </div>
               </div>
 
-              <div className="kpi-card bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-                <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">Annual Energy Cost</h3>
+              <div className="kpi-card bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6">
+                <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Annual Energy Cost</h3>
                 <div className="flex items-end gap-2">
-                  <span className="text-4xl font-bold text-white animate-stat-pop">${totalCost.toLocaleString()}</span>
+                  <span className="text-4xl font-bold text-gray-900 animate-stat-pop">${totalCost.toLocaleString()}</span>
                 </div>
-                <div className="mt-4 pt-4 border-t border-[#1C2030] space-y-2">
+                <div className="mt-4 pt-4 border-t border-[#EAEDF3] space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-neutral-400">Cost per SqFt</span>
-                    <span className="text-white font-medium">${costPerSqft}</span>
+                    <span className="text-gray-500">Cost per SqFt</span>
+                    <span className="text-gray-900 font-medium">${costPerSqft}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-neutral-400">Building Size</span>
-                    <span className="text-white font-medium">{selectedBuilding?.sqft.toLocaleString()} sqft</span>
+                    <span className="text-gray-500">Building Size</span>
+                    <span className="text-gray-900 font-medium">{selectedBuilding?.sqft.toLocaleString()} sqft</span>
                   </div>
                 </div>
               </div>
 
-              <div className="kpi-card bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-                <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">Weather Normalization</h3>
+              <div className="kpi-card bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6">
+                <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Weather Normalization</h3>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-medium border border-emerald-500/20">
                     Good Fit
                   </span>
-                  <span className="text-sm text-neutral-400">R² = {rSquared}</span>
+                  <span className="text-sm text-gray-500">R² = {rSquared}</span>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">Base Load</span>
-                    <span className="text-white font-mono">{baseLoad.toLocaleString()} kWh</span>
+                    <span className="text-gray-500">Base Load</span>
+                    <span className="text-gray-900 font-mono">{baseLoad.toLocaleString()} kWh</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">Cooling (CDD)</span>
-                    <span className="text-white font-mono">{cddCoeff} kWh/DD</span>
+                    <span className="text-gray-500">Cooling (CDD)</span>
+                    <span className="text-gray-900 font-mono">{cddCoeff} kWh/DD</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">Heating (HDD)</span>
-                    <span className="text-white font-mono">{hddCoeff} kWh/DD</span>
+                    <span className="text-gray-500">Heating (HDD)</span>
+                    <span className="text-gray-900 font-mono">{hddCoeff} kWh/DD</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Monthly Chart */}
-            <div className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-              <h3 className="text-sm font-semibold text-white mb-6">Monthly Consumption (kWh)</h3>
+            <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-6">Monthly Consumption (kWh)</h3>
               {buildingBills.length > 0 ? (
                 <div className="h-56 flex items-end gap-2 pb-6 relative">
                   {buildingBills.map((bill, i) => {
@@ -222,31 +222,31 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                             animation: `staggerFade 0.4s cubic-bezier(0.16,1,0.3,1) ${0.03 * i}s both`
                           }}
                         >
-                          <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#252A3A] text-white text-xs py-1.5 px-2.5 rounded-lg whitespace-nowrap z-10 pointer-events-none shadow-xl border border-[#2D3348] transition-opacity duration-150">
+                          <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1.5 px-2.5 rounded-lg whitespace-nowrap z-10 pointer-events-none shadow-xl transition-opacity duration-150">
                             {bill.electricKwh.toLocaleString()} kWh
                           </div>
                         </div>
-                        <span className="text-[10px] text-neutral-500 uppercase absolute -bottom-6">{months[i]}</span>
+                        <span className="text-[10px] text-gray-500 uppercase absolute -bottom-6">{months[i]}</span>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="h-56 flex items-center justify-center text-neutral-500 text-sm">
+                <div className="h-56 flex items-center justify-center text-gray-500 text-sm">
                   No utility data for this building.
                 </div>
               )}
             </div>
 
             {/* Utility Ledger */}
-            <div className="bg-[#12151C] border border-[#1C2030] rounded-xl overflow-hidden">
-              <div className="p-6 border-b border-[#1C2030] flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">Utility Bill Ledger</h3>
-                <span className="text-xs text-neutral-500">{buildingBills.length} months</span>
+            <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
+              <div className="p-6 border-b border-[#EAEDF3] flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900">Utility Bill Ledger</h3>
+                <span className="text-xs text-gray-500">{buildingBills.length} months</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-neutral-400 uppercase bg-[#0E1118] border-b border-[#1C2030]">
+                  <thead className="text-xs text-neutral-400 uppercase bg-[#F8FAFB] border-b border-[#EAEDF3]">
                     <tr>
                       <th className="px-6 py-4 font-medium">Period</th>
                       <th className="px-6 py-4 font-medium text-right">Electric (kWh)</th>
@@ -257,16 +257,16 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                       <th className="px-6 py-4 font-medium text-right">Total Cost</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1C2030] stagger-rows">
+                  <tbody className="divide-y divide-[#EAEDF3] stagger-rows">
                     {buildingBills.map((bill) => (
-                      <tr key={bill.id} className="hover:bg-[#181C25] transition-colors duration-100">
-                        <td className="px-6 py-4 font-medium text-white">{bill.month}</td>
-                        <td className="px-6 py-4 text-right text-neutral-300 font-mono">{bill.electricKwh.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-neutral-300 font-mono">{bill.peakKw}</td>
-                        <td className="px-6 py-4 text-right text-neutral-300 font-mono">${bill.electricCost.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-neutral-300 font-mono">{bill.gasTherms.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-neutral-300 font-mono">${bill.gasCost.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-white font-mono font-semibold">${(bill.electricCost + bill.gasCost).toLocaleString()}</td>
+                      <tr key={bill.id} className="hover:bg-[#F0F2F6] transition-colors duration-100">
+                        <td className="px-6 py-4 font-medium text-gray-900">{bill.month}</td>
+                        <td className="px-6 py-4 text-right text-gray-600 font-mono">{bill.electricKwh.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-right text-gray-600 font-mono">{bill.peakKw}</td>
+                        <td className="px-6 py-4 text-right text-gray-600 font-mono">${bill.electricCost.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-right text-gray-600 font-mono">{bill.gasTherms.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-right text-gray-600 font-mono">${bill.gasCost.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-right text-gray-900 font-mono font-semibold">${(bill.electricCost + bill.gasCost).toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -282,60 +282,60 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
             {/* 5-Year Outlook Cards */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold text-white">5-Year Capital Outlook</h2>
+                <h2 className="text-base font-semibold text-gray-900">5-Year Capital Outlook</h2>
                 <button className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">
                   <FileText className="w-4 h-4" />
                   Generate Capital Plan Report
                 </button>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-                <div className="kpi-card bg-[#12151C] border border-[#1C2030] rounded-xl p-5">
+                <div className="kpi-card bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-2">
-                    <DollarSign className="w-4 h-4 text-amber-400" />
-                    <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">5-Year Capital Need</h3>
+                    <DollarSign className="w-4 h-4 text-amber-600" />
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">5-Year Capital Need</h3>
                   </div>
-                  <span className="text-3xl font-bold text-white animate-stat-pop">
+                  <span className="text-3xl font-bold text-gray-900 animate-stat-pop">
                     ${(total5YearCost / 1000).toFixed(0)}K
                   </span>
-                  <p className="text-xs text-neutral-500 mt-1">Across {capitalTimeline.slice(0,5).reduce((s,t) => s + t.count, 0)} assets reaching EOL</p>
+                  <p className="text-xs text-gray-500 mt-1">Across {capitalTimeline.slice(0,5).reduce((s,t) => s + t.count, 0)} assets reaching EOL</p>
                 </div>
 
-                <div className="kpi-card bg-[#12151C] border border-red-900/30 rounded-xl p-5">
+                <div className="kpi-card bg-[#FFFFFF] border border-red-900/30 rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="w-4 h-4 text-red-400" />
-                    <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Critical Assets (2yr)</h3>
+                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Critical Assets (2yr)</h3>
                   </div>
-                  <span className="text-3xl font-bold text-red-400 animate-stat-pop">{critical2YearCount}</span>
-                  <p className="text-xs text-neutral-500 mt-1">Immediate replacement priority</p>
+                  <span className="text-3xl font-bold text-red-600 animate-stat-pop">{critical2YearCount}</span>
+                  <p className="text-xs text-gray-500 mt-1">Immediate replacement priority</p>
                 </div>
 
-                <div className="kpi-card bg-[#12151C] border border-[#1C2030] rounded-xl p-5">
+                <div className="kpi-card bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-4 h-4 text-neutral-400" />
-                    <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Highest Single Cost</h3>
+                    <TrendingUp className="w-4 h-4 text-gray-500" />
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Highest Single Cost</h3>
                   </div>
-                  <span className="text-3xl font-bold text-white animate-stat-pop">
+                  <span className="text-3xl font-bold text-gray-900 animate-stat-pop">
                     ${highestCostAsset ? (highestCostAsset.replacementCost / 1000).toFixed(0) + 'K' : 'N/A'}
                   </span>
-                  <p className="text-xs text-neutral-500 mt-1 truncate">{highestCostAsset?.type} — {highestCostAsset?.manufacturer}</p>
+                  <p className="text-xs text-gray-500 mt-1 truncate">{highestCostAsset?.type} — {highestCostAsset?.manufacturer}</p>
                 </div>
 
-                <div className="kpi-card bg-[#12151C] border border-emerald-900/30 rounded-xl p-5">
+                <div className="kpi-card bg-[#FFFFFF] border border-emerald-900/30 rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-4 h-4 text-emerald-400" />
-                    <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">ESPC Potential</h3>
+                    <Zap className="w-4 h-4 text-emerald-600" />
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">ESPC Potential</h3>
                   </div>
-                  <span className="text-3xl font-bold text-emerald-400 animate-stat-pop">High</span>
-                  <p className="text-xs text-neutral-500 mt-1">{espcOverlapAssets.length} assets eligible for bundling</p>
+                  <span className="text-3xl font-bold text-emerald-600 animate-stat-pop">High</span>
+                  <p className="text-xs text-gray-500 mt-1">{espcOverlapAssets.length} assets eligible for bundling</p>
                 </div>
               </div>
             </div>
 
             {/* Equipment Replacement Timeline */}
-            <div className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
+            <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-semibold text-white">Equipment Replacement Timeline</h3>
-                <div className="flex items-center gap-4 text-xs text-neutral-400">
+                <h3 className="text-sm font-semibold text-gray-900">Equipment Replacement Timeline</h3>
+                <div className="flex items-center gap-4 text-xs text-gray-500">
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-500/40 border border-red-500/50" />Critical</span>
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500/40 border border-amber-500/50" />Poor</span>
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/40 border border-emerald-500/50" />Good</span>
@@ -350,13 +350,13 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                   >
                     <div className={cn(
                       "w-12 text-sm font-mono text-right flex-shrink-0",
-                      t.year === currentYear ? "text-emerald-400 font-semibold" : "text-neutral-400"
+                      t.year === currentYear ? "text-emerald-600 font-semibold" : "text-gray-500"
                     )}>
                       {t.year}
                     </div>
-                    <div className="flex-1 h-8 bg-[#0E1118] rounded-lg border border-[#1C2030] flex items-center px-2 gap-1.5 overflow-hidden relative">
+                    <div className="flex-1 h-8 bg-[#F8FAFB] rounded-lg border border-[#EAEDF3] flex items-center px-2 gap-1.5 overflow-hidden relative">
                       {t.assets.length === 0 && (
-                        <span className="text-[10px] text-neutral-600 pl-1">—</span>
+                        <span className="text-[10px] text-gray-400 pl-1">—</span>
                       )}
                       {t.assets.map((a: any) => (
                         <div
@@ -366,10 +366,10 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                             "h-5 rounded px-2 text-[10px] font-medium flex items-center whitespace-nowrap cursor-pointer group relative",
                             "transition-all duration-150 hover:z-10 hover:scale-105",
                             a.condition === 'Critical'
-                              ? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
+                              ? "bg-red-500/15 text-red-600 border border-red-500/25 hover:bg-red-500/25"
                               : a.condition === 'Poor'
-                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30"
-                              : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"
+                              ? "bg-amber-500/15 text-amber-600 border border-amber-500/25 hover:bg-amber-500/25"
+                              : "bg-emerald-500/15 text-emerald-600 border border-emerald-500/25 hover:bg-emerald-500/25"
                           )}
                         >
                           {a.type}
@@ -378,9 +378,9 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                     </div>
                     <div className={cn(
                       "w-24 text-right text-sm font-mono flex-shrink-0",
-                      t.cost > 200000 ? "text-red-400 font-semibold" :
-                      t.cost > 50000 ? "text-amber-400" :
-                      t.cost > 0 ? "text-neutral-300" : "text-neutral-600"
+                      t.cost > 200000 ? "text-red-600 font-semibold" :
+                      t.cost > 50000 ? "text-amber-600" :
+                      t.cost > 0 ? "text-gray-600" : "text-gray-400"
                     )}>
                       {t.cost > 0 ? `$${t.cost.toLocaleString()}` : '—'}
                     </div>
@@ -390,17 +390,17 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
             </div>
 
             {/* Replacement Cost Summary Table */}
-            <div className="bg-[#12151C] border border-[#1C2030] rounded-xl overflow-hidden">
-              <div className="p-6 border-b border-[#1C2030] flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">Replacement Cost Summary</h3>
-                <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1C2030] border border-[#252A3A] rounded-lg text-xs font-medium text-neutral-300 hover:bg-[#252A3A] hover:text-white transition-colors duration-150">
+            <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
+              <div className="p-6 border-b border-[#EAEDF3] flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900">Replacement Cost Summary</h3>
+                <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs font-medium text-gray-600 hover:bg-[#D4D8E2] hover:text-gray-900 transition-colors duration-150">
                   <Download className="w-3.5 h-3.5" />
                   Export CSV
                 </button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-neutral-400 uppercase bg-[#0E1118] border-b border-[#1C2030]">
+                  <thead className="text-xs text-neutral-400 uppercase bg-[#F8FAFB] border-b border-[#EAEDF3]">
                     <tr>
                       <th className="px-6 py-4 font-medium">Year</th>
                       <th className="px-6 py-4 font-medium text-center">Assets Reaching EOL</th>
@@ -409,59 +409,59 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                       <th className="px-6 py-4 font-medium">Benchmark Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1C2030] stagger-rows">
+                  <tbody className="divide-y divide-[#EAEDF3] stagger-rows">
                     {costSummaryRows.map((row) => (
                       <tr
                         key={row.year}
                         className={cn(
                           "transition-colors duration-100",
-                          row.year === currentYear ? "bg-emerald-500/5 hover:bg-emerald-500/10" : "hover:bg-[#181C25]"
+                          row.year === currentYear ? "bg-emerald-500/5 hover:bg-emerald-500/10" : "hover:bg-[#F0F2F6]"
                         )}
                       >
-                        <td className="px-6 py-4 font-mono font-semibold text-white">
+                        <td className="px-6 py-4 font-mono font-semibold text-gray-900">
                           {row.year}
                           {row.year === currentYear && (
-                            <span className="ml-2 text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20">NOW</span>
+                            <span className="ml-2 text-[10px] bg-emerald-500/15 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-500/20">NOW</span>
                           )}
                         </td>
                         <td className="px-6 py-4 text-center">
                           {row.count > 0 ? (
                             <span className={cn(
                               "px-2.5 py-1 rounded-full text-xs font-semibold border",
-                              row.count >= 3 ? "bg-red-500/10 text-red-400 border-red-500/20" :
-                              row.count >= 1 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-                              "bg-[#1C2030] text-neutral-400 border-[#252A3A]"
+                              row.count >= 3 ? "bg-red-500/10 text-red-600 border-red-500/20" :
+                              row.count >= 1 ? "bg-amber-500/10 text-amber-600 border-amber-500/20" :
+                              "bg-[#EAEDF3] text-gray-500 border-[#D4D8E2]"
                             )}>
                               {row.count} asset{row.count !== 1 ? 's' : ''}
                             </span>
                           ) : (
-                            <span className="text-neutral-600 text-xs">—</span>
+                            <span className="text-gray-400 text-xs">—</span>
                           )}
                         </td>
                         <td className="px-6 py-4 text-right font-mono">
                           {row.cost > 0 ? (
                             <span className={cn(
                               "font-semibold",
-                              row.cost > 200000 ? "text-red-400" :
-                              row.cost > 50000 ? "text-amber-400" : "text-white"
+                              row.cost > 200000 ? "text-red-600" :
+                              row.cost > 50000 ? "text-amber-600" : "text-gray-900"
                             )}>
                               ${row.cost.toLocaleString()}
                             </span>
                           ) : (
-                            <span className="text-neutral-600">$0</span>
+                            <span className="text-gray-400">$0</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-right font-mono text-neutral-300 font-semibold">
+                        <td className="px-6 py-4 text-right font-mono text-gray-600 font-semibold">
                           ${row.cumulative.toLocaleString()}
                         </td>
                         <td className="px-6 py-4">
                           {row.count > 0 ? (
                             <div className="flex items-center gap-1.5">
-                              <ChevronRight className="w-3 h-3 text-emerald-500" />
-                              <span className="text-xs text-neutral-400">Benchmark available</span>
+                              <ChevronRight className="w-3 h-3 text-emerald-600" />
+                              <span className="text-xs text-gray-500">Benchmark available</span>
                             </div>
                           ) : (
-                            <span className="text-xs text-neutral-600">No replacements</span>
+                            <span className="text-xs text-gray-400">No replacements</span>
                           )}
                         </td>
                       </tr>

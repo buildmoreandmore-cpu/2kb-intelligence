@@ -36,22 +36,22 @@ export function Layout() {
   const navigation = allNavigation.filter(item => item.modes.includes(mode));
 
   return (
-    <div className="flex h-screen bg-[#0B0E13] text-[#B8BDD0]">
+    <div className="flex h-screen bg-[#F4F6FA] text-gray-700">
       {/* Sidebar */}
-      <div className="w-64 flex-shrink-0 border-r border-[#1C2030] bg-[#12151C] flex flex-col">
+      <div className="w-64 flex-shrink-0 border-r border-[#EAEDF3] bg-[#FFFFFF] flex flex-col">
         {/* Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-[#1C2030]">
+        <div className="h-16 flex items-center px-6 border-b border-[#EAEDF3]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-900/30"
               style={{ transition: 'box-shadow 0.2s ease' }}>
               <span className="text-white font-bold text-sm">2KB</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold text-white tracking-tight leading-tight">Intelligence</span>
+              <span className="font-semibold text-gray-900 tracking-tight leading-tight">Intelligence</span>
               <span
                 className={cn(
                   "text-[10px] font-medium uppercase tracking-wider transition-all duration-200",
-                  mode !== 'Full' ? "text-emerald-500 opacity-100" : "text-neutral-600 opacity-60"
+                  mode !== 'Full' ? "text-emerald-600 opacity-100" : "text-gray-400 opacity-100"
                 )}
               >
                 {mode !== 'Full' ? `${mode} Mode` : 'Full Platform'}
@@ -71,8 +71,8 @@ export function Layout() {
                 cn(
                   'nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium',
                   isActive
-                    ? 'bg-emerald-500/10 text-emerald-400 active'
-                    : 'text-neutral-400 hover:bg-[#1C2030] hover:text-white'
+                    ? 'bg-emerald-50 text-emerald-700 active'
+                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
                 )
               }
             >
@@ -83,24 +83,24 @@ export function Layout() {
         </nav>
 
         {/* User */}
-        <div className="p-4 border-t border-[#1C2030]">
+        <div className="p-4 border-t border-[#EAEDF3]">
           <div className="flex items-center gap-3 px-1">
             <div className="w-8 h-8 rounded-full bg-emerald-600/20 border border-emerald-600/30 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-semibold text-emerald-400">ME</span>
+              <span className="text-xs font-semibold text-emerald-600">ME</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-sm font-medium text-white truncate">Martin Engineer</span>
-              <span className="text-xs text-neutral-500 truncate">martin@2kb.com</span>
+              <span className="text-sm font-medium text-gray-900 truncate">Martin Engineer</span>
+              <span className="text-xs text-gray-500 truncate">martin@2kb.com</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#0B0E13]">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#F4F6FA]">
         {/* Top Bar — Service Line Toggle */}
-        <header className="h-16 flex-shrink-0 border-b border-[#1C2030] bg-[#12151C] flex items-center justify-between px-8">
-          <div className="flex items-center gap-1.5 bg-[#0E1118] p-1 rounded-xl border border-[#1C2030]">
+        <header className="h-16 flex-shrink-0 border-b border-[#EAEDF3] bg-[#FFFFFF] flex items-center justify-between px-8">
+          <div className="flex items-center gap-1.5 bg-[#F8FAFB] p-1 rounded-xl border border-[#EAEDF3]">
             <Layers className="w-3.5 h-3.5 text-neutral-500 ml-1.5" />
             {(['Full', 'Audit', 'OR', 'Construction'] as ServiceLineMode[]).map((m) => (
               <button
@@ -109,8 +109,8 @@ export function Layout() {
                 className={cn(
                   "mode-pill px-3 py-1.5 text-xs font-medium rounded-lg",
                   mode === m
-                    ? "active bg-[#1C2030] text-white shadow-sm"
-                    : "text-neutral-500 hover:text-neutral-300 hover:bg-[#1C2030]/60"
+                    ? "active bg-white text-gray-900 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-white/60"
                 )}
               >
                 {modeLabels[m]}
@@ -121,7 +121,7 @@ export function Layout() {
           {/* Right side — notification dot placeholder */}
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-badge-pulse" title="System online" />
-            <span className="text-xs text-neutral-500">2KB Intelligence v2.1</span>
+            <span className="text-xs text-gray-500">2KB Intelligence v2.1</span>
           </div>
         </header>
 

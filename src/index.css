@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0B0E13;
-  --color-card: #12151C;
-  --color-hover: #181C25;
-  --color-input: #0E1118;
-  --color-border: #1C2030;
-  --color-border-light: #252A3A;
-  --color-text-main: #B8BDD0;
-  --color-text-muted: #5A6278;
-  --color-text-heading: #E8ECF4;
+  --color-bg: #F4F6FA;
+  --color-card: #FFFFFF;
+  --color-hover: #F0F2F6;
+  --color-input: #F8FAFB;
+  --color-border: #EAEDF3;
+  --color-border-light: #D4D8E2;
+  --color-text-main: #374151;
+  --color-text-muted: #6B7280;
+  --color-text-heading: #111827;
   --color-accent: #2563EB;
   --color-green: #10B981;
   --color-amber: #F59E0B;
@@ -24,7 +24,7 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* Custom scrollbar for dark theme */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -227,8 +227,8 @@ body {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s var(--ease-out-expo);
 }
 .card-hover:hover {
-  border-color: #252A3A;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-color: #D4D8E2;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 
@@ -237,8 +237,8 @@ body {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .kpi-card:hover {
-  border-color: #2D3348;
-  box-shadow: 0 0 0 1px #2D3348, 0 8px 20px rgba(0,0,0,0.25);
+  border-color: #C5CAD6;
+  box-shadow: 0 0 0 1px #C5CAD6, 0 8px 20px rgba(0,0,0,0.08);
 }
 
 /* Tab button — underline slide */
@@ -266,7 +266,7 @@ body {
   transition: background-color 0.2s var(--ease-out-expo), color 0.2s ease, box-shadow 0.2s ease;
 }
 .mode-pill.active {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 /* Badge — reactive scale on appear */
