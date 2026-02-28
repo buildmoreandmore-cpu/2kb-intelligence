@@ -7,7 +7,7 @@ const STATUS_COLORS: Record<string, { bar: string; text: string; dot: string }> 
   completed:     { bar: 'bg-emerald-500', text: 'text-emerald-700', dot: 'bg-emerald-500' },
   'in progress': { bar: 'bg-blue-500',    text: 'text-blue-700',    dot: 'bg-blue-500' },
   overdue:       { bar: 'bg-red-500',     text: 'text-red-700',     dot: 'bg-red-500' },
-  pending:       { bar: 'bg-gray-300',    text: 'text-gray-500',    dot: 'bg-gray-300' },
+  pending:       { bar: 'bg-[#2A3A5C]',    text: 'text-[#7A8BA8]',    dot: 'bg-[#2A3A5C]' },
 };
 
 function monthsBetween(start: Date, end: Date) {
@@ -69,11 +69,11 @@ export function Timeline({ projectId }: { projectId?: string }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
             <Calendar className="w-6 h-6 text-emerald-600" />
             Timeline Development
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Phase-based project scheduling and milestone tracking</p>
+          <p className="text-sm text-[#7A8BA8] mt-1">Phase-based project scheduling and milestone tracking</p>
         </div>
 
         {/* Project selector (hidden when embedded in ProjectDetail) */}
@@ -82,13 +82,13 @@ export function Timeline({ projectId }: { projectId?: string }) {
             <select
               value={selectedProject}
               onChange={e => setSelectedProject(e.target.value)}
-              className="appearance-none bg-white border border-gray-200 rounded-lg px-4 py-2 pr-10 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="appearance-none bg-[#121C35] border border-[#1E2A45] rounded-lg px-4 py-2 pr-10 text-sm font-medium text-[#CBD2DF] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               {projects.map(p => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5A6B88] pointer-events-none" />
           </div>
         )}
       </div>
@@ -98,22 +98,22 @@ export function Timeline({ projectId }: { projectId?: string }) {
         {Object.entries(STATUS_COLORS).map(([status, colors]) => (
           <div key={status} className="flex items-center gap-1.5">
             <div className={cn('w-3 h-3 rounded-sm', colors.bar)} />
-            <span className="text-gray-600 capitalize">{status}</span>
+            <span className="text-[#9AA5B8] capitalize">{status}</span>
           </div>
         ))}
         <div className="flex items-center gap-1.5">
           <Diamond className="w-3 h-3 text-amber-500 fill-amber-500" />
-          <span className="text-gray-600">Milestone</span>
+          <span className="text-[#9AA5B8]">Milestone</span>
         </div>
       </div>
 
       {/* Gantt Chart */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-[#121C35] rounded-xl border border-[#1E2A45] overflow-hidden">
         {/* Month Headers */}
-        <div className="flex border-b border-gray-200">
+        <div className="flex border-b border-[#1E2A45]">
           {/* Label column */}
-          <div className="w-64 flex-shrink-0 border-r border-gray-200 px-4 py-3 bg-gray-50">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Task / Phase</span>
+          <div className="w-64 flex-shrink-0 border-r border-[#1E2A45] px-4 py-3 bg-[#0F1829]">
+            <span className="text-xs font-semibold text-[#7A8BA8] uppercase tracking-wider">Task / Phase</span>
           </div>
           {/* Timeline columns */}
           <div className="flex-1 relative">
@@ -122,13 +122,13 @@ export function Timeline({ projectId }: { projectId?: string }) {
                 <div
                   key={m.key}
                   className={cn(
-                    "flex-1 text-center py-3 text-xs font-medium border-r border-gray-100 last:border-r-0",
-                    m.month === 0 ? "text-gray-700" : "text-gray-500"
+                    "flex-1 text-center py-3 text-xs font-medium border-r border-[#1E2A45] last:border-r-0",
+                    m.month === 0 ? "text-[#CBD2DF]" : "text-[#7A8BA8]"
                   )}
                 >
                   {m.label}
                   {(i === 0 || m.month === 0) && (
-                    <span className="block text-[10px] text-gray-400">{m.year}</span>
+                    <span className="block text-[10px] text-[#5A6B88]">{m.year}</span>
                   )}
                 </div>
               ))}
@@ -138,7 +138,7 @@ export function Timeline({ projectId }: { projectId?: string }) {
 
         {/* Rows */}
         {items.length === 0 ? (
-          <div className="px-8 py-16 text-center text-gray-400 text-sm">
+          <div className="px-8 py-16 text-center text-[#5A6B88] text-sm">
             No timeline items for this project yet.
           </div>
         ) : (
@@ -156,17 +156,17 @@ export function Timeline({ projectId }: { projectId?: string }) {
                 <div
                   key={item.id}
                   className={cn(
-                    "flex items-center border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors",
-                    idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
+                    "flex items-center border-b border-[#1E2A45] last:border-b-0 hover:bg-[#0F1829]/50 transition-colors",
+                    idx % 2 === 0 ? 'bg-[#121C35]' : 'bg-[#0F1829]/30'
                   )}
                 >
                   {/* Label */}
-                  <div className="w-64 flex-shrink-0 border-r border-gray-200 px-4 py-3">
+                  <div className="w-64 flex-shrink-0 border-r border-[#1E2A45] px-4 py-3">
                     <div className="flex items-center gap-2">
                       <div className={cn('w-2 h-2 rounded-full flex-shrink-0', colors.dot)} />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
-                        <p className="text-[11px] text-gray-400">{item.phase}</p>
+                        <p className="text-sm font-medium text-white truncate">{item.name}</p>
+                        <p className="text-[11px] text-[#5A6B88]">{item.phase}</p>
                       </div>
                     </div>
                   </div>
@@ -175,7 +175,7 @@ export function Timeline({ projectId }: { projectId?: string }) {
                     {/* Month grid lines */}
                     <div className="absolute inset-0 flex pointer-events-none">
                       {months.map(m => (
-                        <div key={m.key} className="flex-1 border-r border-gray-100 last:border-r-0" />
+                        <div key={m.key} className="flex-1 border-r border-[#1E2A45] last:border-r-0" />
                       ))}
                     </div>
 
@@ -219,13 +219,13 @@ export function Timeline({ projectId }: { projectId?: string }) {
       {items.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: 'Total Items', value: items.length, color: 'text-gray-900' },
+            { label: 'Total Items', value: items.length, color: 'text-white' },
             { label: 'Completed', value: items.filter(i => i.status === 'completed').length, color: 'text-emerald-600' },
             { label: 'In Progress', value: items.filter(i => i.status === 'in progress').length, color: 'text-blue-600' },
             { label: 'Overdue', value: items.filter(i => i.status === 'overdue').length, color: 'text-red-600' },
           ].map(stat => (
-            <div key={stat.label} className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-              <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
+            <div key={stat.label} className="bg-[#121C35] rounded-lg border border-[#1E2A45] px-4 py-3">
+              <p className="text-xs text-[#7A8BA8] font-medium">{stat.label}</p>
               <p className={cn('text-2xl font-bold mt-1', stat.color)}>{stat.value}</p>
             </div>
           ))}

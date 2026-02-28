@@ -20,23 +20,23 @@ export function MV({ projectId }: { projectId?: string }) {
   return (
     <div className="flex flex-col h-full">
       {!projectId && (
-        <div className="flex-shrink-0 border-b border-[#EAEDF3] bg-[#FFFFFF] px-8 py-6">
+        <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Measurement & Verification</h1>
-              <p className="text-sm text-gray-500 mt-1">Track post-retrofit savings vs guarantee and detect performance drift.</p>
+              <h1 className="text-2xl font-bold text-white tracking-tight">Measurement & Verification</h1>
+              <p className="text-sm text-[#7A8BA8] mt-1">Track post-retrofit savings vs guarantee and detect performance drift.</p>
             </div>
             <div className="flex items-center gap-3">
               <select 
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="bg-[#EAEDF3] border border-[#D4D8E2] text-gray-700 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
+                className="bg-[#EAEDF3] border border-[#D4D8E2] text-[#CBD2DF] text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-gray-600 hover:bg-[#D4D8E2] transition-colors">
+              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors">
                 <FileText className="w-4 h-4" />
                 Generate M&V Report
               </button>
@@ -61,7 +61,7 @@ export function MV({ projectId }: { projectId?: string }) {
                 <button className="px-4 py-2 bg-red-500/20 text-red-500 text-sm font-medium rounded-lg hover:bg-red-500/30 transition-colors">
                   Investigate Root Cause
                 </button>
-                <button className="px-4 py-2 bg-[#EAEDF3] text-gray-600 text-sm font-medium rounded-lg hover:bg-[#D4D8E2] transition-colors">
+                <button className="px-4 py-2 bg-[#EAEDF3] text-[#9AA5B8] text-sm font-medium rounded-lg hover:bg-[#D4D8E2] transition-colors">
                   Dismiss Alert
                 </button>
               </div>
@@ -70,15 +70,15 @@ export function MV({ projectId }: { projectId?: string }) {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Total Guaranteed</h3>
+          <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
+            <h3 className="text-sm font-medium text-[#7A8BA8] uppercase tracking-wider mb-2">Total Guaranteed</h3>
             <div className="flex items-end gap-3">
-              <span className="text-4xl font-bold text-gray-900">${totalGuaranteed.toLocaleString()}</span>
+              <span className="text-4xl font-bold text-white">${totalGuaranteed.toLocaleString()}</span>
             </div>
           </div>
 
-          <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Total Achieved</h3>
+          <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
+            <h3 className="text-sm font-medium text-[#7A8BA8] uppercase tracking-wider mb-2">Total Achieved</h3>
             <div className="flex items-end gap-3">
               <span className={`text-4xl font-bold ${totalCalculated >= totalGuaranteed ? 'text-emerald-500' : 'text-amber-500'}`}>
                 ${totalCalculated.toLocaleString()}
@@ -86,8 +86,8 @@ export function MV({ projectId }: { projectId?: string }) {
             </div>
           </div>
 
-          <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Achievement Rate</h3>
+          <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
+            <h3 className="text-sm font-medium text-[#7A8BA8] uppercase tracking-wider mb-2">Achievement Rate</h3>
             <div className="flex items-end gap-3">
               <span className={`text-4xl font-bold ${achievementRate >= 100 ? 'text-emerald-500' : 'text-amber-500'}`}>
                 {achievementRate.toFixed(1)}%
@@ -97,8 +97,8 @@ export function MV({ projectId }: { projectId?: string }) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-6">Savings vs Guarantee (Cumulative)</h3>
+          <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
+            <h3 className="text-sm font-semibold text-white mb-6">Savings vs Guarantee (Cumulative)</h3>
             <div className="h-64 flex items-end gap-4">
               {projectMvData.map((data) => {
                 const maxVal = Math.max(...projectMvData.map(d => Math.max(d.guaranteed, d.calculated)));
@@ -126,12 +126,12 @@ export function MV({ projectId }: { projectId?: string }) {
                         </div>
                       </div>
                     </div>
-                    <span className="text-[10px] text-gray-500 font-mono">Year {data.year}</span>
+                    <span className="text-[10px] text-[#7A8BA8] font-mono">Year {data.year}</span>
                   </div>
                 );
               })}
             </div>
-            <div className="mt-6 flex items-center justify-center gap-6 text-xs text-gray-500">
+            <div className="mt-6 flex items-center justify-center gap-6 text-xs text-[#7A8BA8]">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-[#D4D8E2] rounded-sm"></div>
                 <span>Guaranteed</span>
@@ -147,13 +147,13 @@ export function MV({ projectId }: { projectId?: string }) {
             </div>
           </div>
 
-          <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-[#EAEDF3]">
-              <h3 className="text-sm font-semibold text-gray-900">M&V Period Summary</h3>
+          <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
+            <div className="p-6 border-b border-[#1E2A45]">
+              <h3 className="text-sm font-semibold text-white">M&V Period Summary</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-neutral-400 uppercase bg-[#F8FAFB] border-b border-[#EAEDF3]">
+                <thead className="text-xs text-neutral-400 uppercase bg-[#0F1829] border-b border-[#1E2A45]">
                   <tr>
                     <th className="px-6 py-4 font-medium">Period</th>
                     <th className="px-6 py-4 font-medium text-right">Guaranteed</th>
@@ -169,9 +169,9 @@ export function MV({ projectId }: { projectId?: string }) {
                     
                     return (
                       <tr key={data.year} className="hover:bg-[#F0F2F6] transition-colors">
-                        <td className="px-6 py-4 font-medium text-gray-900">Year {data.year}</td>
-                        <td className="px-6 py-4 text-right text-gray-600 font-mono">${data.guaranteed.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-gray-600 font-mono">${data.calculated.toLocaleString()}</td>
+                        <td className="px-6 py-4 font-medium text-white">Year {data.year}</td>
+                        <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${data.guaranteed.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${data.calculated.toLocaleString()}</td>
                         <td className={`px-6 py-4 text-right font-mono ${isShortfall ? 'text-amber-500' : 'text-emerald-500'}`}>
                           {isShortfall ? '' : '+'}${variance.toLocaleString()}
                         </td>
@@ -189,7 +189,7 @@ export function MV({ projectId }: { projectId?: string }) {
                   })}
                   {projectMvData.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-gray-500">No M&V data available for this project.</td>
+                      <td colSpan={5} className="px-6 py-8 text-center text-[#7A8BA8]">No M&V data available for this project.</td>
                     </tr>
                   )}
                 </tbody>

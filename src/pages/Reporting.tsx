@@ -19,7 +19,7 @@ const REPORT_TYPES = [
 ];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  'Draft':       { label: 'DRAFT',      color: 'text-gray-500',     bg: 'bg-[#EAEDF3]',        border: 'border-[#D4D8E2]' },
+  'Draft':       { label: 'DRAFT',      color: 'text-[#7A8BA8]',     bg: 'bg-[#EAEDF3]',        border: 'border-[#D4D8E2]' },
   'In Review':   { label: 'IN REVIEW',  color: 'text-amber-600',    bg: 'bg-amber-500/10',     border: 'border-amber-500/20' },
   'QA Complete': { label: 'QA COMPLETE',color: 'text-blue-600',     bg: 'bg-blue-500/10',      border: 'border-blue-500/20' },
   'Approved':    { label: 'APPROVED',   color: 'text-emerald-600',  bg: 'bg-emerald-500/10',   border: 'border-emerald-500/20' },
@@ -65,9 +65,9 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
               { label: 'Contract Value', val: `$${(project.value / 1000000).toFixed(1)}M` },
               { label: 'Current Phase', val: project.phase.toUpperCase() },
             ].map(({ label, val }) => (
-              <div key={label} className="bg-[#F8FAFB] rounded-lg p-3 border border-[#EAEDF3]">
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</p>
-                <p className="text-sm font-semibold text-gray-900 mt-1">{val}</p>
+              <div key={label} className="bg-[#0F1829] rounded-lg p-3 border border-[#1E2A45]">
+                <p className="text-[10px] text-[#7A8BA8] uppercase tracking-wider">{label}</p>
+                <p className="text-sm font-semibold text-white mt-1">{val}</p>
               </div>
             ))}
           </div>
@@ -82,12 +82,12 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
         <div className="space-y-4">
           <div className="flex items-end gap-3">
             <span className="text-4xl font-bold text-emerald-600">${totalSavings.toLocaleString()}</span>
-            <span className="text-sm text-gray-500 mb-1">/ year guaranteed savings</span>
+            <span className="text-sm text-[#7A8BA8] mb-1">/ year guaranteed savings</span>
           </div>
-          <div className="w-full bg-[#F8FAFB] rounded-full h-3 border border-[#EAEDF3] overflow-hidden">
+          <div className="w-full bg-[#0F1829] rounded-full h-3 border border-[#1E2A45] overflow-hidden">
             <div className="bg-emerald-500 h-full rounded-full progress-bar-fill" style={{ width: '94%' }} />
           </div>
-          <p className="text-xs text-gray-500">Achievement rate: <span className="text-emerald-600 font-semibold">94%</span> of guaranteed baseline</p>
+          <p className="text-xs text-[#7A8BA8]">Achievement rate: <span className="text-emerald-600 font-semibold">94%</span> of guaranteed baseline</p>
         </div>
       ),
       copyText: `Savings Performance\nAnnual Guaranteed Savings: $${totalSavings.toLocaleString()}\nAchievement Rate: 94%`
@@ -103,9 +103,9 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
             { label: 'Simple Payback', val: totalSavings > 0 ? `${(totalCost / totalSavings).toFixed(1)} years` : 'N/A', highlight: false },
             { label: 'NPV (20yr, 5%)', val: '$425,000', highlight: true },
           ].map(({ label, val, highlight }) => (
-            <div key={label} className="flex items-center justify-between py-2 border-b border-[#EAEDF3] last:border-0">
-              <span className="text-sm text-gray-500">{label}</span>
-              <span className={cn("text-sm font-bold", highlight ? "text-emerald-600" : "text-gray-900")}>{val}</span>
+            <div key={label} className="flex items-center justify-between py-2 border-b border-[#1E2A45] last:border-0">
+              <span className="text-sm text-[#7A8BA8]">{label}</span>
+              <span className={cn("text-sm font-bold", highlight ? "text-emerald-600" : "text-white")}>{val}</span>
             </div>
           ))}
         </div>
@@ -122,7 +122,7 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
               "flex items-start gap-3 p-3 rounded-lg border",
               risk.severity === 'Critical' ? "bg-red-500/5 border-red-500/20" :
               risk.severity === 'High' ? "bg-amber-500/5 border-amber-500/20" :
-              "bg-[#F8FAFB] border-[#EAEDF3]"
+              "bg-[#0F1829] border-[#1E2A45]"
             )}>
               <span className={cn(
                 "text-[10px] font-bold px-1.5 py-0.5 rounded border mt-0.5 uppercase flex-shrink-0",
@@ -130,12 +130,12 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
                 "bg-amber-500/15 text-amber-600 border-amber-500/25"
               )}>{risk.severity}</span>
               <div>
-                <p className="text-xs text-gray-700 font-medium">{risk.description}</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">{risk.status}</p>
+                <p className="text-xs text-[#CBD2DF] font-medium">{risk.description}</p>
+                <p className="text-[10px] text-[#7A8BA8] mt-0.5">{risk.status}</p>
               </div>
             </div>
           ))}
-          {risks.length === 0 && <p className="text-sm text-gray-500">No active risks identified.</p>}
+          {risks.length === 0 && <p className="text-sm text-[#7A8BA8]">No active risks identified.</p>}
         </div>
       ),
       copyText: `Risk Summary\n${risks.slice(0,3).map(r => `• ${r.severity}: ${r.description} (${r.status})`).join('\n')}`
@@ -147,7 +147,7 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
         <div className="space-y-4">
           <div className="flex items-end gap-2">
             <span className="text-4xl font-bold text-emerald-600 animate-stat-pop">{co2Reduced.toLocaleString()}</span>
-            <span className="text-sm text-gray-500 mb-1">tCO₂e / year</span>
+            <span className="text-sm text-[#7A8BA8] mb-1">tCO₂e / year</span>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {[
@@ -175,12 +175,12 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
             { text: 'Construction mobilization', done: false },
             { text: 'M&V baseline period begins', done: false },
           ].map(({ text, done }) => (
-            <div key={text} className="flex items-center gap-3 py-2 border-b border-[#EAEDF3] last:border-0">
+            <div key={text} className="flex items-center gap-3 py-2 border-b border-[#1E2A45] last:border-0">
               {done
                 ? <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                : <CircleDot className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                : <CircleDot className="w-4 h-4 text-[#5A6B88] flex-shrink-0" />
               }
-              <span className={cn("text-sm", done ? "text-gray-400 line-through" : "text-gray-700")}>{text}</span>
+              <span className={cn("text-sm", done ? "text-[#5A6B88] line-through" : "text-[#CBD2DF]")}>{text}</span>
             </div>
           ))}
         </div>
@@ -192,26 +192,26 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-sm text-gray-500">Slide-by-slide presentation preview — copy each card to clipboard</p>
-        <span className="text-xs text-gray-500">{slides.length} slides</span>
+        <p className="text-sm text-[#7A8BA8]">Slide-by-slide presentation preview — copy each card to clipboard</p>
+        <span className="text-xs text-[#7A8BA8]">{slides.length} slides</span>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 stagger-children">
         {slides.map((slide, idx) => (
           <div
             key={slide.title}
-            className="card-hover bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden flex flex-col"
+            className="card-hover bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden flex flex-col"
           >
-            <div className="p-4 border-b border-[#EAEDF3] bg-[#F8FAFB] flex items-center justify-between">
+            <div className="p-4 border-b border-[#1E2A45] bg-[#0F1829] flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 {slide.icon}
                 <div>
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">Slide {idx + 1}</p>
-                  <h4 className="text-sm font-bold text-gray-900">{slide.title}</h4>
+                  <p className="text-[10px] text-[#7A8BA8] uppercase tracking-wider">Slide {idx + 1}</p>
+                  <h4 className="text-sm font-bold text-white">{slide.title}</h4>
                 </div>
               </div>
               <button
                 onClick={() => handleCopy(idx, slide.copyText)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs text-gray-500 hover:text-gray-900 hover:border-[#C5CAD6] transition-all duration-150"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs text-[#7A8BA8] hover:text-white hover:border-[#C5CAD6] transition-all duration-150"
               >
                 {copiedSlide === idx
                   ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
@@ -243,12 +243,12 @@ function OnePageSummary({ project, risks }: { project: any, risks: any[] }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">Single-page formatted summary — designed for printing or email</p>
+        <p className="text-sm text-[#7A8BA8]">Single-page formatted summary — designed for printing or email</p>
         <div className="flex items-center gap-3">
           <button
             onClick={handleGenerate}
             disabled={generating}
-            className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm text-gray-600 hover:bg-[#D4D8E2] transition-colors duration-150 disabled:opacity-50"
+            className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors duration-150 disabled:opacity-50"
           >
             <Printer className="w-4 h-4" />
             {generating ? 'Generating…' : generated ? 'Re-generate PDF' : 'Generate PDF'}
@@ -257,7 +257,7 @@ function OnePageSummary({ project, risks }: { project: any, risks: any[] }) {
       </div>
 
       {/* Clean Executive Summary Card */}
-      <div className="bg-white rounded-xl shadow-2xl overflow-hidden text-black max-w-3xl mx-auto">
+      <div className="bg-[#121C35] rounded-xl shadow-2xl overflow-hidden text-black max-w-3xl mx-auto">
         {/* Header bar */}
         <div className="bg-emerald-700 text-white px-8 py-5">
           <div className="flex items-center justify-between">
@@ -406,16 +406,16 @@ export function Reporting({ projectId }: { projectId?: string }) {
   return (
     <div className="flex flex-col h-full">
       {!projectId && (
-        <div className="flex-shrink-0 border-b border-[#EAEDF3] bg-[#FFFFFF] px-8 py-6">
+        <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Automated Reporting & QA</h1>
-              <p className="text-sm text-gray-500 mt-1">Generate standardized deliverables and manage QA/QC workflows.</p>
+              <h1 className="text-2xl font-bold text-white tracking-tight">Automated Reporting & QA</h1>
+              <p className="text-sm text-[#7A8BA8] mt-1">Generate standardized deliverables and manage QA/QC workflows.</p>
             </div>
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="bg-[#EAEDF3] border border-[#D4D8E2] text-gray-700 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5 transition-colors"
+              className="bg-[#EAEDF3] border border-[#D4D8E2] text-[#CBD2DF] text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5 transition-colors"
             >
               {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
@@ -434,7 +434,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                   "tab-btn px-4 pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
                   activeTab === tab.id
                     ? "border-emerald-500 text-emerald-600 active"
-                    : "border-transparent text-gray-500 hover:text-gray-900"
+                    : "border-transparent text-[#7A8BA8] hover:text-white"
                 )}
               >
                 <tab.icon className="w-4 h-4" />
@@ -452,8 +452,8 @@ export function Reporting({ projectId }: { projectId?: string }) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Type Selector */}
             <div className="lg:col-span-1 space-y-6">
-              <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Report Type</h3>
+              <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
+                <h3 className="text-xs font-semibold text-[#7A8BA8] uppercase tracking-wider mb-4">Report Type</h3>
                 <div className="space-y-1.5">
                   {REPORT_TYPES.map((type) => (
                     <button
@@ -463,7 +463,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                         "w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 border flex items-center justify-between group",
                         reportType === type
                           ? "bg-emerald-50 text-emerald-700 border-emerald-500/20"
-                          : "bg-[#F8FAFB] text-gray-500 border-[#EAEDF3] hover:bg-[#F0F2F6] hover:text-gray-900 hover:border-[#D4D8E2]"
+                          : "bg-[#0F1829] text-[#7A8BA8] border-[#1E2A45] hover:bg-[#F0F2F6] hover:text-white hover:border-[#D4D8E2]"
                       )}
                     >
                       {type}
@@ -471,7 +471,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                     </button>
                   ))}
                 </div>
-                <div className="mt-6 pt-6 border-t border-[#EAEDF3]">
+                <div className="mt-6 pt-6 border-t border-[#1E2A45]">
                   <button className="btn-primary w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 rounded-lg text-sm font-medium text-white hover:bg-emerald-700">
                     <FileText className="w-4 h-4" />
                     Generate Draft
@@ -483,9 +483,9 @@ export function Reporting({ projectId }: { projectId?: string }) {
             {/* Preview Panel */}
             <div className="lg:col-span-2">
               {reportType === 'Council Presentation' && selectedProject ? (
-                <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
-                  <div className="p-4 border-b border-[#EAEDF3] bg-[#F8FAFB] flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-gray-500">Preview: Council/Board Presentation</h3>
+                <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
+                  <div className="p-4 border-b border-[#1E2A45] bg-[#0F1829] flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-[#7A8BA8]">Preview: Council/Board Presentation</h3>
                     <StatusBadge status="Draft" />
                   </div>
                   <div className="p-6 overflow-y-auto max-h-[700px]">
@@ -497,9 +497,9 @@ export function Reporting({ projectId }: { projectId?: string }) {
                   </div>
                 </div>
               ) : reportType === 'One-Page Executive Summary' && selectedProject ? (
-                <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
-                  <div className="p-4 border-b border-[#EAEDF3] bg-[#F8FAFB] flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-gray-500">Preview: One-Page Executive Summary</h3>
+                <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
+                  <div className="p-4 border-b border-[#1E2A45] bg-[#0F1829] flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-[#7A8BA8]">Preview: One-Page Executive Summary</h3>
                     <StatusBadge status="Draft" />
                   </div>
                   <div className="p-6 overflow-y-auto max-h-[700px]">
@@ -507,20 +507,20 @@ export function Reporting({ projectId }: { projectId?: string }) {
                   </div>
                 </div>
               ) : (
-                <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden h-full min-h-[600px] flex flex-col">
-                  <div className="p-4 border-b border-[#EAEDF3] bg-[#F8FAFB] flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-gray-500">Preview: {reportType}</h3>
-                    <button className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-[#EAEDF3] rounded transition-colors duration-150">
+                <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden h-full min-h-[600px] flex flex-col">
+                  <div className="p-4 border-b border-[#1E2A45] bg-[#0F1829] flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-[#7A8BA8]">Preview: {reportType}</h3>
+                    <button className="p-1.5 text-[#7A8BA8] hover:text-white hover:bg-[#EAEDF3] rounded transition-colors duration-150">
                       <Download className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="flex-1 p-8 bg-[#F4F6FA] overflow-y-auto">
-                    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-xl min-h-[700px] p-12 text-black">
+                  <div className="flex-1 p-8 bg-[#0B1120] overflow-y-auto">
+                    <div className="max-w-2xl mx-auto bg-[#121C35] rounded-lg shadow-xl min-h-[700px] p-12 text-black">
                       <div className="border-b-4 border-emerald-600 pb-6 mb-8">
                         <h1 className="text-3xl font-bold text-neutral-900 mb-2">{selectedProject?.name}</h1>
-                        <h2 className="text-xl text-gray-600">{reportType}</h2>
-                        <p className="text-sm text-gray-500 mt-4">Prepared by: 2KB Energy Services</p>
-                        <p className="text-sm text-gray-500">Date: {new Date().toLocaleDateString()}</p>
+                        <h2 className="text-xl text-[#9AA5B8]">{reportType}</h2>
+                        <p className="text-sm text-[#7A8BA8] mt-4">Prepared by: 2KB Energy Services</p>
+                        <p className="text-sm text-[#7A8BA8]">Date: {new Date().toLocaleDateString()}</p>
                       </div>
                       <div className="space-y-6">
                         <section>
@@ -567,14 +567,14 @@ export function Reporting({ projectId }: { projectId?: string }) {
 
         {/* ─── REPORT HISTORY TAB ─── */}
         {activeTab === 'history' && (
-          <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-[#EAEDF3] flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-900">Report History</h3>
-              <span className="text-xs text-gray-500">{reports.length} reports</span>
+          <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
+            <div className="p-6 border-b border-[#1E2A45] flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-white">Report History</h3>
+              <span className="text-xs text-[#7A8BA8]">{reports.length} reports</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-neutral-400 uppercase bg-[#F8FAFB] border-b border-[#EAEDF3]">
+                <thead className="text-xs text-neutral-400 uppercase bg-[#0F1829] border-b border-[#1E2A45]">
                   <tr>
                     <th className="px-6 py-4 font-medium">Report Type</th>
                     <th className="px-6 py-4 font-medium">Version</th>
@@ -587,20 +587,20 @@ export function Reporting({ projectId }: { projectId?: string }) {
                 <tbody className="divide-y divide-[#EAEDF3] stagger-rows">
                   {reports.map((report) => (
                     <tr key={report.id} className="hover:bg-[#F0F2F6] transition-colors duration-100">
-                      <td className="px-6 py-4 font-medium text-gray-900">
+                      <td className="px-6 py-4 font-medium text-white">
                         <div>
                           <span>{report.type}</span>
-                          <span className="block text-xs text-gray-500 font-normal mt-0.5">
+                          <span className="block text-xs text-[#7A8BA8] font-normal mt-0.5">
                             {projects.find(p => p.id === report.projectId)?.name}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-600 font-mono">{report.version}</td>
-                      <td className="px-6 py-4 text-gray-600 font-mono text-xs">{report.date}</td>
-                      <td className="px-6 py-4 text-gray-600">{report.by}</td>
+                      <td className="px-6 py-4 text-[#9AA5B8] font-mono">{report.version}</td>
+                      <td className="px-6 py-4 text-[#9AA5B8] font-mono text-xs">{report.date}</td>
+                      <td className="px-6 py-4 text-[#9AA5B8]">{report.by}</td>
                       <td className="px-6 py-4"><StatusBadge status={report.status} /></td>
                       <td className="px-6 py-4">
-                        <button className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-[#EAEDF3] rounded transition-colors duration-150">
+                        <button className="p-1.5 text-[#7A8BA8] hover:text-white hover:bg-[#EAEDF3] rounded transition-colors duration-150">
                           <Download className="w-4 h-4" />
                         </button>
                       </td>
@@ -625,12 +625,12 @@ export function Reporting({ projectId }: { projectId?: string }) {
               const showComments = expandedComments[report.id];
 
               return (
-                <div key={report.id} className="card-hover bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
+                <div key={report.id} className="card-hover bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
                   {/* Header */}
-                  <div className="p-6 border-b border-[#EAEDF3] bg-[#F8FAFB] flex items-start justify-between">
+                  <div className="p-6 border-b border-[#1E2A45] bg-[#0F1829] flex items-start justify-between">
                     <div>
-                      <h3 className="text-base font-bold text-gray-900">{report.type}</h3>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <h3 className="text-base font-bold text-white">{report.type}</h3>
+                      <p className="text-xs text-[#7A8BA8] mt-1">
                         {projects.find(p => p.id === report.projectId)?.name} • {report.version} • By {report.by} on {report.date}
                       </p>
                     </div>
@@ -643,11 +643,11 @@ export function Reporting({ projectId }: { projectId?: string }) {
                     {/* QA Progress Bar */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <h4 className="text-sm font-semibold text-[#CBD2DF] flex items-center gap-2">
                           <FileCheck className="w-4 h-4 text-emerald-600" />
                           QA Checklist
                         </h4>
-                        <span className="text-xs font-mono text-gray-500">{completedCount}/{qaItems.length} items</span>
+                        <span className="text-xs font-mono text-[#7A8BA8]">{completedCount}/{qaItems.length} items</span>
                       </div>
                       <div className="w-full h-2 bg-[#EAEDF3] rounded-full overflow-hidden mb-4">
                         <div
@@ -669,7 +669,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                               "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150",
                               item.checked
                                 ? "bg-emerald-500/5 border-emerald-500/15 opacity-80"
-                                : "bg-[#F8FAFB] border-[#EAEDF3] hover:border-[#D4D8E2]"
+                                : "bg-[#0F1829] border-[#1E2A45] hover:border-[#D4D8E2]"
                             )}
                           >
                             <input
@@ -682,12 +682,12 @@ export function Reporting({ projectId }: { projectId?: string }) {
                             <div className="flex-1 min-w-0">
                               <span className={cn(
                                 "text-sm block",
-                                item.checked ? "text-gray-400 line-through" : "text-gray-700"
+                                item.checked ? "text-[#5A6B88] line-through" : "text-[#CBD2DF]"
                               )}>
                                 {item.text}
                               </span>
                               {item.checked && item.reviewer && (
-                                <span className="text-[10px] text-gray-500 block mt-0.5">
+                                <span className="text-[10px] text-[#7A8BA8] block mt-0.5">
                                   ✓ Checked by {item.reviewer} on {item.reviewDate}
                                 </span>
                               )}
@@ -702,11 +702,11 @@ export function Reporting({ projectId }: { projectId?: string }) {
                     <div>
                       <button
                         onClick={() => setExpandedComments(prev => ({ ...prev, [report.id]: !prev[report.id] }))}
-                        className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors duration-150 mb-3"
+                        className="flex items-center gap-2 text-sm font-semibold text-[#9AA5B8] hover:text-white transition-colors duration-150 mb-3"
                       >
                         <MessageSquare className="w-4 h-4" />
                         Review Comments
-                        <span className="text-xs bg-[#EAEDF3] text-gray-500 px-1.5 py-0.5 rounded border border-[#D4D8E2] font-mono">
+                        <span className="text-xs bg-[#EAEDF3] text-[#7A8BA8] px-1.5 py-0.5 rounded border border-[#D4D8E2] font-mono">
                           {comments.length}
                         </span>
                         <ChevronRight className={cn("w-3.5 h-3.5 transition-transform duration-200", showComments ? "rotate-90" : "")} />
@@ -715,7 +715,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                       {showComments && (
                         <div className="animate-slide-down space-y-3">
                           {comments.length === 0 && (
-                            <p className="text-sm text-gray-500 italic">No comments yet.</p>
+                            <p className="text-sm text-[#7A8BA8] italic">No comments yet.</p>
                           )}
                           {comments.map((comment: any) => (
                             <div
@@ -723,14 +723,14 @@ export function Reporting({ projectId }: { projectId?: string }) {
                               className={cn(
                                 "p-3 rounded-lg border text-sm",
                                 comment.resolved
-                                  ? "bg-[#F8FAFB] border-[#EAEDF3] opacity-70"
-                                  : "bg-[#FFFFFF] border-[#D4D8E2]"
+                                  ? "bg-[#0F1829] border-[#1E2A45] opacity-70"
+                                  : "bg-[#121C35] border-[#D4D8E2]"
                               )}
                             >
                               <div className="flex items-center justify-between mb-1.5">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-semibold text-gray-900">{comment.author}</span>
-                                  <span className="text-[10px] text-gray-500">
+                                  <span className="text-xs font-semibold text-white">{comment.author}</span>
+                                  <span className="text-[10px] text-[#7A8BA8]">
                                     {new Date(comment.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                   </span>
                                 </div>
@@ -738,7 +738,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                                   <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">Resolved</span>
                                 )}
                               </div>
-                              <p className="text-gray-600 leading-relaxed">{comment.text}</p>
+                              <p className="text-[#9AA5B8] leading-relaxed">{comment.text}</p>
                             </div>
                           ))}
 
@@ -750,7 +750,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                                 value={commentInputs[report.id] || ''}
                                 onChange={(e) => setCommentInputs(prev => ({ ...prev, [report.id]: e.target.value }))}
                                 onKeyDown={(e) => { if (e.key === 'Enter') handleAddComment(report.id); }}
-                                className="flex-1 bg-[#F8FAFB] border border-[#EAEDF3] text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder-gray-400 transition-colors"
+                                className="flex-1 bg-[#0F1829] border border-[#1E2A45] text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder-gray-400 transition-colors"
                               />
                               <button
                                 onClick={() => handleAddComment(report.id)}
@@ -771,7 +771,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                         <p className="text-sm text-emerald-600">
                           Approved by <strong>{approvedBy}</strong> on{' '}
                           {new Date((report as any).approvedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                          <span className="text-gray-500"> — Report locked</span>
+                          <span className="text-[#7A8BA8]"> — Report locked</span>
                         </p>
                       </div>
                     )}
@@ -779,15 +779,15 @@ export function Reporting({ projectId }: { projectId?: string }) {
 
                   {/* Footer Actions */}
                   {!isApproved && (
-                    <div className="px-6 py-4 border-t border-[#EAEDF3] bg-[#F8FAFB] flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <div className="px-6 py-4 border-t border-[#1E2A45] bg-[#0F1829] flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-[#7A8BA8]">
                         <Users className="w-3.5 h-3.5" />
                         {completedCount}/{qaItems.length} checks complete
                       </div>
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => setExpandedComments(prev => ({ ...prev, [report.id]: true }))}
-                          className="px-4 py-2 bg-[#EAEDF3] text-gray-600 text-sm font-medium rounded-lg hover:bg-[#D4D8E2] transition-colors duration-150 border border-[#D4D8E2]"
+                          className="px-4 py-2 bg-[#EAEDF3] text-[#9AA5B8] text-sm font-medium rounded-lg hover:bg-[#D4D8E2] transition-colors duration-150 border border-[#D4D8E2]"
                         >
                           Add Comment
                         </button>
@@ -798,7 +798,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                             "btn-primary px-4 py-2 text-sm font-medium rounded-lg border border-transparent transition-all duration-150",
                             progress === 100
                               ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                              : "bg-[#EAEDF3] text-gray-400 cursor-not-allowed border-[#EAEDF3]"
+                              : "bg-[#EAEDF3] text-[#5A6B88] cursor-not-allowed border-[#1E2A45]"
                           )}
                           title={progress < 100 ? "Complete all QA items to approve" : "Approve and lock report"}
                         >

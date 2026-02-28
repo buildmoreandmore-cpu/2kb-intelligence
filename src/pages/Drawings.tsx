@@ -48,10 +48,10 @@ export function Drawings({ projectId }: { projectId: string }) {
                 placeholder="Search drawings..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-[#FFFFFF] border border-[#EAEDF3] rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder-gray-400 w-72 transition-all duration-150"
+                className="pl-10 pr-4 py-2 bg-[#121C35] border border-[#1E2A45] rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder-gray-400 w-72 transition-all duration-150"
               />
             </div>
-            <div className="flex items-center gap-1 bg-[#F8FAFB] border border-[#EAEDF3] rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-[#0F1829] border border-[#1E2A45] rounded-lg p-1">
               {DRAWING_TYPES.map(type => (
                 <button
                   key={type}
@@ -59,8 +59,8 @@ export function Drawings({ projectId }: { projectId: string }) {
                   className={cn(
                     "px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150",
                     typeFilter === type
-                      ? "bg-[#EAEDF3] text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
+                      ? "bg-[#EAEDF3] text-white shadow-sm"
+                      : "text-[#7A8BA8] hover:text-[#CBD2DF]"
                   )}
                 >
                   {type}
@@ -75,14 +75,14 @@ export function Drawings({ projectId }: { projectId: string }) {
         </div>
 
         {/* Drawings Table */}
-        <div className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
-          <div className="p-5 border-b border-[#EAEDF3] flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-900">Facility Drawings & Plans</h3>
-            <span className="text-xs text-gray-500">{filtered.length} drawing{filtered.length !== 1 ? 's' : ''}</span>
+        <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
+          <div className="p-5 border-b border-[#1E2A45] flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-white">Facility Drawings & Plans</h3>
+            <span className="text-xs text-[#7A8BA8]">{filtered.length} drawing{filtered.length !== 1 ? 's' : ''}</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-neutral-400 uppercase bg-[#F8FAFB] border-b border-[#EAEDF3]">
+              <thead className="text-xs text-neutral-400 uppercase bg-[#0F1829] border-b border-[#1E2A45]">
                 <tr>
                   <th className="px-6 py-4 font-medium">Filename</th>
                   <th className="px-6 py-4 font-medium">Type</th>
@@ -101,15 +101,15 @@ export function Drawings({ projectId }: { projectId: string }) {
                       className="hover:bg-[#F0F2F6] transition-colors duration-100 cursor-pointer group"
                       onClick={() => setSelectedDrawing(d.id)}
                     >
-                      <td className="px-6 py-4 font-medium text-gray-900 group-hover:text-emerald-600 transition-colors duration-150">
+                      <td className="px-6 py-4 font-medium text-white group-hover:text-emerald-600 transition-colors duration-150">
                         {d.filename}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-0.5 rounded bg-[#EAEDF3] text-xs text-gray-600 border border-[#D4D8E2]">
+                        <span className="px-2 py-0.5 rounded bg-[#EAEDF3] text-xs text-[#9AA5B8] border border-[#D4D8E2]">
                           {d.type}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-gray-600">{buildings.find(b => b.id === d.buildingId)?.name}</td>
+                      <td className="px-6 py-4 text-[#9AA5B8]">{buildings.find(b => b.id === d.buildingId)?.name}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-600 text-xs font-semibold border border-emerald-500/20">
@@ -121,7 +121,7 @@ export function Drawings({ projectId }: { projectId: string }) {
                                 e.stopPropagation();
                                 setShowVersionHistory(showVersionHistory === d.id ? null : d.id);
                               }}
-                              className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-gray-700 transition-colors"
+                              className="flex items-center gap-1 text-[10px] text-[#7A8BA8] hover:text-[#CBD2DF] transition-colors"
                             >
                               <History className="w-3 h-3" />
                               {(d as any).versions.length} versions
@@ -130,9 +130,9 @@ export function Drawings({ projectId }: { projectId: string }) {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-500 font-mono text-xs">
+                      <td className="px-6 py-4 text-[#7A8BA8] font-mono text-xs">
                         {d.date}
-                        <span className="block text-gray-500 text-[10px]">by {d.by}</span>
+                        <span className="block text-[#7A8BA8] text-[10px]">by {d.by}</span>
                       </td>
                       <td className="px-6 py-4">
                         {d.annotations > 0 ? (
@@ -141,13 +141,13 @@ export function Drawings({ projectId }: { projectId: string }) {
                             {d.annotations} pins
                           </span>
                         ) : (
-                          <span className="text-gray-400 text-xs">No pins</span>
+                          <span className="text-[#5A6B88] text-xs">No pins</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => setSelectedDrawing(d.id)}
-                          className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-[#EAEDF3] rounded-lg transition-colors duration-150"
+                          className="p-1.5 text-[#7A8BA8] hover:text-white hover:bg-[#EAEDF3] rounded-lg transition-colors duration-150"
                         >
                           <Maximize2 className="w-4 h-4" />
                         </button>
@@ -155,10 +155,10 @@ export function Drawings({ projectId }: { projectId: string }) {
                     </tr>
                     {/* Version History Row */}
                     {showVersionHistory === d.id && (
-                      <tr key={`${d.id}-versions`} className="bg-[#F4F6FA]">
+                      <tr key={`${d.id}-versions`} className="bg-[#0B1120]">
                         <td colSpan={7} className="px-6 py-3 animate-slide-down">
                           <div className="flex items-center gap-4 pl-4">
-                            <span className="text-[10px] text-gray-500 uppercase tracking-wider flex-shrink-0">Version History</span>
+                            <span className="text-[10px] text-[#7A8BA8] uppercase tracking-wider flex-shrink-0">Version History</span>
                             <div className="flex items-center gap-3">
                               {(d as any).versions?.map((v: any, idx: number) => (
                                 <div key={v.v} className="flex items-center gap-2">
@@ -166,13 +166,13 @@ export function Drawings({ projectId }: { projectId: string }) {
                                     "px-2 py-0.5 rounded text-[10px] font-semibold border",
                                     v.v === d.version
                                       ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                                      : "bg-[#EAEDF3] text-gray-500 border-[#D4D8E2]"
+                                      : "bg-[#EAEDF3] text-[#7A8BA8] border-[#D4D8E2]"
                                   )}>
                                     {v.v}
                                     {v.v === d.version && <span className="ml-1">current</span>}
                                   </span>
-                                  <span className="text-[10px] text-gray-400">{v.date}</span>
-                                  {idx < (d as any).versions.length - 1 && <span className="text-gray-400">→</span>}
+                                  <span className="text-[10px] text-[#5A6B88]">{v.date}</span>
+                                  {idx < (d as any).versions.length - 1 && <span className="text-[#5A6B88]">→</span>}
                                 </div>
                               ))}
                             </div>
@@ -185,9 +185,9 @@ export function Drawings({ projectId }: { projectId: string }) {
                 {filtered.length === 0 && (
                   <tr>
                     <td colSpan={7} className="px-6 py-12 text-center">
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-500 font-medium">No drawings found</p>
-                      <p className="text-gray-400 text-sm mt-1">Upload your first drawing or adjust your filters</p>
+                      <Upload className="w-8 h-8 text-[#5A6B88] mx-auto mb-3" />
+                      <p className="text-[#7A8BA8] font-medium">No drawings found</p>
+                      <p className="text-[#5A6B88] text-sm mt-1">Upload your first drawing or adjust your filters</p>
                     </td>
                   </tr>
                 )}
@@ -200,18 +200,18 @@ export function Drawings({ projectId }: { projectId: string }) {
       {/* Drawing Detail Modal */}
       {selectedDrawing && drawing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-6 modal-backdrop">
-          <div className="modal-panel bg-[#FFFFFF] border border-[#EAEDF3] rounded-2xl w-full h-full max-w-7xl flex flex-col overflow-hidden shadow-2xl">
+          <div className="modal-panel bg-[#121C35] border border-[#1E2A45] rounded-2xl w-full h-full max-w-7xl flex flex-col overflow-hidden shadow-2xl">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-[#EAEDF3] bg-[#F8FAFB] flex-shrink-0">
+            <div className="flex items-center justify-between p-4 border-b border-[#1E2A45] bg-[#0F1829] flex-shrink-0">
               <div>
-                <h2 className="text-base font-bold text-gray-900">{drawing.filename}</h2>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <h2 className="text-base font-bold text-white">{drawing.filename}</h2>
+                <p className="text-xs text-[#7A8BA8] mt-0.5">
                   {drawing.type} • {drawing.version} • {buildings.find(b => b.id === drawing.buildingId)?.name}
-                  <span className="ml-2 text-gray-400">• {drawing.annotations} annotation{drawing.annotations !== 1 ? 's' : ''}</span>
+                  <span className="ml-2 text-[#5A6B88]">• {drawing.annotations} annotation{drawing.annotations !== 1 ? 's' : ''}</span>
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs font-medium text-gray-600 hover:bg-[#D4D8E2] transition-colors duration-150">
+                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors duration-150">
                   <Filter className="w-3.5 h-3.5" />
                   Annotation Filter
                 </button>
@@ -221,7 +221,7 @@ export function Drawings({ projectId }: { projectId: string }) {
                 </button>
                 <button
                   onClick={() => setSelectedDrawing(null)}
-                  className="p-2 text-gray-500 hover:text-gray-900 hover:bg-[#EAEDF3] rounded-lg transition-colors duration-150 ml-1"
+                  className="p-2 text-[#7A8BA8] hover:text-white hover:bg-[#EAEDF3] rounded-lg transition-colors duration-150 ml-1"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -230,7 +230,7 @@ export function Drawings({ projectId }: { projectId: string }) {
 
             {/* Drawing Canvas */}
             <div className="flex-1 bg-[#080B10] relative overflow-hidden flex items-center justify-center p-6">
-              <div className="relative w-full max-w-5xl aspect-[4/3] bg-white rounded-xl shadow-2xl border border-neutral-200 overflow-hidden">
+              <div className="relative w-full max-w-5xl aspect-[4/3] bg-[#121C35] rounded-xl shadow-2xl border border-neutral-200 overflow-hidden">
                 <img
                   src={`https://picsum.photos/seed/${drawing.id}base/1400/1050?grayscale`}
                   alt="Drawing Placeholder"
@@ -267,13 +267,13 @@ export function Drawings({ projectId }: { projectId: string }) {
                     </div>
 
                     {/* Tooltip */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl shadow-2xl p-3 w-52 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-30"
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-[#121C35] border border-[#1E2A45] rounded-xl shadow-2xl p-3 w-52 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-30"
                       style={{ transform: 'translateX(-50%) translateY(4px)', transition: 'opacity 0.2s ease, transform 0.2s ease' }}
                     >
-                      <p className="text-xs font-bold text-gray-900 mb-1">{pin.label}</p>
+                      <p className="text-xs font-bold text-white mb-1">{pin.label}</p>
                       {pin.asset && (
                         <div className="space-y-1">
-                          <p className="text-[10px] text-gray-500">
+                          <p className="text-[10px] text-[#7A8BA8]">
                             {pin.asset.manufacturer} {pin.asset.model}
                           </p>
                           <div className="flex items-center gap-1.5">
@@ -285,7 +285,7 @@ export function Drawings({ projectId }: { projectId: string }) {
                             )}>
                               {pin.asset.condition}
                             </span>
-                            <span className="text-[10px] text-gray-500">Year {pin.asset.year}</span>
+                            <span className="text-[10px] text-[#7A8BA8]">Year {pin.asset.year}</span>
                           </div>
                           <p className="text-[10px] text-emerald-600 font-semibold">
                             Replacement: ${pin.asset.replacementCost?.toLocaleString()}
@@ -299,8 +299,8 @@ export function Drawings({ projectId }: { projectId: string }) {
             </div>
 
             {/* Bottom Legend */}
-            <div className="flex-shrink-0 border-t border-[#EAEDF3] bg-[#F8FAFB] px-6 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-4 text-xs text-gray-500">
+            <div className="flex-shrink-0 border-t border-[#1E2A45] bg-[#0F1829] px-6 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-4 text-xs text-[#7A8BA8]">
                 <span className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-emerald-500" />
                   Good condition
@@ -318,7 +318,7 @@ export function Drawings({ projectId }: { projectId: string }) {
                   Mechanical
                 </span>
               </div>
-              <span className="text-xs text-gray-400">Hover pins to see asset details</span>
+              <span className="text-xs text-[#5A6B88]">Hover pins to see asset details</span>
             </div>
           </div>
         </div>

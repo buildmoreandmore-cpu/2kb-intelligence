@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #F4F6FA;
-  --color-card: #FFFFFF;
-  --color-hover: #F0F2F6;
-  --color-input: #F8FAFB;
-  --color-border: #EAEDF3;
-  --color-border-light: #D4D8E2;
-  --color-text-main: #374151;
-  --color-text-muted: #6B7280;
-  --color-text-heading: #111827;
+  --color-bg: #0B1120;
+  --color-card: #121C35;
+  --color-hover: #1A2544;
+  --color-input: #0F1829;
+  --color-border: #1E2A45;
+  --color-border-light: #2A3A5C;
+  --color-text-main: #CBD2DF;
+  --color-text-muted: #7A8BA8;
+  --color-text-heading: #FFFFFF;
   --color-accent: #2563EB;
   --color-green: #10B981;
   --color-amber: #F59E0B;
   --color-red: #EF4444;
   --color-purple: #8B5CF6;
   --color-cyan: #06B6D4;
+  --color-sidebar: #080D1A;
 }
 
 body {
@@ -227,8 +228,8 @@ body {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s var(--ease-out-expo);
 }
 .card-hover:hover {
-  border-color: #D4D8E2;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--color-border-light);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
 }
 
@@ -237,8 +238,8 @@ body {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .kpi-card:hover {
-  border-color: #C5CAD6;
-  box-shadow: 0 0 0 1px #C5CAD6, 0 8px 20px rgba(0,0,0,0.08);
+  border-color: var(--color-border-light);
+  box-shadow: 0 0 0 1px var(--color-border-light), 0 8px 20px rgba(0,0,0,0.25);
 }
 
 /* Tab button — underline slide */

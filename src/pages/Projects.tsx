@@ -12,11 +12,11 @@ export function Projects() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-shrink-0 border-b border-[#EAEDF3] bg-[#FFFFFF] px-8 py-6">
+      <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-8 py-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Projects</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage ESPC projects across all phases.</p>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Projects</h1>
+            <p className="text-sm text-[#7A8BA8] mt-1">Manage ESPC projects across all phases.</p>
           </div>
           <button className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-emerald-700 transition-colors">
             <Plus className="w-4 h-4" />
@@ -32,10 +32,10 @@ export function Projects() {
               placeholder="Search projects..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#F8FAFB] border border-[#EAEDF3] rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm"
+              className="w-full pl-10 pr-4 py-2 bg-[#0F1829] border border-[#1E2A45] rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm"
             />
           </div>
-          <button className="inline-flex items-center gap-2 px-3 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-gray-600 hover:bg-[#D4D8E2] transition-colors shadow-sm">
+          <button className="inline-flex items-center gap-2 px-3 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors shadow-sm">
             <Filter className="w-4 h-4" />
             Filter
           </button>
@@ -50,7 +50,7 @@ export function Projects() {
               <div 
                 key={project.id} 
                 onClick={() => navigate(`/app/projects/${project.id}`)}
-                className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6 hover:border-emerald-500/50 transition-colors cursor-pointer group flex flex-col"
+                className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6 hover:border-emerald-500/50 transition-colors cursor-pointer group flex flex-col"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-10 h-10 bg-[#EAEDF3] rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
@@ -66,17 +66,17 @@ export function Projects() {
                   </span>
                 </div>
                 
-                <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors">{project.name}</h3>
-                <p className="text-sm text-gray-500 mb-6">{org?.name}</p>
+                <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-emerald-600 transition-colors">{project.name}</h3>
+                <p className="text-sm text-[#7A8BA8] mb-6">{org?.name}</p>
                 
-                <div className="mt-auto pt-4 border-t border-[#EAEDF3] grid grid-cols-2 gap-4">
+                <div className="mt-auto pt-4 border-t border-[#1E2A45] grid grid-cols-2 gap-4">
                   <div>
-                    <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">ESCO</span>
-                    <span className="text-sm text-gray-600">{project.esco}</span>
+                    <span className="block text-xs font-medium text-[#7A8BA8] uppercase tracking-wider mb-1">ESCO</span>
+                    <span className="text-sm text-[#9AA5B8]">{project.esco}</span>
                   </div>
                   <div>
-                    <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Value</span>
-                    <span className="text-sm text-gray-600 font-mono">${(project.value / 1000000).toFixed(1)}M</span>
+                    <span className="block text-xs font-medium text-[#7A8BA8] uppercase tracking-wider mb-1">Value</span>
+                    <span className="text-sm text-[#9AA5B8] font-mono">${(project.value / 1000000).toFixed(1)}M</span>
                   </div>
                 </div>
               </div>
