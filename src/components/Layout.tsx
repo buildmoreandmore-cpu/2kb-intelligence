@@ -68,7 +68,7 @@ export function Layout() {
       {/* Sidebar */}
       <div className="w-64 flex-shrink-0 border-r border-[#1E2A45] bg-[#080D1A] flex flex-col">
         {/* Logo */}
-        <div className="h-16 flex items-center px-5 border-b border-[#1E2A45]">
+        <div className="flex items-center px-5 pt-4 pb-3 border-b border-[#1E2A45]">
           <div className="flex items-center gap-3">
             <img src="/logo.webp" alt="2KB Energy" className="w-10 h-10 object-contain" />
             <div className="flex flex-col">
