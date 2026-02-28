@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/store';
-import { MessageSquare, X, Send, Bot, User, Minimize2, Maximize2, Sparkles } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, Minimize2, Maximize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -248,9 +248,9 @@ RULES:
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+        className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-xl bg-[#080D1A] border border-[#1E2A45] hover:border-emerald-500/40 text-white shadow-lg shadow-black/40 flex items-center justify-center transition-all duration-200 hover:scale-105 hover:shadow-emerald-500/10 hover:shadow-xl active:scale-95 group"
       >
-        <Sparkles className="w-6 h-6" />
+        <img src="/logo.webp" alt="2KB" className="w-7 h-7 object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
       </button>
     );
   }
