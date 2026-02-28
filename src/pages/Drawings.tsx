@@ -59,7 +59,7 @@ export function Drawings({ projectId }: { projectId: string }) {
                   className={cn(
                     "px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150",
                     typeFilter === type
-                      ? "bg-[#EAEDF3] text-white shadow-sm"
+                      ? "bg-[#1E2A45] text-white shadow-sm"
                       : "text-[#7A8BA8] hover:text-[#CBD2DF]"
                   )}
                 >
@@ -93,19 +93,19 @@ export function Drawings({ projectId }: { projectId: string }) {
                   <th className="px-6 py-4 font-medium"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#EAEDF3] stagger-rows">
+              <tbody className="divide-y divide-[#1E2A45] stagger-rows">
                 {filtered.map((d) => (
                   <>
                     <tr
                       key={d.id}
-                      className="hover:bg-[#F0F2F6] transition-colors duration-100 cursor-pointer group"
+                      className="hover:bg-[#1A2544] transition-colors duration-100 cursor-pointer group"
                       onClick={() => setSelectedDrawing(d.id)}
                     >
                       <td className="px-6 py-4 font-medium text-white group-hover:text-emerald-600 transition-colors duration-150">
                         {d.filename}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-0.5 rounded bg-[#EAEDF3] text-xs text-[#9AA5B8] border border-[#D4D8E2]">
+                        <span className="px-2 py-0.5 rounded bg-[#1E2A45] text-xs text-[#9AA5B8] border border-[#2A3A5C]">
                           {d.type}
                         </span>
                       </td>
@@ -147,7 +147,7 @@ export function Drawings({ projectId }: { projectId: string }) {
                       <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => setSelectedDrawing(d.id)}
-                          className="p-1.5 text-[#7A8BA8] hover:text-white hover:bg-[#EAEDF3] rounded-lg transition-colors duration-150"
+                          className="p-1.5 text-[#7A8BA8] hover:text-white hover:bg-[#1E2A45] rounded-lg transition-colors duration-150"
                         >
                           <Maximize2 className="w-4 h-4" />
                         </button>
@@ -166,7 +166,7 @@ export function Drawings({ projectId }: { projectId: string }) {
                                     "px-2 py-0.5 rounded text-[10px] font-semibold border",
                                     v.v === d.version
                                       ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                                      : "bg-[#EAEDF3] text-[#7A8BA8] border-[#D4D8E2]"
+                                      : "bg-[#1E2A45] text-[#7A8BA8] border-[#2A3A5C]"
                                   )}>
                                     {v.v}
                                     {v.v === d.version && <span className="ml-1">current</span>}
@@ -211,7 +211,7 @@ export function Drawings({ projectId }: { projectId: string }) {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors duration-150">
+                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-xs font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors duration-150">
                   <Filter className="w-3.5 h-3.5" />
                   Annotation Filter
                 </button>
@@ -221,7 +221,7 @@ export function Drawings({ projectId }: { projectId: string }) {
                 </button>
                 <button
                   onClick={() => setSelectedDrawing(null)}
-                  className="p-2 text-[#7A8BA8] hover:text-white hover:bg-[#EAEDF3] rounded-lg transition-colors duration-150 ml-1"
+                  className="p-2 text-[#7A8BA8] hover:text-white hover:bg-[#1E2A45] rounded-lg transition-colors duration-150 ml-1"
                 >
                   <X className="w-5 h-5" />
                 </button>

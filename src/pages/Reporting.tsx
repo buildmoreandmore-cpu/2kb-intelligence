@@ -19,7 +19,7 @@ const REPORT_TYPES = [
 ];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  'Draft':       { label: 'DRAFT',      color: 'text-[#7A8BA8]',     bg: 'bg-[#EAEDF3]',        border: 'border-[#D4D8E2]' },
+  'Draft':       { label: 'DRAFT',      color: 'text-[#7A8BA8]',     bg: 'bg-[#1E2A45]',        border: 'border-[#2A3A5C]' },
   'In Review':   { label: 'IN REVIEW',  color: 'text-amber-600',    bg: 'bg-amber-500/10',     border: 'border-amber-500/20' },
   'QA Complete': { label: 'QA COMPLETE',color: 'text-blue-600',     bg: 'bg-blue-500/10',      border: 'border-blue-500/20' },
   'Approved':    { label: 'APPROVED',   color: 'text-emerald-600',  bg: 'bg-emerald-500/10',   border: 'border-emerald-500/20' },
@@ -211,7 +211,7 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
               </div>
               <button
                 onClick={() => handleCopy(idx, slide.copyText)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs text-[#7A8BA8] hover:text-white hover:border-[#C5CAD6] transition-all duration-150"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-xs text-[#7A8BA8] hover:text-white hover:border-[#3A4B68] transition-all duration-150"
               >
                 {copiedSlide === idx
                   ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
@@ -248,7 +248,7 @@ function OnePageSummary({ project, risks }: { project: any, risks: any[] }) {
           <button
             onClick={handleGenerate}
             disabled={generating}
-            className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors duration-150 disabled:opacity-50"
+            className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors duration-150 disabled:opacity-50"
           >
             <Printer className="w-4 h-4" />
             {generating ? 'Generating…' : generated ? 'Re-generate PDF' : 'Generate PDF'}
@@ -257,7 +257,7 @@ function OnePageSummary({ project, risks }: { project: any, risks: any[] }) {
       </div>
 
       {/* Clean Executive Summary Card */}
-      <div className="bg-[#121C35] rounded-xl shadow-2xl overflow-hidden text-black max-w-3xl mx-auto">
+      <div className="bg-white rounded-xl shadow-2xl overflow-hidden text-black max-w-3xl mx-auto">
         {/* Header bar */}
         <div className="bg-emerald-700 text-white px-8 py-5">
           <div className="flex items-center justify-between">
@@ -415,7 +415,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="bg-[#EAEDF3] border border-[#D4D8E2] text-[#CBD2DF] text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5 transition-colors"
+              className="bg-[#1E2A45] border border-[#2A3A5C] text-[#CBD2DF] text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5 transition-colors"
             >
               {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
@@ -463,7 +463,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                         "w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 border flex items-center justify-between group",
                         reportType === type
                           ? "bg-emerald-50 text-emerald-700 border-emerald-500/20"
-                          : "bg-[#0F1829] text-[#7A8BA8] border-[#1E2A45] hover:bg-[#F0F2F6] hover:text-white hover:border-[#D4D8E2]"
+                          : "bg-[#0F1829] text-[#7A8BA8] border-[#1E2A45] hover:bg-[#1A2544] hover:text-white hover:border-[#2A3A5C]"
                       )}
                     >
                       {type}
@@ -510,17 +510,17 @@ export function Reporting({ projectId }: { projectId?: string }) {
                 <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden h-full min-h-[600px] flex flex-col">
                   <div className="p-4 border-b border-[#1E2A45] bg-[#0F1829] flex items-center justify-between">
                     <h3 className="text-sm font-medium text-[#7A8BA8]">Preview: {reportType}</h3>
-                    <button className="p-1.5 text-[#7A8BA8] hover:text-white hover:bg-[#EAEDF3] rounded transition-colors duration-150">
+                    <button className="p-1.5 text-[#7A8BA8] hover:text-white hover:bg-[#1E2A45] rounded transition-colors duration-150">
                       <Download className="w-4 h-4" />
                     </button>
                   </div>
                   <div className="flex-1 p-8 bg-[#0B1120] overflow-y-auto">
-                    <div className="max-w-2xl mx-auto bg-[#121C35] rounded-lg shadow-xl min-h-[700px] p-12 text-black">
+                    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-xl min-h-[700px] p-12">
                       <div className="border-b-4 border-emerald-600 pb-6 mb-8">
                         <h1 className="text-3xl font-bold text-neutral-900 mb-2">{selectedProject?.name}</h1>
-                        <h2 className="text-xl text-[#9AA5B8]">{reportType}</h2>
-                        <p className="text-sm text-[#7A8BA8] mt-4">Prepared by: 2KB Energy Services</p>
-                        <p className="text-sm text-[#7A8BA8]">Date: {new Date().toLocaleDateString()}</p>
+                        <h2 className="text-xl text-neutral-500">{reportType}</h2>
+                        <p className="text-sm text-neutral-500 mt-4">Prepared by: 2KB Energy Services</p>
+                        <p className="text-sm text-neutral-500">Date: {new Date().toLocaleDateString()}</p>
                       </div>
                       <div className="space-y-6">
                         <section>
@@ -584,9 +584,9 @@ export function Reporting({ projectId }: { projectId?: string }) {
                     <th className="px-6 py-4 font-medium">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAEDF3] stagger-rows">
+                <tbody className="divide-y divide-[#1E2A45] stagger-rows">
                   {reports.map((report) => (
-                    <tr key={report.id} className="hover:bg-[#F0F2F6] transition-colors duration-100">
+                    <tr key={report.id} className="hover:bg-[#1A2544] transition-colors duration-100">
                       <td className="px-6 py-4 font-medium text-white">
                         <div>
                           <span>{report.type}</span>
@@ -600,7 +600,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                       <td className="px-6 py-4 text-[#9AA5B8]">{report.by}</td>
                       <td className="px-6 py-4"><StatusBadge status={report.status} /></td>
                       <td className="px-6 py-4">
-                        <button className="p-1.5 text-[#7A8BA8] hover:text-white hover:bg-[#EAEDF3] rounded transition-colors duration-150">
+                        <button className="p-1.5 text-[#7A8BA8] hover:text-white hover:bg-[#1E2A45] rounded transition-colors duration-150">
                           <Download className="w-4 h-4" />
                         </button>
                       </td>
@@ -649,7 +649,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                         </h4>
                         <span className="text-xs font-mono text-[#7A8BA8]">{completedCount}/{qaItems.length} items</span>
                       </div>
-                      <div className="w-full h-2 bg-[#EAEDF3] rounded-full overflow-hidden mb-4">
+                      <div className="w-full h-2 bg-[#1E2A45] rounded-full overflow-hidden mb-4">
                         <div
                           className={cn(
                             "h-full rounded-full progress-bar-fill",
@@ -669,7 +669,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                               "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150",
                               item.checked
                                 ? "bg-emerald-500/5 border-emerald-500/15 opacity-80"
-                                : "bg-[#0F1829] border-[#1E2A45] hover:border-[#D4D8E2]"
+                                : "bg-[#0F1829] border-[#1E2A45] hover:border-[#2A3A5C]"
                             )}
                           >
                             <input
@@ -677,7 +677,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                               checked={item.checked}
                               disabled={isApproved}
                               onChange={() => toggleQAItem(report.id, item.id)}
-                              className="mt-0.5 rounded border-[#D4D8E2] text-emerald-500 focus:ring-emerald-500 bg-[#EAEDF3] flex-shrink-0"
+                              className="mt-0.5 rounded border-[#2A3A5C] text-emerald-500 focus:ring-emerald-500 bg-[#1E2A45] flex-shrink-0"
                             />
                             <div className="flex-1 min-w-0">
                               <span className={cn(
@@ -706,7 +706,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                       >
                         <MessageSquare className="w-4 h-4" />
                         Review Comments
-                        <span className="text-xs bg-[#EAEDF3] text-[#7A8BA8] px-1.5 py-0.5 rounded border border-[#D4D8E2] font-mono">
+                        <span className="text-xs bg-[#1E2A45] text-[#7A8BA8] px-1.5 py-0.5 rounded border border-[#2A3A5C] font-mono">
                           {comments.length}
                         </span>
                         <ChevronRight className={cn("w-3.5 h-3.5 transition-transform duration-200", showComments ? "rotate-90" : "")} />
@@ -724,7 +724,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                                 "p-3 rounded-lg border text-sm",
                                 comment.resolved
                                   ? "bg-[#0F1829] border-[#1E2A45] opacity-70"
-                                  : "bg-[#121C35] border-[#D4D8E2]"
+                                  : "bg-[#121C35] border-[#2A3A5C]"
                               )}
                             >
                               <div className="flex items-center justify-between mb-1.5">
@@ -787,7 +787,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => setExpandedComments(prev => ({ ...prev, [report.id]: true }))}
-                          className="px-4 py-2 bg-[#EAEDF3] text-[#9AA5B8] text-sm font-medium rounded-lg hover:bg-[#D4D8E2] transition-colors duration-150 border border-[#D4D8E2]"
+                          className="px-4 py-2 bg-[#1E2A45] text-[#9AA5B8] text-sm font-medium rounded-lg hover:bg-[#2A3A5C] transition-colors duration-150 border border-[#2A3A5C]"
                         >
                           Add Comment
                         </button>
@@ -798,7 +798,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
                             "btn-primary px-4 py-2 text-sm font-medium rounded-lg border border-transparent transition-all duration-150",
                             progress === 100
                               ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                              : "bg-[#EAEDF3] text-[#5A6B88] cursor-not-allowed border-[#1E2A45]"
+                              : "bg-[#1E2A45] text-[#5A6B88] cursor-not-allowed border-[#1E2A45]"
                           )}
                           title={progress < 100 ? "Complete all QA items to approve" : "Approve and lock report"}
                         >

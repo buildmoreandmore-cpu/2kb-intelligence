@@ -31,7 +31,7 @@ export function Governance({ projectId }: { projectId?: string }) {
               <select 
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="bg-[#EAEDF3] border border-[#D4D8E2] text-[#CBD2DF] text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
+                className="bg-[#1E2A45] border border-[#2A3A5C] text-[#CBD2DF] text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -77,13 +77,13 @@ export function Governance({ projectId }: { projectId?: string }) {
                   <div key={phase} className="flex-shrink-0 w-80 bg-[#121C35] border border-[#1E2A45] rounded-xl flex flex-col h-[calc(100vh-250px)]">
                     <div className="p-4 border-b border-[#1E2A45] flex items-center justify-between bg-[#0F1829] rounded-t-xl">
                       <h3 className="text-sm font-semibold text-white uppercase tracking-wider">{phase}</h3>
-                      <span className="px-2 py-0.5 rounded-full bg-[#EAEDF3] text-xs font-medium text-[#7A8BA8]">
+                      <span className="px-2 py-0.5 rounded-full bg-[#1E2A45] text-xs font-medium text-[#7A8BA8]">
                         {phaseProjects.length}
                       </span>
                     </div>
                     <div className="p-4 flex-1 overflow-y-auto space-y-3">
                       {phaseProjects.map(project => (
-                        <div key={project.id} className="bg-[#F0F2F6] border border-[#D4D8E2] rounded-lg p-4 hover:border-emerald-500/50 transition-colors cursor-pointer group">
+                        <div key={project.id} className="bg-[#1A2544] border border-[#2A3A5C] rounded-lg p-4 hover:border-emerald-500/50 transition-colors cursor-pointer group">
                           <div className="flex justify-between items-start mb-2">
                             <h4 className="text-sm font-medium text-white group-hover:text-emerald-600 transition-colors">{project.name}</h4>
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
@@ -128,9 +128,9 @@ export function Governance({ projectId }: { projectId?: string }) {
                     <th className="px-6 py-4 font-medium">Assigned To</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAEDF3]">
+                <tbody className="divide-y divide-[#1E2A45]">
                   {milestones.filter(m => m.projectId === selectedProjectId).map((milestone) => (
-                    <tr key={milestone.id} className="hover:bg-[#F0F2F6] transition-colors">
+                    <tr key={milestone.id} className="hover:bg-[#1A2544] transition-colors">
                       <td className="px-6 py-4 font-medium text-white">{milestone.name}</td>
                       <td className="px-6 py-4 text-[#9AA5B8] font-mono">{milestone.dueDate}</td>
                       <td className="px-6 py-4">
@@ -139,7 +139,7 @@ export function Governance({ projectId }: { projectId?: string }) {
                           milestone.status === 'completed' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
                           milestone.status === 'overdue' ? "bg-red-500/10 text-red-500 border-red-500/20" :
                           milestone.status === 'in progress' ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
-                          "bg-[#EAEDF3] text-[#7A8BA8] border-[#D4D8E2]"
+                          "bg-[#1E2A45] text-[#7A8BA8] border-[#2A3A5C]"
                         )}>
                           {milestone.status.toUpperCase()}
                         </span>
@@ -178,9 +178,9 @@ export function Governance({ projectId }: { projectId?: string }) {
                     <th className="px-6 py-4 font-medium">Owner</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAEDF3]">
+                <tbody className="divide-y divide-[#1E2A45]">
                   {risks.filter(r => r.projectId === selectedProjectId).map((risk) => (
-                    <tr key={risk.id} className="hover:bg-[#F0F2F6] transition-colors">
+                    <tr key={risk.id} className="hover:bg-[#1A2544] transition-colors">
                       <td className="px-6 py-4 font-medium text-white max-w-md truncate">{risk.description}</td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{risk.category}</td>
                       <td className="px-6 py-4">
@@ -280,7 +280,7 @@ export function Governance({ projectId }: { projectId?: string }) {
                   <div className="p-6 border-b border-[#1E2A45]">
                     <h3 className="text-sm font-semibold text-white">Upcoming & Overdue Obligations</h3>
                   </div>
-                  <div className="divide-y divide-[#EAEDF3]">
+                  <div className="divide-y divide-[#1E2A45]">
                     {upcoming90.map(o => (
                       <div key={o.id} className="px-6 py-4">
                         <div className="flex items-start justify-between gap-4">
@@ -333,14 +333,14 @@ export function Governance({ projectId }: { projectId?: string }) {
                         <th className="px-6 py-4 font-medium">Ref</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#EAEDF3]">
+                    <tbody className="divide-y divide-[#1E2A45]">
                       {filtered.map(o => (
-                        <tr key={o.id} className="hover:bg-[#F0F2F6] transition-colors">
+                        <tr key={o.id} className="hover:bg-[#1A2544] transition-colors">
                           <td className="px-6 py-4">
                             <p className="font-medium text-white max-w-sm">{o.description}</p>
                             {o.evidence && <p className="text-[10px] text-[#5A6B88] mt-0.5">{o.evidence}</p>}
                           </td>
-                          <td className="px-6 py-4"><span className="px-2.5 py-1 rounded bg-[#EAEDF3] text-xs font-medium border border-[#D4D8E2]">{o.category}</span></td>
+                          <td className="px-6 py-4"><span className="px-2.5 py-1 rounded bg-[#1E2A45] text-xs font-medium border border-[#2A3A5C]">{o.category}</span></td>
                           <td className="px-6 py-4 text-[#9AA5B8]">{o.responsibleParty}</td>
                           <td className="px-6 py-4 text-[#9AA5B8] font-mono text-xs">{o.dueDate || 'Ongoing'}</td>
                           <td className="px-6 py-4">

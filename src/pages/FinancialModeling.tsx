@@ -57,7 +57,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
               <p className="text-sm text-[#7A8BA8] mt-1">Build ECM bundles, model cash flows, and analyze guarantee risk.</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors">
+              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors">
                 <Calculator className="w-4 h-4" />
                 Compare Scenarios
               </button>
@@ -110,9 +110,9 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
                     <th className="px-6 py-4 font-medium text-right">Payback</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAEDF3]">
+                <tbody className="divide-y divide-[#1E2A45]">
                   {projectEcms.map((ecm) => (
-                    <tr key={ecm.id} className="hover:bg-[#F0F2F6] transition-colors">
+                    <tr key={ecm.id} className="hover:bg-[#1A2544] transition-colors">
                       <td className="px-6 py-4 font-medium text-white">
                         <div className="flex flex-col">
                           <span>{ecm.number}</span>
@@ -120,7 +120,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-[#9AA5B8]">
-                        <span className="px-2.5 py-1 rounded bg-[#EAEDF3] text-xs font-medium border border-[#D4D8E2]">
+                        <span className="px-2.5 py-1 rounded bg-[#1E2A45] text-xs font-medium border border-[#2A3A5C]">
                           {ecm.category}
                         </span>
                       </td>
@@ -148,7 +148,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
                   max="25" 
                   value={term} 
                   onChange={(e) => setTerm(parseInt(e.target.value))}
-                  className="w-full h-2 bg-[#EAEDF3] rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                  className="w-full h-2 bg-[#1E2A45] rounded-lg appearance-none cursor-pointer accent-emerald-500"
                 />
               </div>
               
@@ -164,7 +164,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
                   step="0.1"
                   value={interestRate} 
                   onChange={(e) => setInterestRate(parseFloat(e.target.value))}
-                  className="w-full h-2 bg-[#EAEDF3] rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                  className="w-full h-2 bg-[#1E2A45] rounded-lg appearance-none cursor-pointer accent-emerald-500"
                 />
               </div>
 
@@ -180,7 +180,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
                   step="0.1"
                   value={elecEscalation} 
                   onChange={(e) => setElecEscalation(parseFloat(e.target.value))}
-                  className="w-full h-2 bg-[#EAEDF3] rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                  className="w-full h-2 bg-[#1E2A45] rounded-lg appearance-none cursor-pointer accent-emerald-500"
                 />
                 {elecEscalation > 3.5 && (
                   <div className="mt-2 flex items-start gap-2 text-xs text-amber-500 bg-amber-500/10 p-2 rounded border border-amber-500/20">
@@ -280,7 +280,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
               <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
                 <div className="p-6 border-b border-[#1E2A45] flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-white">Line Item Pricing Review</h3>
-                  <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors">
+                  <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-xs font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors">
                     <Icon icon="solar:export-bold-duotone" className="w-3.5 h-3.5" />
                     Export Pricing Review
                   </button>
@@ -298,12 +298,12 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
                         <th className="px-6 py-4 font-medium">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#EAEDF3]">
+                    <tbody className="divide-y divide-[#1E2A45]">
                       {items.map(item => {
                         const status = getStatus(item);
                         const variance = ((item.escoCost - item.benchMid) / item.benchMid) * 100;
                         return (
-                          <tr key={item.id} className="hover:bg-[#F0F2F6] transition-colors">
+                          <tr key={item.id} className="hover:bg-[#1A2544] transition-colors">
                             <td className="px-6 py-4">
                               <p className="font-medium text-white">{item.description}</p>
                               <p className="text-xs text-[#5A6B88] mt-1 italic">{item.internalNote}</p>

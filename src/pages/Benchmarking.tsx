@@ -87,7 +87,7 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
               <p className="text-sm text-[#7A8BA8] mt-1">Ingest utility data, normalize for weather, calculate EUI and capital exposure.</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors duration-150">
+              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors duration-150">
                 <DollarSign className="w-4 h-4" />
                 Upload Bills (CSV)
               </button>
@@ -257,9 +257,9 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                       <th className="px-6 py-4 font-medium text-right">Total Cost</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#EAEDF3] stagger-rows">
+                  <tbody className="divide-y divide-[#1E2A45] stagger-rows">
                     {buildingBills.map((bill) => (
-                      <tr key={bill.id} className="hover:bg-[#F0F2F6] transition-colors duration-100">
+                      <tr key={bill.id} className="hover:bg-[#1A2544] transition-colors duration-100">
                         <td className="px-6 py-4 font-medium text-white">{bill.month}</td>
                         <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">{bill.electricKwh.toLocaleString()}</td>
                         <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">{bill.peakKw}</td>
@@ -393,7 +393,7 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
             <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
               <div className="p-6 border-b border-[#1E2A45] flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white">Replacement Cost Summary</h3>
-                <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] hover:text-white transition-colors duration-150">
+                <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-xs font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] hover:text-white transition-colors duration-150">
                   <Download className="w-3.5 h-3.5" />
                   Export CSV
                 </button>
@@ -409,13 +409,13 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                       <th className="px-6 py-4 font-medium">Benchmark Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#EAEDF3] stagger-rows">
+                  <tbody className="divide-y divide-[#1E2A45] stagger-rows">
                     {costSummaryRows.map((row) => (
                       <tr
                         key={row.year}
                         className={cn(
                           "transition-colors duration-100",
-                          row.year === currentYear ? "bg-emerald-500/5 hover:bg-emerald-500/10" : "hover:bg-[#F0F2F6]"
+                          row.year === currentYear ? "bg-emerald-500/5 hover:bg-emerald-500/10" : "hover:bg-[#1A2544]"
                         )}
                       >
                         <td className="px-6 py-4 font-mono font-semibold text-white">
@@ -430,7 +430,7 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                               "px-2.5 py-1 rounded-full text-xs font-semibold border",
                               row.count >= 3 ? "bg-red-500/10 text-red-600 border-red-500/20" :
                               row.count >= 1 ? "bg-amber-500/10 text-amber-600 border-amber-500/20" :
-                              "bg-[#EAEDF3] text-[#7A8BA8] border-[#D4D8E2]"
+                              "bg-[#1E2A45] text-[#7A8BA8] border-[#2A3A5C]"
                             )}>
                               {row.count} asset{row.count !== 1 ? 's' : ''}
                             </span>

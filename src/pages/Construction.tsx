@@ -31,7 +31,7 @@ export function Construction({ projectId }: { projectId?: string }) {
               <select 
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="bg-[#EAEDF3] border border-[#D4D8E2] text-[#CBD2DF] text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
+                className="bg-[#1E2A45] border border-[#2A3A5C] text-[#CBD2DF] text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -110,14 +110,14 @@ export function Construction({ projectId }: { projectId?: string }) {
                     <th className="px-6 py-4 font-medium">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAEDF3]">
+                <tbody className="divide-y divide-[#1E2A45]">
                   {projectEcms.map((ecm, idx) => {
                     // Mock progress based on index for demo
                     const progress = idx === 0 ? 100 : idx === 1 ? 45 : 0;
                     const status = idx === 0 ? 'Complete' : idx === 1 ? 'In Progress' : 'Not Started';
                     
                     return (
-                      <tr key={ecm.id} className="hover:bg-[#F0F2F6] transition-colors">
+                      <tr key={ecm.id} className="hover:bg-[#1A2544] transition-colors">
                         <td className="px-6 py-4 font-medium text-white">
                           <div className="flex flex-col">
                             <span>{ecm.number}</span>
@@ -127,7 +127,7 @@ export function Construction({ projectId }: { projectId?: string }) {
                         <td className="px-6 py-4 text-[#9AA5B8]">{ecm.category}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-32 h-2 bg-[#EAEDF3] rounded-full overflow-hidden">
+                            <div className="w-32 h-2 bg-[#1E2A45] rounded-full overflow-hidden">
                               <div 
                                 className={`h-full rounded-full ${progress === 100 ? 'bg-emerald-500' : progress > 0 ? 'bg-blue-500' : 'bg-transparent'}`}
                                 style={{ width: `${progress}%` }}
@@ -141,7 +141,7 @@ export function Construction({ projectId }: { projectId?: string }) {
                             "px-2.5 py-1 rounded text-xs font-medium border",
                             status === 'Complete' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
                             status === 'In Progress' ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
-                            "bg-[#EAEDF3] text-[#7A8BA8] border-[#D4D8E2]"
+                            "bg-[#1E2A45] text-[#7A8BA8] border-[#2A3A5C]"
                           )}>
                             {status.toUpperCase()}
                           </span>
@@ -181,9 +181,9 @@ export function Construction({ projectId }: { projectId?: string }) {
                     <th className="px-6 py-4 font-medium">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAEDF3]">
+                <tbody className="divide-y divide-[#1E2A45]">
                   {projectFindings.map((finding) => (
-                    <tr key={finding.id} className="hover:bg-[#F0F2F6] transition-colors">
+                    <tr key={finding.id} className="hover:bg-[#1A2544] transition-colors">
                       <td className="px-6 py-4 text-[#9AA5B8] font-mono">{finding.date}</td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{finding.ecm}</td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{finding.type}</td>
@@ -202,7 +202,7 @@ export function Construction({ projectId }: { projectId?: string }) {
                         <span className={cn(
                           "px-2.5 py-1 rounded text-xs font-medium border",
                           finding.status === 'Resolved' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                          "bg-[#EAEDF3] text-[#7A8BA8] border-[#D4D8E2]"
+                          "bg-[#1E2A45] text-[#7A8BA8] border-[#2A3A5C]"
                         )}>
                           {finding.status.toUpperCase()}
                         </span>

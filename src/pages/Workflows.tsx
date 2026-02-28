@@ -75,7 +75,7 @@ export function Workflows() {
           <div className="p-6 border-b border-[#1E2A45] flex items-center justify-between">
             <h3 className="text-sm font-semibold text-white">Task List</h3>
             <div className="flex items-center gap-2">
-              <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors">
+              <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-xs font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors">
                 <Filter className="w-3.5 h-3.5" />
                 Filter
               </button>
@@ -93,13 +93,13 @@ export function Workflows() {
                   <th className="px-6 py-4 font-medium">Assignee</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#EAEDF3]">
+              <tbody className="divide-y divide-[#1E2A45]">
                 {filteredTasks.map((task) => {
                   const isOverdue = new Date(task.dueDate) < new Date() && task.status !== 'Completed';
                   
                   return (
                     <tr key={task.id} className={cn(
-                      "hover:bg-[#F0F2F6] transition-colors group",
+                      "hover:bg-[#1A2544] transition-colors group",
                       task.status === 'Completed' ? "opacity-50" : ""
                     )}>
                       <td className="px-6 py-4">
@@ -109,7 +109,7 @@ export function Workflows() {
                             "w-5 h-5 rounded border flex items-center justify-center transition-colors",
                             task.status === 'Completed' 
                               ? "bg-emerald-500 border-emerald-500 text-white" 
-                              : "border-[#D4D8E2] hover:border-emerald-500 group-hover:bg-[#EAEDF3]"
+                              : "border-[#2A3A5C] hover:border-emerald-500 group-hover:bg-[#1E2A45]"
                           )}
                         >
                           {task.status === 'Completed' && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -146,7 +146,7 @@ export function Workflows() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-[#EAEDF3] flex items-center justify-center border border-[#D4D8E2]">
+                          <div className="w-6 h-6 rounded-full bg-[#1E2A45] flex items-center justify-center border border-[#2A3A5C]">
                             <span className="text-[10px] font-medium text-[#7A8BA8]">
                               {task.assignedTo.substring(0, 2).toUpperCase()}
                             </span>

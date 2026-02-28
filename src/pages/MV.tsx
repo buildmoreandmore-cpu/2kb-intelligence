@@ -30,13 +30,13 @@ export function MV({ projectId }: { projectId?: string }) {
               <select 
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="bg-[#EAEDF3] border border-[#D4D8E2] text-[#CBD2DF] text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
+                className="bg-[#1E2A45] border border-[#2A3A5C] text-[#CBD2DF] text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors">
+              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors">
                 <FileText className="w-4 h-4" />
                 Generate M&V Report
               </button>
@@ -61,7 +61,7 @@ export function MV({ projectId }: { projectId?: string }) {
                 <button className="px-4 py-2 bg-red-500/20 text-red-500 text-sm font-medium rounded-lg hover:bg-red-500/30 transition-colors">
                   Investigate Root Cause
                 </button>
-                <button className="px-4 py-2 bg-[#EAEDF3] text-[#9AA5B8] text-sm font-medium rounded-lg hover:bg-[#D4D8E2] transition-colors">
+                <button className="px-4 py-2 bg-[#1E2A45] text-[#9AA5B8] text-sm font-medium rounded-lg hover:bg-[#2A3A5C] transition-colors">
                   Dismiss Alert
                 </button>
               </div>
@@ -110,7 +110,7 @@ export function MV({ projectId }: { projectId?: string }) {
                   <div key={data.year} className="flex-1 flex flex-col items-center gap-2">
                     <div className="w-full flex items-end justify-center gap-1 h-full">
                       <div 
-                        className="w-1/3 bg-[#D4D8E2] rounded-t-sm relative group"
+                        className="w-1/3 bg-[#2A3A5C] rounded-t-sm relative group"
                         style={{ height: `${guaranteedHeight}%` }}
                       >
                          <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10 pointer-events-none">
@@ -133,7 +133,7 @@ export function MV({ projectId }: { projectId?: string }) {
             </div>
             <div className="mt-6 flex items-center justify-center gap-6 text-xs text-[#7A8BA8]">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-[#D4D8E2] rounded-sm"></div>
+                <div className="w-3 h-3 bg-[#2A3A5C] rounded-sm"></div>
                 <span>Guaranteed</span>
               </div>
               <div className="flex items-center gap-2">
@@ -162,13 +162,13 @@ export function MV({ projectId }: { projectId?: string }) {
                     <th className="px-6 py-4 font-medium">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAEDF3]">
+                <tbody className="divide-y divide-[#1E2A45]">
                   {projectMvData.map((data) => {
                     const variance = data.calculated - data.guaranteed;
                     const isShortfall = variance < 0;
                     
                     return (
-                      <tr key={data.year} className="hover:bg-[#F0F2F6] transition-colors">
+                      <tr key={data.year} className="hover:bg-[#1A2544] transition-colors">
                         <td className="px-6 py-4 font-medium text-white">Year {data.year}</td>
                         <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${data.guaranteed.toLocaleString()}</td>
                         <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${data.calculated.toLocaleString()}</td>

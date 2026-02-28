@@ -36,7 +36,7 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
               <p className="text-sm text-[#7A8BA8] mt-1">Capture equipment data, transcribe notes, and flag deficiencies.</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors">
+              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors">
                 <Upload className="w-4 h-4" />
                 Batch Upload
               </button>
@@ -88,7 +88,7 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
                   className="w-full pl-10 pr-4 py-2 bg-[#121C35] border border-[#1E2A45] rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm"
                 />
               </div>
-              <button className="inline-flex items-center gap-2 px-3 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors shadow-sm">
+              <button className="inline-flex items-center gap-2 px-3 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors shadow-sm">
                 <Filter className="w-4 h-4" />
                 Filter
               </button>
@@ -168,8 +168,8 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
               </div>
               
               <div className="p-8">
-                <div className="border-2 border-dashed border-[#D4D8E2] rounded-xl p-12 flex flex-col items-center justify-center text-center hover:bg-[#F0F2F6] hover:border-emerald-500/50 transition-colors cursor-pointer group">
-                  <div className="w-16 h-16 bg-[#EAEDF3] text-emerald-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="border-2 border-dashed border-[#2A3A5C] rounded-xl p-12 flex flex-col items-center justify-center text-center hover:bg-[#1A2544] hover:border-emerald-500/50 transition-colors cursor-pointer group">
+                  <div className="w-16 h-16 bg-[#1E2A45] text-emerald-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <Camera className="w-8 h-8" />
                   </div>
                   <h4 className="text-lg font-medium text-white mb-1">Upload Equipment Photos</h4>
@@ -177,13 +177,13 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
                 </div>
 
                 <div className="mt-8 flex items-center gap-4">
-                  <div className="flex-1 h-px bg-[#EAEDF3]"></div>
+                  <div className="flex-1 h-px bg-[#1E2A45]"></div>
                   <span className="text-sm font-medium text-[#5A6B88] uppercase tracking-wider">OR</span>
-                  <div className="flex-1 h-px bg-[#EAEDF3]"></div>
+                  <div className="flex-1 h-px bg-[#1E2A45]"></div>
                 </div>
 
                 <div className="mt-8 text-center">
-                  <button className="inline-flex items-center gap-2 px-6 py-3 bg-[#EAEDF3] border border-[#D4D8E2] rounded-full text-[#9AA5B8] font-medium hover:border-emerald-500 hover:text-emerald-600 transition-colors shadow-sm">
+                  <button className="inline-flex items-center gap-2 px-6 py-3 bg-[#1E2A45] border border-[#2A3A5C] rounded-full text-[#9AA5B8] font-medium hover:border-emerald-500 hover:text-emerald-600 transition-colors shadow-sm">
                     <Mic className="w-5 h-5" />
                     Record Voice Audit Note
                   </button>

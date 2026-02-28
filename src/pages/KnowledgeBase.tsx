@@ -72,7 +72,7 @@ export function KnowledgeBase() {
               className="w-full pl-10 pr-4 py-2 bg-[#121C35] border border-[#1E2A45] rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm"
             />
           </div>
-          <button className="inline-flex items-center gap-2 px-3 py-2 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#D4D8E2] transition-colors shadow-sm">
+          <button className="inline-flex items-center gap-2 px-3 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors shadow-sm">
             <Filter className="w-4 h-4" />
             Filter
           </button>
@@ -95,16 +95,16 @@ export function KnowledgeBase() {
                     <th className="px-6 py-4 font-medium">Source</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAEDF3]">
+                <tbody className="divide-y divide-[#1E2A45]">
                   {benchmarks.filter(b => b.category.toLowerCase().includes(searchQuery.toLowerCase())).map((benchmark) => (
-                    <tr key={benchmark.id} className="hover:bg-[#F0F2F6] transition-colors">
+                    <tr key={benchmark.id} className="hover:bg-[#1A2544] transition-colors">
                       <td className="px-6 py-4 font-medium text-white">{benchmark.category}</td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{benchmark.buildingType}</td>
                       <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">${benchmark.unitCostMid.toLocaleString()}</td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{benchmark.unit}</td>
                       <td className="px-6 py-4 text-right text-emerald-500 font-mono">{benchmark.savingsMid}%</td>
                       <td className="px-6 py-4 text-[#9AA5B8]">
-                        <span className="px-2.5 py-1 rounded bg-[#EAEDF3] text-xs font-medium border border-[#D4D8E2]">
+                        <span className="px-2.5 py-1 rounded bg-[#1E2A45] text-xs font-medium border border-[#2A3A5C]">
                           {benchmark.source}
                         </span>
                       </td>
@@ -130,7 +130,7 @@ export function KnowledgeBase() {
                     <h3 className="text-lg font-semibold text-white group-hover:text-emerald-600 transition-colors">{lesson.title}</h3>
                     <p className="text-sm text-[#7A8BA8] mt-1">Project: {useStore.getState().projects.find(p => p.id === lesson.projectId)?.name}</p>
                   </div>
-                  <span className="px-2.5 py-1 rounded bg-[#EAEDF3] text-xs font-medium text-[#9AA5B8] border border-[#D4D8E2]">
+                  <span className="px-2.5 py-1 rounded bg-[#1E2A45] text-xs font-medium text-[#9AA5B8] border border-[#2A3A5C]">
                     {lesson.category}
                   </span>
                 </div>
@@ -159,7 +159,7 @@ export function KnowledgeBase() {
             ].filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase())).map((template) => (
               <div key={template.id} className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6 flex flex-col hover:border-emerald-500/50 transition-colors group">
                 <div className="flex-1">
-                  <div className="w-10 h-10 bg-[#EAEDF3] rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald-500/20 transition-colors">
+                  <div className="w-10 h-10 bg-[#1E2A45] rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald-500/20 transition-colors">
                     <FileText className="w-5 h-5 text-[#7A8BA8] group-hover:text-emerald-500 transition-colors" />
                   </div>
                   <h3 className="text-base font-semibold text-white mb-2">{template.title}</h3>
