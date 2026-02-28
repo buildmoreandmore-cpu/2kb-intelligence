@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { BarChart3, TrendingUp, AlertTriangle, CheckCircle2, DollarSign, Leaf, Search, Filter, Plus, Calendar } from 'lucide-react';
+import { BarChart3, DollarSign, Plus, Calendar, TrendingUp, AlertTriangle, Zap, Download, FileText, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function Benchmarking({ projectId }: { projectId?: string }) {
@@ -8,10 +8,10 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
   const utilityBills = useStore(state => state.utilityBills);
   const assets = useStore(state => state.assets);
   const projects = useStore(state => state.projects);
-  
+
   const [activeTab, setActiveTab] = useState<'energy' | 'capital'>('energy');
   const [selectedBuildingId, setSelectedBuildingId] = useState(buildings[0].id);
-  
+
   let displayBuildings = buildings;
   if (projectId) {
     const project = projects.find(p => p.id === projectId);
@@ -22,33 +22,60 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
 
   const selectedBuilding = displayBuildings.find(b => b.id === selectedBuildingId) || displayBuildings[0];
   const buildingBills = utilityBills.filter(b => b.buildingId === selectedBuilding?.id);
-  const buildingAssets = assets.filter(a => a.buildingId === selectedBuilding?.id);
-  
-  // Calculate EUI
-  const totalKbtu = buildingBills.reduce((sum, bill) => {
-    return sum + (bill.electricKwh * 3.412) + (bill.gasTherms * 100);
-  }, 0);
-  
+
+  // All assets for capital planning (all buildings or scoped)
+  const scopedAssets = projectId
+    ? (() => {
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return assets;
+        const orgBuildingIds = buildings.filter(b => b.orgId === project.orgId).map(b => b.id);
+        return assets.filter(a => orgBuildingIds.includes(a.buildingId));
+      })()
+    : assets;
+
+  const buildingAssets = scopedAssets.filter(a => a.buildingId === selectedBuilding?.id);
+
+  // EUI Calculations
+  const totalKbtu = buildingBills.reduce((sum, bill) =>
+    sum + (bill.electricKwh * 3.412) + (bill.gasTherms * 100), 0);
   const eui = selectedBuilding ? (totalKbtu / selectedBuilding.sqft).toFixed(1) : 0;
   const totalCost = buildingBills.reduce((sum, bill) => sum + bill.electricCost + bill.gasCost, 0);
   const costPerSqft = selectedBuilding ? (totalCost / selectedBuilding.sqft).toFixed(2) : 0;
-  
-  // Mock regression data
+
   const rSquared = 0.92;
   const baseLoad = 15000;
   const hddCoeff = 45.2;
   const cddCoeff = 68.4;
 
-  // Capital Planning Calculations
+  // Capital Planning — all scoped assets
   const currentYear = new Date().getFullYear();
-  const capitalTimeline = Array.from({ length: 10 }, (_, i) => currentYear + i).map(year => {
-    const assetsReachingEol = buildingAssets.filter(a => a.year + a.remainingLife === year);
-    const cost = assetsReachingEol.reduce((sum, a) => sum + (a.replacementCost || 0), 0);
+
+  const capitalTimeline = Array.from({ length: 15 }, (_, i) => currentYear + i).map(year => {
+    const assetsReachingEol = scopedAssets.filter(a => (a.year + a.remainingLife) === year);
+    const cost = assetsReachingEol.reduce((sum, a) => sum + ((a as any).replacementCost || 0), 0);
     return { year, count: assetsReachingEol.length, cost, assets: assetsReachingEol };
   });
 
   const total5YearCost = capitalTimeline.slice(0, 5).reduce((sum, t) => sum + t.cost, 0);
-  const critical2YearCount = capitalTimeline.slice(0, 2).reduce((sum, t) => sum + t.assets.filter(a => a.condition === 'Critical').length, 0);
+  const critical2YearCount = capitalTimeline.slice(0, 2).reduce((sum, t) =>
+    sum + t.assets.filter((a: any) => a.condition === 'Critical').length, 0);
+  const allCritical = scopedAssets.filter((a: any) => a.condition === 'Critical');
+  const highestCostAsset = [...scopedAssets].sort((a: any, b: any) => (b.replacementCost || 0) - (a.replacementCost || 0))[0] as any;
+
+  // ESPC potential: assets with replacementCost > 0 in next 5 years
+  const espcOverlapAssets = capitalTimeline.slice(0, 5).flatMap(t => t.assets).filter((a: any) => a.replacementCost > 0);
+
+  // Replacement Cost Summary Table
+  let cumulative = 0;
+  const costSummaryRows = capitalTimeline
+    .filter(t => t.count > 0 || t.year <= currentYear + 5)
+    .slice(0, 8)
+    .map(t => {
+      cumulative += t.cost;
+      return { ...t, cumulative };
+    });
+
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   return (
     <div className="flex flex-col h-full">
@@ -57,100 +84,105 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-white tracking-tight">Facility Assessment & Benchmarking</h1>
-              <p className="text-sm text-neutral-400 mt-1">Ingest utility data, normalize for weather, calculate EUI.</p>
+              <p className="text-sm text-neutral-400 mt-1">Ingest utility data, normalize for weather, calculate EUI and capital exposure.</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#1C2030] border border-[#252A3A] rounded-lg text-sm font-medium text-white hover:bg-[#252A3A] transition-colors">
+              <button className="inline-flex items-center gap-2 px-4 py-2 bg-[#1C2030] border border-[#252A3A] rounded-lg text-sm font-medium text-white hover:bg-[#252A3A] transition-colors duration-150">
                 <DollarSign className="w-4 h-4" />
                 Upload Bills (CSV)
               </button>
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-emerald-700 transition-colors">
+              <button className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-emerald-700">
                 <Plus className="w-4 h-4" />
                 Add Manual Entry
               </button>
             </div>
           </div>
 
-          <div className="flex space-x-6 border-b border-[#1C2030]">
-            <button
-              onClick={() => setActiveTab('energy')}
-              className={cn(
-                "pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
-                activeTab === 'energy' 
-                  ? "border-emerald-500 text-emerald-500" 
-                  : "border-transparent text-neutral-400 hover:text-white hover:border-[#252A3A]"
-              )}
-            >
-              <BarChart3 className="w-4 h-4" />
-              Energy Profile
-            </button>
-            <button
-              onClick={() => setActiveTab('capital')}
-              className={cn(
-                "pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
-                activeTab === 'capital' 
-                  ? "border-emerald-500 text-emerald-500" 
-                  : "border-transparent text-neutral-400 hover:text-white hover:border-[#252A3A]"
-              )}
-            >
-              <Calendar className="w-4 h-4" />
-              Capital Planning
-            </button>
+          <div className="flex space-x-1">
+            {[
+              { id: 'energy', label: 'Energy Profile', icon: BarChart3 },
+              { id: 'capital', label: 'Capital Planning', icon: Calendar },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={cn(
+                  "tab-btn px-4 pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
+                  activeTab === tab.id
+                    ? "border-emerald-500 text-emerald-500 active"
+                    : "border-transparent text-neutral-400 hover:text-white"
+                )}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-8 max-w-7xl mx-auto w-full space-y-8">
+      <div className="flex-1 overflow-y-auto p-8 max-w-7xl mx-auto w-full space-y-8 animate-page-enter">
+        {/* Building Selector */}
         <div className="flex items-center gap-4">
-          <select 
+          <select
             value={selectedBuilding?.id}
             onChange={(e) => setSelectedBuildingId(e.target.value)}
-            className="bg-[#12151C] border border-[#1C2030] text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5"
+            className="bg-[#12151C] border border-[#1C2030] text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-64 p-2.5 transition-colors duration-150"
           >
             {displayBuildings.map(b => (
               <option key={b.id} value={b.id}>{b.name}</option>
             ))}
           </select>
+          {activeTab === 'capital' && (
+            <span className="text-xs text-neutral-500">
+              Showing all {scopedAssets.length} assets across {displayBuildings.length} buildings
+            </span>
+          )}
         </div>
 
-        {activeTab === 'energy' ? (
+        {/* ─── ENERGY PROFILE TAB ─── */}
+        {activeTab === 'energy' && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-                <h3 className="text-sm font-medium text-neutral-400 uppercase tracking-wider mb-2">Energy Use Intensity (EUI)</h3>
-                <div className="flex items-end gap-3">
-                  <span className="text-4xl font-bold text-white">{eui}</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-children">
+              <div className="kpi-card bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
+                <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">Energy Use Intensity (EUI)</h3>
+                <div className="flex items-end gap-2">
+                  <span className="text-4xl font-bold text-white animate-stat-pop">{eui}</span>
                   <span className="text-sm text-neutral-500 mb-1">kBtu/sqft/yr</span>
                 </div>
-                <div className="mt-4 pt-4 border-t border-[#1C2030]">
+                <div className="mt-4 pt-4 border-t border-[#1C2030] space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-neutral-400">Portfolio Median</span>
-                    <span className="text-white font-medium">65.2</span>
+                    <span className="text-emerald-400 font-medium">65.2</span>
                   </div>
-                  <div className="flex justify-between text-sm mt-2">
+                  <div className="flex justify-between text-sm">
                     <span className="text-neutral-400">National Median</span>
-                    <span className="text-white font-medium">72.4</span>
+                    <span className="text-neutral-300 font-medium">72.4</span>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-                <h3 className="text-sm font-medium text-neutral-400 uppercase tracking-wider mb-2">Annual Energy Cost</h3>
-                <div className="flex items-end gap-3">
-                  <span className="text-4xl font-bold text-white">${totalCost.toLocaleString()}</span>
+              <div className="kpi-card bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
+                <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">Annual Energy Cost</h3>
+                <div className="flex items-end gap-2">
+                  <span className="text-4xl font-bold text-white animate-stat-pop">${totalCost.toLocaleString()}</span>
                 </div>
-                <div className="mt-4 pt-4 border-t border-[#1C2030]">
+                <div className="mt-4 pt-4 border-t border-[#1C2030] space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-neutral-400">Cost per SqFt</span>
                     <span className="text-white font-medium">${costPerSqft}</span>
                   </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-400">Building Size</span>
+                    <span className="text-white font-medium">{selectedBuilding?.sqft.toLocaleString()} sqft</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-                <h3 className="text-sm font-medium text-neutral-400 uppercase tracking-wider mb-2">Weather Normalization</h3>
+              <div className="kpi-card bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
+                <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">Weather Normalization</h3>
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-500 text-xs font-medium border border-emerald-500/20">
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-medium border border-emerald-500/20">
                     Good Fit
                   </span>
                   <span className="text-sm text-neutral-400">R² = {rSquared}</span>
@@ -158,7 +190,7 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-neutral-400">Base Load</span>
-                    <span className="text-white font-mono">{baseLoad} kWh</span>
+                    <span className="text-white font-mono">{baseLoad.toLocaleString()} kWh</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-400">Cooling (CDD)</span>
@@ -172,32 +204,45 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
               </div>
             </div>
 
+            {/* Monthly Chart */}
             <div className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
               <h3 className="text-sm font-semibold text-white mb-6">Monthly Consumption (kWh)</h3>
-              <div className="h-64 flex items-end gap-2">
-                {buildingBills.map((bill, i) => {
-                  const maxKwh = Math.max(...buildingBills.map(b => b.electricKwh));
-                  const height = (bill.electricKwh / maxKwh) * 100;
-                  return (
-                    <div key={bill.id} className="flex-1 flex flex-col items-center gap-2 group relative">
-                      <div 
-                        className="w-full bg-blue-500/80 rounded-t-sm hover:bg-blue-400 transition-colors"
-                        style={{ height: `${height}%` }}
-                      >
-                        <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#252A3A] text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10 pointer-events-none">
-                          {bill.electricKwh.toLocaleString()} kWh
+              {buildingBills.length > 0 ? (
+                <div className="h-56 flex items-end gap-2 pb-6 relative">
+                  {buildingBills.map((bill, i) => {
+                    const maxKwh = Math.max(...buildingBills.map(b => b.electricKwh));
+                    const height = (bill.electricKwh / maxKwh) * 100;
+                    return (
+                      <div key={bill.id} className="flex-1 flex flex-col items-center gap-2 group relative">
+                        <div
+                          className="w-full rounded-t-sm cursor-default"
+                          style={{
+                            height: `${height}%`,
+                            background: 'linear-gradient(to top, #3B82F6, #60A5FA)',
+                            animation: `staggerFade 0.4s cubic-bezier(0.16,1,0.3,1) ${0.03 * i}s both`
+                          }}
+                        >
+                          <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#252A3A] text-white text-xs py-1.5 px-2.5 rounded-lg whitespace-nowrap z-10 pointer-events-none shadow-xl border border-[#2D3348] transition-opacity duration-150">
+                            {bill.electricKwh.toLocaleString()} kWh
+                          </div>
                         </div>
+                        <span className="text-[10px] text-neutral-500 uppercase absolute -bottom-6">{months[i]}</span>
                       </div>
-                      <span className="text-[10px] text-neutral-500 uppercase">{bill.month.split('-')[1]}</span>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="h-56 flex items-center justify-center text-neutral-500 text-sm">
+                  No utility data for this building.
+                </div>
+              )}
             </div>
 
+            {/* Utility Ledger */}
             <div className="bg-[#12151C] border border-[#1C2030] rounded-xl overflow-hidden">
-              <div className="p-6 border-b border-[#1C2030]">
+              <div className="p-6 border-b border-[#1C2030] flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white">Utility Bill Ledger</h3>
+                <span className="text-xs text-neutral-500">{buildingBills.length} months</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
@@ -212,16 +257,16 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                       <th className="px-6 py-4 font-medium text-right">Total Cost</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1C2030]">
+                  <tbody className="divide-y divide-[#1C2030] stagger-rows">
                     {buildingBills.map((bill) => (
-                      <tr key={bill.id} className="hover:bg-[#181C25] transition-colors">
+                      <tr key={bill.id} className="hover:bg-[#181C25] transition-colors duration-100">
                         <td className="px-6 py-4 font-medium text-white">{bill.month}</td>
                         <td className="px-6 py-4 text-right text-neutral-300 font-mono">{bill.electricKwh.toLocaleString()}</td>
                         <td className="px-6 py-4 text-right text-neutral-300 font-mono">{bill.peakKw}</td>
                         <td className="px-6 py-4 text-right text-neutral-300 font-mono">${bill.electricCost.toLocaleString()}</td>
                         <td className="px-6 py-4 text-right text-neutral-300 font-mono">{bill.gasTherms.toLocaleString()}</td>
                         <td className="px-6 py-4 text-right text-neutral-300 font-mono">${bill.gasCost.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-right text-white font-mono font-medium">${(bill.electricCost + bill.gasCost).toLocaleString()}</td>
+                        <td className="px-6 py-4 text-right text-white font-mono font-semibold">${(bill.electricCost + bill.gasCost).toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -229,57 +274,200 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
               </div>
             </div>
           </>
-        ) : (
+        )}
+
+        {/* ─── CAPITAL PLANNING TAB ─── */}
+        {activeTab === 'capital' && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-                <h3 className="text-sm font-medium text-neutral-400 uppercase tracking-wider mb-2">5-Year Capital Need</h3>
-                <div className="flex items-end gap-3">
-                  <span className="text-4xl font-bold text-white">${total5YearCost.toLocaleString()}</span>
-                </div>
+            {/* 5-Year Outlook Cards */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-semibold text-white">5-Year Capital Outlook</h2>
+                <button className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">
+                  <FileText className="w-4 h-4" />
+                  Generate Capital Plan Report
+                </button>
               </div>
-              <div className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-                <h3 className="text-sm font-medium text-neutral-400 uppercase tracking-wider mb-2">Critical Assets (2yr)</h3>
-                <div className="flex items-end gap-3">
-                  <span className="text-4xl font-bold text-red-500">{critical2YearCount}</span>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
+                <div className="kpi-card bg-[#12151C] border border-[#1C2030] rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="w-4 h-4 text-amber-400" />
+                    <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">5-Year Capital Need</h3>
+                  </div>
+                  <span className="text-3xl font-bold text-white animate-stat-pop">
+                    ${(total5YearCost / 1000).toFixed(0)}K
+                  </span>
+                  <p className="text-xs text-neutral-500 mt-1">Across {capitalTimeline.slice(0,5).reduce((s,t) => s + t.count, 0)} assets reaching EOL</p>
                 </div>
-              </div>
-              <div className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-                <h3 className="text-sm font-medium text-neutral-400 uppercase tracking-wider mb-2">ESPC Potential</h3>
-                <div className="flex items-end gap-3">
-                  <span className="text-4xl font-bold text-emerald-500">High</span>
+
+                <div className="kpi-card bg-[#12151C] border border-red-900/30 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="w-4 h-4 text-red-400" />
+                    <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Critical Assets (2yr)</h3>
+                  </div>
+                  <span className="text-3xl font-bold text-red-400 animate-stat-pop">{critical2YearCount}</span>
+                  <p className="text-xs text-neutral-500 mt-1">Immediate replacement priority</p>
                 </div>
-                <p className="text-xs text-neutral-500 mt-2">Significant overlap between EOL assets and ECM categories.</p>
+
+                <div className="kpi-card bg-[#12151C] border border-[#1C2030] rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="w-4 h-4 text-neutral-400" />
+                    <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Highest Single Cost</h3>
+                  </div>
+                  <span className="text-3xl font-bold text-white animate-stat-pop">
+                    ${highestCostAsset ? (highestCostAsset.replacementCost / 1000).toFixed(0) + 'K' : 'N/A'}
+                  </span>
+                  <p className="text-xs text-neutral-500 mt-1 truncate">{highestCostAsset?.type} — {highestCostAsset?.manufacturer}</p>
+                </div>
+
+                <div className="kpi-card bg-[#12151C] border border-emerald-900/30 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap className="w-4 h-4 text-emerald-400" />
+                    <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">ESPC Potential</h3>
+                  </div>
+                  <span className="text-3xl font-bold text-emerald-400 animate-stat-pop">High</span>
+                  <p className="text-xs text-neutral-500 mt-1">{espcOverlapAssets.length} assets eligible for bundling</p>
+                </div>
               </div>
             </div>
 
+            {/* Equipment Replacement Timeline */}
             <div className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6">
-              <h3 className="text-sm font-semibold text-white mb-6">Equipment Replacement Timeline</h3>
-              <div className="space-y-4">
-                {capitalTimeline.map((t) => (
-                  <div key={t.year} className="flex items-center gap-4">
-                    <div className="w-16 text-sm font-mono text-neutral-400">{t.year}</div>
-                    <div className="flex-1 h-8 bg-[#0E1118] rounded border border-[#1C2030] flex items-center px-2 gap-1 overflow-hidden">
-                      {t.assets.map(a => (
-                        <div 
-                          key={a.id} 
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-sm font-semibold text-white">Equipment Replacement Timeline</h3>
+                <div className="flex items-center gap-4 text-xs text-neutral-400">
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-500/40 border border-red-500/50" />Critical</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500/40 border border-amber-500/50" />Poor</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/40 border border-emerald-500/50" />Good</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {capitalTimeline.map((t, idx) => (
+                  <div
+                    key={t.year}
+                    className="flex items-center gap-4"
+                    style={{ animation: `staggerFade 0.3s cubic-bezier(0.16,1,0.3,1) ${idx * 0.04}s both` }}
+                  >
+                    <div className={cn(
+                      "w-12 text-sm font-mono text-right flex-shrink-0",
+                      t.year === currentYear ? "text-emerald-400 font-semibold" : "text-neutral-400"
+                    )}>
+                      {t.year}
+                    </div>
+                    <div className="flex-1 h-8 bg-[#0E1118] rounded-lg border border-[#1C2030] flex items-center px-2 gap-1.5 overflow-hidden relative">
+                      {t.assets.length === 0 && (
+                        <span className="text-[10px] text-neutral-600 pl-1">—</span>
+                      )}
+                      {t.assets.map((a: any) => (
+                        <div
+                          key={a.id}
+                          title={`${a.type} — ${a.manufacturer} ${a.model}\nReplacement: $${a.replacementCost?.toLocaleString()}`}
                           className={cn(
-                            "h-4 rounded px-2 text-[10px] font-medium flex items-center whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity",
-                            a.condition === 'Critical' ? "bg-red-500/20 text-red-500 border border-red-500/30" :
-                            a.condition === 'Poor' ? "bg-amber-500/20 text-amber-500 border border-amber-500/30" :
-                            "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
+                            "h-5 rounded px-2 text-[10px] font-medium flex items-center whitespace-nowrap cursor-pointer group relative",
+                            "transition-all duration-150 hover:z-10 hover:scale-105",
+                            a.condition === 'Critical'
+                              ? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
+                              : a.condition === 'Poor'
+                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30"
+                              : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"
                           )}
-                          title={`${a.type} - ${a.manufacturer} ($${a.replacementCost?.toLocaleString()})`}
                         >
                           {a.type}
                         </div>
                       ))}
                     </div>
-                    <div className="w-24 text-right text-sm font-mono text-neutral-300">
-                      ${t.cost.toLocaleString()}
+                    <div className={cn(
+                      "w-24 text-right text-sm font-mono flex-shrink-0",
+                      t.cost > 200000 ? "text-red-400 font-semibold" :
+                      t.cost > 50000 ? "text-amber-400" :
+                      t.cost > 0 ? "text-neutral-300" : "text-neutral-600"
+                    )}>
+                      {t.cost > 0 ? `$${t.cost.toLocaleString()}` : '—'}
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Replacement Cost Summary Table */}
+            <div className="bg-[#12151C] border border-[#1C2030] rounded-xl overflow-hidden">
+              <div className="p-6 border-b border-[#1C2030] flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">Replacement Cost Summary</h3>
+                <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1C2030] border border-[#252A3A] rounded-lg text-xs font-medium text-neutral-300 hover:bg-[#252A3A] hover:text-white transition-colors duration-150">
+                  <Download className="w-3.5 h-3.5" />
+                  Export CSV
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-neutral-400 uppercase bg-[#0E1118] border-b border-[#1C2030]">
+                    <tr>
+                      <th className="px-6 py-4 font-medium">Year</th>
+                      <th className="px-6 py-4 font-medium text-center">Assets Reaching EOL</th>
+                      <th className="px-6 py-4 font-medium text-right">Est. Replacement Cost</th>
+                      <th className="px-6 py-4 font-medium text-right">Cumulative Cost</th>
+                      <th className="px-6 py-4 font-medium">Benchmark Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1C2030] stagger-rows">
+                    {costSummaryRows.map((row) => (
+                      <tr
+                        key={row.year}
+                        className={cn(
+                          "transition-colors duration-100",
+                          row.year === currentYear ? "bg-emerald-500/5 hover:bg-emerald-500/10" : "hover:bg-[#181C25]"
+                        )}
+                      >
+                        <td className="px-6 py-4 font-mono font-semibold text-white">
+                          {row.year}
+                          {row.year === currentYear && (
+                            <span className="ml-2 text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20">NOW</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {row.count > 0 ? (
+                            <span className={cn(
+                              "px-2.5 py-1 rounded-full text-xs font-semibold border",
+                              row.count >= 3 ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                              row.count >= 1 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+                              "bg-[#1C2030] text-neutral-400 border-[#252A3A]"
+                            )}>
+                              {row.count} asset{row.count !== 1 ? 's' : ''}
+                            </span>
+                          ) : (
+                            <span className="text-neutral-600 text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-right font-mono">
+                          {row.cost > 0 ? (
+                            <span className={cn(
+                              "font-semibold",
+                              row.cost > 200000 ? "text-red-400" :
+                              row.cost > 50000 ? "text-amber-400" : "text-white"
+                            )}>
+                              ${row.cost.toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="text-neutral-600">$0</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-right font-mono text-neutral-300 font-semibold">
+                          ${row.cumulative.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4">
+                          {row.count > 0 ? (
+                            <div className="flex items-center gap-1.5">
+                              <ChevronRight className="w-3 h-3 text-emerald-500" />
+                              <span className="text-xs text-neutral-400">Benchmark available</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-neutral-600">No replacements</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </>

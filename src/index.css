@@ -39,3 +39,274 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-muted);
 }
+
+/* =============================================
+   MOTION DESIGN SYSTEM
+   Speed: fast (web UI micro-interactions 0.15-0.35s)
+   Easing: physics-based cubic-bezier curves
+   Layering: transform + opacity always together
+   Stagger: sequential offset for list items
+   ============================================= */
+
+/* Core easing curves */
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Page entry animation — fast, decisive, layered (transform + opacity) */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide in from left (sidebar nav active) */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scale in — for modals, cards appearing */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Stagger fade — for list items, table rows */
+@keyframes staggerFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Progress bar fill */
+@keyframes progressFill {
+  from { width: 0%; }
+}
+
+/* KPI counter pulse on load */
+@keyframes statPop {
+  0%   { opacity: 0; transform: scale(0.85) translateY(4px); }
+  60%  { transform: scale(1.04) translateY(-1px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Shimmer loading skeleton */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Badge pulse for alerts */
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); }
+  50%       { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+/* Slide down for comment/content reveals */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 800px;
+  }
+}
+
+/* Horizontal bar chart entry */
+@keyframes barGrow {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+
+/* ---- Utility classes ---- */
+
+.animate-page-enter {
+  animation: pageEnter 0.35s var(--ease-out-expo) both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.25s var(--ease-out-expo) both;
+}
+
+.animate-stat-pop {
+  animation: statPop 0.4s var(--ease-out-back) both;
+}
+
+.animate-progress-fill {
+  animation: progressFill 0.6s var(--ease-out-expo) both;
+}
+
+.animate-badge-pulse {
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s var(--ease-out-expo) both;
+}
+
+/* Stagger delays for list items — apply to immediate children */
+.stagger-children > *:nth-child(1)  { animation: staggerFade 0.3s var(--ease-out-expo) 0.03s both; }
+.stagger-children > *:nth-child(2)  { animation: staggerFade 0.3s var(--ease-out-expo) 0.06s both; }
+.stagger-children > *:nth-child(3)  { animation: staggerFade 0.3s var(--ease-out-expo) 0.09s both; }
+.stagger-children > *:nth-child(4)  { animation: staggerFade 0.3s var(--ease-out-expo) 0.12s both; }
+.stagger-children > *:nth-child(5)  { animation: staggerFade 0.3s var(--ease-out-expo) 0.15s both; }
+.stagger-children > *:nth-child(6)  { animation: staggerFade 0.3s var(--ease-out-expo) 0.18s both; }
+.stagger-children > *:nth-child(7)  { animation: staggerFade 0.3s var(--ease-out-expo) 0.21s both; }
+.stagger-children > *:nth-child(8)  { animation: staggerFade 0.3s var(--ease-out-expo) 0.24s both; }
+.stagger-children > *:nth-child(9)  { animation: staggerFade 0.3s var(--ease-out-expo) 0.27s both; }
+.stagger-children > *:nth-child(10) { animation: staggerFade 0.3s var(--ease-out-expo) 0.30s both; }
+.stagger-children > *:nth-child(n+11) { animation: staggerFade 0.3s var(--ease-out-expo) 0.33s both; }
+
+/* Table row stagger */
+.stagger-rows tr:nth-child(1)  { animation: staggerFade 0.25s var(--ease-out-expo) 0.04s both; }
+.stagger-rows tr:nth-child(2)  { animation: staggerFade 0.25s var(--ease-out-expo) 0.08s both; }
+.stagger-rows tr:nth-child(3)  { animation: staggerFade 0.25s var(--ease-out-expo) 0.12s both; }
+.stagger-rows tr:nth-child(4)  { animation: staggerFade 0.25s var(--ease-out-expo) 0.16s both; }
+.stagger-rows tr:nth-child(5)  { animation: staggerFade 0.25s var(--ease-out-expo) 0.20s both; }
+.stagger-rows tr:nth-child(6)  { animation: staggerFade 0.25s var(--ease-out-expo) 0.24s both; }
+.stagger-rows tr:nth-child(7)  { animation: staggerFade 0.25s var(--ease-out-expo) 0.28s both; }
+.stagger-rows tr:nth-child(8)  { animation: staggerFade 0.25s var(--ease-out-expo) 0.32s both; }
+.stagger-rows tr:nth-child(n+9) { animation: staggerFade 0.25s var(--ease-out-expo) 0.36s both; }
+
+/* Sidebar nav item hover — layered scale + color */
+.nav-item {
+  transition: color 0.15s ease, background-color 0.15s ease, transform 0.15s var(--ease-out-expo);
+}
+.nav-item:hover {
+  transform: translateX(2px);
+}
+.nav-item.active {
+  animation: slideInLeft 0.2s var(--ease-out-expo) both;
+}
+
+/* Button micro-interaction — press-down effect */
+.btn-primary {
+  transition: transform 0.12s var(--ease-out-expo), background-color 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+.btn-primary:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* Card hover — subtle lift with shadow reaction */
+.card-hover {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s var(--ease-out-expo);
+}
+.card-hover:hover {
+  border-color: #252A3A;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* KPI card — pop in on mount, hover glow */
+.kpi-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.kpi-card:hover {
+  border-color: #2D3348;
+  box-shadow: 0 0 0 1px #2D3348, 0 8px 20px rgba(0,0,0,0.25);
+}
+
+/* Tab button — underline slide */
+.tab-btn {
+  position: relative;
+  transition: color 0.2s ease;
+}
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0; right: 0;
+  height: 2px;
+  background: #10B981;
+  border-radius: 2px 2px 0 0;
+  transform: scaleX(0);
+  transition: transform 0.2s var(--ease-out-expo);
+}
+.tab-btn.active::after {
+  transform: scaleX(1);
+}
+
+/* Mode toggle pill — smooth highlight transition */
+.mode-pill {
+  transition: background-color 0.2s var(--ease-out-expo), color 0.2s ease, box-shadow 0.2s ease;
+}
+.mode-pill.active {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* Badge — reactive scale on appear */
+.status-badge {
+  transition: transform 0.15s var(--ease-out-expo), opacity 0.15s ease;
+}
+
+/* Modal backdrop + panel — layered entrance */
+.modal-backdrop {
+  animation: pageEnter 0.2s ease both;
+}
+.modal-panel {
+  animation: scaleIn 0.28s var(--ease-out-expo) 0.04s both;
+}
+
+/* Shimmer skeleton */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-card) 25%,
+    var(--color-hover) 50%,
+    var(--color-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* Slide progress bar */
+.progress-bar-fill {
+  animation: progressFill 0.7s var(--ease-out-expo) 0.1s both;
+}
+
+/* Chart bar grow (horizontal timeline bars) */
+.bar-grow {
+  animation: barGrow 0.5s var(--ease-out-expo) both;
+}
+
+/* Focus ring — emerald, fast */
+*:focus-visible {
+  outline: 2px solid #10B981;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
