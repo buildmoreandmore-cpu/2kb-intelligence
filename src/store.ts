@@ -232,6 +232,25 @@ export const seedData = {
     { id: 'mn2', projectId: 'p3', date: '2024-02-10', title: 'Change Order Review', attendees: ['David Chen (2KB)', 'Robert Williams (Henry County)', 'Mark Thompson (JCI)'], summary: 'Reviewed CO-01 for additional asbestos abatement. 2KB confirmed scope is justified based on site conditions. Owner approved $45,000 cost and 5-day extension.', actionItems: [{ text: 'Owner to execute change order', owner: 'Henry County', dueDate: '2024-02-15', completed: true }, { text: 'ESCO to update project schedule', owner: 'JCI', dueDate: '2024-02-20', completed: true }], acknowledged: true },
     { id: 'mn3', projectId: 'p2', date: '2024-03-18', title: 'IGEA Review Kickoff', attendees: ['Sarah Kim (2KB)', 'James Morton (City of Morrow)', 'Lisa Park (Honeywell)'], summary: 'Initiated review of Honeywell IGEA report. Discussed escalation rates and ECM cost reconciliation. Sarah flagged electric escalation rate of 4.5% as aggressive.', actionItems: [{ text: 'Sarah to complete IGEA review checklist', owner: '2KB', dueDate: '2024-04-15', completed: false }, { text: 'Honeywell to provide sensitivity analysis at 3% escalation', owner: 'Honeywell', dueDate: '2024-04-01', completed: false }], acknowledged: false }
   ],
+  timelineItems: [
+    // Henry County Public Safety — Construction phase (p3)
+    { id: 'tl1', projectId: 'p3', name: 'Pre-Construction Planning', startDate: '2023-10-01', endDate: '2023-12-15', status: 'completed', phase: 'Pre-Construction' },
+    { id: 'tl2', projectId: 'p3', name: 'Submittals & Procurement', startDate: '2023-12-16', endDate: '2024-02-15', status: 'completed', phase: 'Procurement' },
+    { id: 'tl3', projectId: 'p3', name: 'LED Lighting Installation', startDate: '2024-02-16', endDate: '2024-04-30', status: 'completed', phase: 'Construction' },
+    { id: 'tl4', projectId: 'p3', name: 'Chiller Replacement', startDate: '2024-03-01', endDate: '2024-06-30', status: 'in progress', phase: 'Construction' },
+    { id: 'tl5', projectId: 'p3', name: 'BAS Installation & Programming', startDate: '2024-04-01', endDate: '2024-07-15', status: 'in progress', phase: 'Construction' },
+    { id: 'tl6', projectId: 'p3', name: 'Commissioning', startDate: '2024-07-01', endDate: '2024-08-15', status: 'pending', phase: 'Commissioning' },
+    { id: 'tl7', projectId: 'p3', name: 'Substantial Completion', startDate: '2024-08-30', endDate: '2024-08-30', status: 'pending', phase: 'Milestone' },
+    { id: 'tl8', projectId: 'p3', name: 'Punch List & Closeout', startDate: '2024-08-16', endDate: '2024-09-30', status: 'pending', phase: 'Closeout' },
+    { id: 'tl9', projectId: 'p3', name: 'Owner Training', startDate: '2024-09-01', endDate: '2024-09-15', status: 'pending', phase: 'Closeout' },
+    { id: 'tl10', projectId: 'p3', name: 'M&V Baseline Period Starts', startDate: '2024-10-01', endDate: '2024-10-01', status: 'pending', phase: 'Milestone' },
+    // Clayton County Schools — Audit phase (p1)
+    { id: 'tl11', projectId: 'p1', name: 'Project Kickoff', startDate: '2024-01-15', endDate: '2024-01-15', status: 'completed', phase: 'Milestone' },
+    { id: 'tl12', projectId: 'p1', name: 'Utility Data Collection', startDate: '2024-01-16', endDate: '2024-02-15', status: 'completed', phase: 'Audit' },
+    { id: 'tl13', projectId: 'p1', name: 'Site Surveys & Photo Capture', startDate: '2024-02-01', endDate: '2024-03-15', status: 'overdue', phase: 'Audit' },
+    { id: 'tl14', projectId: 'p1', name: 'Energy Analysis & Modeling', startDate: '2024-03-01', endDate: '2024-04-15', status: 'in progress', phase: 'Audit' },
+    { id: 'tl15', projectId: 'p1', name: 'Audit Report Draft', startDate: '2024-04-01', endDate: '2024-05-01', status: 'pending', phase: 'Deliverable' },
+  ],
   teamContacts: [
     { id: 'tc1', projectId: 'p3', name: 'David Chen', role: 'Project Engineer', email: 'david@2kbenergyservices.com', phone: '(404) 555-2KB3' },
     { id: 'tc2', projectId: 'p3', name: 'Martin Francis', role: 'Principal / Technical Lead', email: 'martin@2kbenergyservices.com', phone: '(404) 555-2KB1' },

@@ -21,12 +21,10 @@ export function Landing() {
         <nav className="relative z-10 px-6 md:px-12 py-6">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-emerald-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">2KB</span>
-              </div>
+              <img src="/logo.webp" alt="2KB Energy" className="w-9 h-9 object-contain" />
               <span className="font-semibold text-white text-lg tracking-tight">Intelligence</span>
             </div>
-            <span className="text-xs text-white/25 font-mono hidden md:block">2KB Energy Services</span>
+            <span className="text-xs text-white/25 font-mono hidden md:block">2KB Energy Services, LLC</span>
           </div>
         </nav>
 
@@ -212,10 +210,8 @@ export function Landing() {
             {/* Left: Logo + contact */}
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">2KB</span>
-                </div>
-                <span className="font-semibold text-white tracking-tight">2KB Energy Engineering</span>
+                <img src="/logo.webp" alt="2KB Energy" className="w-8 h-8 object-contain" />
+                <span className="font-semibold text-white tracking-tight">2KB Energy Services, LLC</span>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-white/30">info@2kbenergyservices.com</p>
@@ -234,7 +230,7 @@ export function Landing() {
                 </span>
               </div>
               <p className="text-xs text-white/15">
-                &copy; {new Date().getFullYear()} 2KB Energy Services. All rights reserved.
+                &copy; {new Date().getFullYear()} 2KB Energy Services, LLC. All rights reserved.
               </p>
               <p className="text-[10px] text-white/10">Powered by 2KB</p>
             </div>

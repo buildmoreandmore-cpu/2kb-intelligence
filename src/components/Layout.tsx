@@ -7,7 +7,8 @@ import {
   BookOpen,
   Zap,
   FolderOpen,
-  Layers
+  Layers,
+  Calendar
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStore, ServiceLineMode } from '@/store';
@@ -19,6 +20,7 @@ const allNavigation = [
   { name: 'Benchmarking', href: '/app/benchmarking', icon: BarChart3, modes: ['Full', 'Audit', 'OR'] },
   { name: 'Reports', href: '/app/reporting', icon: FileText, modes: ['Full', 'Audit', 'OR', 'Construction'] },
   { name: 'Knowledge Base', href: '/app/knowledge', icon: BookOpen, modes: ['Full', 'Audit'] },
+  { name: 'Timeline', href: '/app/timeline', icon: Calendar, modes: ['Full', 'Audit', 'Construction'] },
   { name: 'Tasks & Workflow', href: '/app/workflows', icon: Zap, modes: ['Full', 'Audit', 'OR', 'Construction'] },
 ];
 
@@ -42,10 +44,7 @@ export function Layout() {
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-[#EAEDF3]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-900/30"
-              style={{ transition: 'box-shadow 0.2s ease' }}>
-              <span className="text-white font-bold text-sm">2KB</span>
-            </div>
+            <img src="/logo.webp" alt="2KB Energy" className="w-8 h-8 object-contain" />
             <div className="flex flex-col">
               <span className="font-semibold text-gray-900 tracking-tight leading-tight">Intelligence</span>
               <span

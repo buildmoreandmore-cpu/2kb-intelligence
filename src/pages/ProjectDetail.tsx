@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
-import { ArrowLeft, Camera, BarChart3, Calculator, ShieldCheck, HardHat, LineChart, FileText, MapPin } from 'lucide-react';
+import { ArrowLeft, Camera, BarChart3, Calculator, ShieldCheck, HardHat, LineChart, FileText, MapPin, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FieldAudit } from './FieldAudit';
 import { Benchmarking } from './Benchmarking';
@@ -10,6 +10,7 @@ import { Governance } from './Governance';
 import { Construction } from './Construction';
 import { MV } from './MV';
 import { Drawings } from './Drawings';
+import { Timeline } from './Timeline';
 
 export function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -17,7 +18,7 @@ export function ProjectDetail() {
   const project = useStore(state => state.projects.find(p => p.id === id));
   const org = useStore(state => state.organizations.find(o => o.id === project?.orgId));
 
-  const [activeTab, setActiveTab] = useState<'audit' | 'drawings' | 'energy' | 'financial' | 'governance' | 'construction' | 'mv'>('audit');
+  const [activeTab, setActiveTab] = useState<'audit' | 'drawings' | 'energy' | 'financial' | 'governance' | 'construction' | 'mv' | 'timeline'>('audit');
 
   if (!project) {
     return <div className="p-8 text-gray-500">Project not found</div>;
@@ -31,6 +32,7 @@ export function ProjectDetail() {
     { id: 'governance', label: 'Governance', icon: ShieldCheck },
     { id: 'construction', label: 'Construction', icon: HardHat },
     { id: 'mv', label: 'M&V', icon: LineChart },
+    { id: 'timeline', label: 'Timeline', icon: Calendar },
   ];
 
   return (
@@ -86,6 +88,7 @@ export function ProjectDetail() {
         {activeTab === 'governance' && <Governance projectId={project.id} />}
         {activeTab === 'construction' && <Construction projectId={project.id} />}
         {activeTab === 'mv' && <MV projectId={project.id} />}
+        {activeTab === 'timeline' && <Timeline projectId={project.id} />}
       </div>
     </div>
   );

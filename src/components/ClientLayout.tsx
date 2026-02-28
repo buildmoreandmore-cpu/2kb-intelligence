@@ -17,9 +17,7 @@ export function ClientLayout() {
           </button>
           <div className="w-px h-5 bg-gray-200" />
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-emerald-600 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-[11px]">2KB</span>
-            </div>
+            <img src="/logo.webp" alt="2KB Energy" className="w-7 h-7 object-contain" />
             <span className="font-semibold text-gray-900 text-sm">Client Dashboard</span>
           </div>
         </div>

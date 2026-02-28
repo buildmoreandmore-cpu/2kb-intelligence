@@ -20,6 +20,7 @@ import { MV } from './pages/MV';
 import { Reporting } from './pages/Reporting';
 import { KnowledgeBase } from './pages/KnowledgeBase';
 import { Workflows } from './pages/Workflows';
+import { Timeline } from './pages/Timeline';
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="mv" element={<MV />} />
           <Route path="reporting" element={<Reporting />} />
           <Route path="knowledge" element={<KnowledgeBase />} />
+          <Route path="timeline" element={<Timeline />} />
           <Route path="workflows" element={<Workflows />} />
           <Route path="*" element={<div className="p-8 text-gray-500">Module under construction</div>} />
         </Route>
