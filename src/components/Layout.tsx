@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -10,12 +11,15 @@ import {
   Layers,
   CalendarRange,
   Settings,
+  AlertTriangle,
+  ChevronUp,
+  LogOut,
+  UserCog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStore, ServiceLineMode } from '@/store';
 import { AIAssistant } from './AIAssistant';
 import { getFreshnessStatus } from '@/lib/freshness';
-import { AlertTriangle } from 'lucide-react';
 
 const allNavigation = [
   { name: 'Dashboard', href: '/app', icon: LayoutDashboard, modes: ['Full', 'OR'], badgeKey: null as string | null, freshnessModule: null as string | null },
@@ -36,6 +40,7 @@ const modeLabels: Record<ServiceLineMode, string> = {
 };
 
 export function Layout() {
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const mode = useStore(state => state.serviceLineMode);
   const setMode = useStore(state => state.setServiceLineMode);
   const projects = useStore(state => state.projects);
@@ -46,6 +51,7 @@ export function Layout() {
   const contractObligations = useStore(state => state.contractObligations);
   const currentUserId = useStore(state => state.currentUserId);
   const users = useStore(state => state.users);
+  const setCurrentUser = useStore(state => state.setCurrentUser);
 
   const currentUser = users.find(u => u.id === currentUserId);
   const moduleLastUpdated = useStore(state => state.moduleLastUpdated);
@@ -179,16 +185,55 @@ export function Layout() {
         </nav>
 
         {/* User */}
-        <div className="p-4 border-t border-[#1E2A45]">
-          <div className="flex items-center gap-3 px-1">
+        <div className="p-4 border-t border-[#1E2A45] relative">
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="w-full flex items-center gap-3 px-1 hover:bg-[#121C35] rounded-lg py-1 -my-1 transition-colors"
+          >
             <div className="w-8 h-8 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center flex-shrink-0">
               <span className="text-xs font-semibold text-emerald-400">{currentUser?.initials || 'MF'}</span>
             </div>
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 text-left flex-1">
               <span className="text-sm font-medium text-white truncate">{currentUser?.name || 'Martin Francis'}</span>
               <span className="text-[11px] text-[#5A6B88] truncate">{currentUser?.defaultRole || 'Admin'} • {modeLabels[mode]}</span>
             </div>
-          </div>
+            <ChevronUp className={cn("w-4 h-4 text-[#5A6B88] transition-transform", showUserMenu && "rotate-180")} />
+          </button>
+
+          {showUserMenu && (
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setShowUserMenu(false)} />
+              <div className="absolute bottom-full left-3 right-3 mb-2 bg-[#121C35] border border-[#1E2A45] rounded-xl shadow-2xl z-40 overflow-hidden animate-slide-down">
+                <div className="px-3 py-2 border-b border-[#1E2A45]">
+                  <p className="text-[10px] font-medium text-[#7A8BA8] uppercase tracking-wider">Switch User</p>
+                </div>
+                {users.filter(u => u.id !== currentUserId).map(user => (
+                  <button
+                    key={user.id}
+                    onClick={() => { setCurrentUser(user.id); setShowUserMenu(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#1E2A45] transition-colors text-left"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-[#1E2A45] border border-[#2A3A5C] flex items-center justify-center flex-shrink-0">
+                      <span className="text-[10px] font-semibold text-[#7A8BA8]">{user.initials}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-[#CBD2DF] truncate">{user.name}</p>
+                      <p className="text-[10px] text-[#5A6B88]">{user.defaultRole}</p>
+                    </div>
+                  </button>
+                ))}
+                <div className="border-t border-[#1E2A45]">
+                  <button
+                    onClick={() => { setCurrentUser('user1'); setShowUserMenu(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#1E2A45] transition-colors text-left text-red-400"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="text-sm">Log Out</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
