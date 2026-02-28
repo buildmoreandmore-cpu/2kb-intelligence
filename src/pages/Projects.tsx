@@ -1,0 +1,89 @@
+import { useState } from 'react';
+import { useStore } from '@/store';
+import { useNavigate } from 'react-router-dom';
+import { FolderOpen, Plus, Search, Filter, MoreVertical } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+export function Projects() {
+  const projects = useStore(state => state.projects);
+  const organizations = useStore(state => state.organizations);
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-shrink-0 border-b border-[#1C2030] bg-[#12151C] px-8 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Projects</h1>
+            <p className="text-sm text-neutral-400 mt-1">Manage ESPC projects across all phases.</p>
+          </div>
+          <button className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-emerald-700 transition-colors">
+            <Plus className="w-4 h-4" />
+            New Project
+          </button>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="relative w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input 
+              type="text" 
+              placeholder="Search projects..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-[#0E1118] border border-[#1C2030] rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm"
+            />
+          </div>
+          <button className="inline-flex items-center gap-2 px-3 py-2 bg-[#1C2030] border border-[#252A3A] rounded-lg text-sm font-medium text-white hover:bg-[#252A3A] transition-colors shadow-sm">
+            <Filter className="w-4 h-4" />
+            Filter
+          </button>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-8 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).map(project => {
+            const org = organizations.find(o => o.id === project.orgId);
+            return (
+              <div 
+                key={project.id} 
+                onClick={() => navigate(`/projects/${project.id}`)}
+                className="bg-[#12151C] border border-[#1C2030] rounded-xl p-6 hover:border-emerald-500/50 transition-colors cursor-pointer group flex flex-col"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-10 h-10 bg-[#1C2030] rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                    <FolderOpen className="w-5 h-5 text-neutral-400 group-hover:text-emerald-500 transition-colors" />
+                  </div>
+                  <span className={cn(
+                    "px-2.5 py-1 rounded text-xs font-medium border",
+                    project.phase === 'Construction' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
+                    project.phase === 'M&V' ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
+                    "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                  )}>
+                    {project.phase.toUpperCase()}
+                  </span>
+                </div>
+                
+                <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-emerald-400 transition-colors">{project.name}</h3>
+                <p className="text-sm text-neutral-400 mb-6">{org?.name}</p>
+                
+                <div className="mt-auto pt-4 border-t border-[#1C2030] grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="block text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">ESCO</span>
+                    <span className="text-sm text-neutral-300">{project.esco}</span>
+                  </div>
+                  <div>
+                    <span className="block text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Value</span>
+                    <span className="text-sm text-neutral-300 font-mono">${(project.value / 1000000).toFixed(1)}M</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
