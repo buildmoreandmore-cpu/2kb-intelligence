@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStore, ServiceLineMode } from '@/store';
+import { AIAssistant } from './AIAssistant';
 
 const allNavigation = [
   { name: 'Dashboard', href: '/app', icon: LayoutDashboard, modes: ['Full', 'OR'], badgeKey: null as string | null },
@@ -165,6 +166,9 @@ export function Layout() {
           </div>
         </main>
       </div>
+
+      {/* AI Assistant */}
+      <AIAssistant />
     </div>
   );
 }
