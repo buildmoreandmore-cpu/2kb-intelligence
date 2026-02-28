@@ -17,10 +17,10 @@ export function Landing() {
 
       {/* Center content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center">
-        <img src="/logo.webp" alt="2KB Energy" className="w-16 h-16 object-contain mb-4" />
+        <img src="/logo.webp" alt="2KB Energy" className="w-32 h-32 object-contain mb-6" />
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
           <span className="text-white">2KB</span>{' '}
-          <span className="text-emerald-400">Intelligence</span>
+          <span className="text-teal-400">Intelligence</span>
         </h1>
 
         <p className="text-base text-white/50 max-w-md mb-10 leading-relaxed">
@@ -31,7 +31,7 @@ export function Landing() {
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <button
             onClick={() => navigate('/app')}
-            className="group inline-flex items-center gap-3 px-8 py-4 bg-white text-[#060E09] text-sm font-semibold rounded-full hover:bg-emerald-50 transition-colors duration-200 min-w-[200px] justify-center"
+            className="group inline-flex items-center gap-3 px-8 py-4 bg-white text-[#060E09] text-sm font-semibold rounded-full hover:bg-teal-50 transition-colors duration-200 min-w-[200px] justify-center"
           >
             <Icon icon="solar:login-3-bold-duotone" className="w-5 h-5" />
             Engineer Login
@@ -40,7 +40,7 @@ export function Landing() {
             onClick={() => navigate('/client')}
             className="group inline-flex items-center gap-3 px-8 py-4 bg-transparent text-white text-sm font-semibold rounded-full border border-white/20 hover:border-white/40 hover:bg-white/5 transition-all duration-200 min-w-[200px] justify-center"
           >
-            <Icon icon="solar:monitor-bold-duotone" className="w-5 h-5 text-emerald-400" />
+            <Icon icon="solar:monitor-bold-duotone" className="w-5 h-5 text-teal-400" />
             Client Dashboard
           </button>
         </div>

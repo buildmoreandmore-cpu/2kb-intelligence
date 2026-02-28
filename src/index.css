@@ -320,9 +320,9 @@ body {
 
 /* Hero background gradient */
 .hero-gradient-bg {
-  background: radial-gradient(ellipse 80% 60% at 20% 40%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
+  background: radial-gradient(ellipse 80% 60% at 20% 40%, rgba(20, 184, 166, 0.12) 0%, transparent 60%),
               radial-gradient(ellipse 60% 50% at 80% 60%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
-              radial-gradient(ellipse 80% 80% at 50% 100%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
+              radial-gradient(ellipse 80% 80% at 50% 100%, rgba(20, 184, 166, 0.06) 0%, transparent 40%),
               #060E09;
 }
 
@@ -340,7 +340,7 @@ body {
   height: 600px;
   top: -15%;
   left: -5%;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.04) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.18) 0%, rgba(20, 184, 166, 0.04) 50%, transparent 70%);
   animation: blobFloat1 18s ease-in-out infinite;
 }
 
@@ -358,7 +358,7 @@ body {
   height: 400px;
   top: 40%;
   left: 35%;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.06) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.04) 0%, transparent 60%);
   animation: blobFloat3 15s ease-in-out infinite;
 }
 
