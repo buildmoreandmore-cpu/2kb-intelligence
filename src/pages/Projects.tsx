@@ -49,7 +49,7 @@ export function Projects() {
             return (
               <div 
                 key={project.id} 
-                onClick={() => navigate(`/projects/${project.id}`)}
+                onClick={() => navigate(`/app/projects/${project.id}`)}
                 className="bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl p-6 hover:border-emerald-500/50 transition-colors cursor-pointer group flex flex-col"
               >
                 <div className="flex items-start justify-between mb-4">

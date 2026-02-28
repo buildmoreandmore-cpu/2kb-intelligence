@@ -13,13 +13,13 @@ import { cn } from '@/lib/utils';
 import { useStore, ServiceLineMode } from '@/store';
 
 const allNavigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard, modes: ['Full', 'OR'] },
-  { name: 'Projects', href: '/projects', icon: FolderOpen, modes: ['Full', 'Audit', 'OR', 'Construction'] },
-  { name: 'All Assets', href: '/assets', icon: Camera, modes: ['Full', 'Audit', 'Construction'] },
-  { name: 'Benchmarking', href: '/benchmarking', icon: BarChart3, modes: ['Full', 'Audit', 'OR'] },
-  { name: 'Reports', href: '/reporting', icon: FileText, modes: ['Full', 'Audit', 'OR', 'Construction'] },
-  { name: 'Knowledge Base', href: '/knowledge', icon: BookOpen, modes: ['Full', 'Audit'] },
-  { name: 'Tasks & Workflow', href: '/workflows', icon: Zap, modes: ['Full', 'Audit', 'OR', 'Construction'] },
+  { name: 'Dashboard', href: '/app', icon: LayoutDashboard, modes: ['Full', 'OR'] },
+  { name: 'Projects', href: '/app/projects', icon: FolderOpen, modes: ['Full', 'Audit', 'OR', 'Construction'] },
+  { name: 'All Assets', href: '/app/assets', icon: Camera, modes: ['Full', 'Audit', 'Construction'] },
+  { name: 'Benchmarking', href: '/app/benchmarking', icon: BarChart3, modes: ['Full', 'Audit', 'OR'] },
+  { name: 'Reports', href: '/app/reporting', icon: FileText, modes: ['Full', 'Audit', 'OR', 'Construction'] },
+  { name: 'Knowledge Base', href: '/app/knowledge', icon: BookOpen, modes: ['Full', 'Audit'] },
+  { name: 'Tasks & Workflow', href: '/app/workflows', icon: Zap, modes: ['Full', 'Audit', 'OR', 'Construction'] },
 ];
 
 const modeLabels: Record<ServiceLineMode, string> = {
@@ -66,7 +66,7 @@ export function Layout() {
             <NavLink
               key={item.name}
               to={item.href}
-              end={item.href === '/'}
+              end={item.href === '/app'}
               className={({ isActive }) =>
                 cn(
                   'nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium',
