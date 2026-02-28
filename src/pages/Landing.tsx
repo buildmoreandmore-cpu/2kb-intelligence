@@ -17,10 +17,13 @@ export function Landing() {
 
       {/* Center content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center">
-        <img src="/logo.webp" alt="2KB Energy" className="w-32 h-32 object-contain mb-6" />
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-          <span className="text-white">2KB</span>{' '}
-          <span className="text-teal-400">Intelligence</span>
+        <div className="relative mb-6">
+          <div className="absolute inset-0 m-auto w-32 h-32 rounded-full bg-teal-500/20" style={{ animation: 'heroPulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both' }} />
+          <img src="/logo.webp" alt="2KB Energy" className="relative w-32 h-32 object-contain" />
+        </div>
+        <h1 className="text-4xl md:text-5xl tracking-tight mb-2" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+          <span className="text-white font-extrabold">2KB</span>{' '}
+          <span className="text-teal-400 font-light tracking-[0.2em]">Intelligence</span>
         </h1>
 
         <p className="text-base text-white/50 max-w-md mb-10 leading-relaxed">

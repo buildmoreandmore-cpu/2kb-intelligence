@@ -17,7 +17,7 @@ export const seedData = {
     { id: 'b4', orgId: 'o3', name: 'Public Safety Complex', type: 'Public Safety', sqft: 55000, yearBuilt: 1968 }
   ],
   projects: [
-    { id: 'p1', orgId: 'o1', name: 'Clayton County Schools ESPC', phase: 'Audit' as Phase, esco: 'Trane', value: 0, riskScore: 35, engineer: 'Martin' },
+    { id: 'p1', orgId: 'o1', name: 'Clayton County Schools ESPC', phase: 'M&V' as Phase, esco: 'Trane', value: 8500000, riskScore: 35, engineer: 'Martin' },
     { id: 'p2', orgId: 'o2', name: 'City of Morrow Municipal', phase: 'IGEA' as Phase, esco: 'Honeywell', value: 4200000, riskScore: 58, engineer: 'Sarah' },
     { id: 'p3', orgId: 'o3', name: 'Henry County Public Safety', phase: 'Construction' as Phase, esco: 'Johnson Controls', value: 7800000, riskScore: 72, engineer: 'David' }
   ],
@@ -109,7 +109,10 @@ export const seedData = {
     { id: 'e1', projectId: 'p2', number: 'ECM-1', description: 'LED Lighting Upgrade', category: 'Lighting', cost: 450000, savings: 65000, life: 15 },
     { id: 'e2', projectId: 'p2', number: 'ECM-2', description: 'Chiller Replacement', category: 'HVAC', cost: 1200000, savings: 85000, life: 20 },
     { id: 'e3', projectId: 'p2', number: 'ECM-3', description: 'Building Automation', category: 'Controls', cost: 350000, savings: 45000, life: 15 },
-    { id: 'e4', projectId: 'p2', number: 'ECM-4', description: 'Water Conservation', category: 'Water', cost: 150000, savings: 25000, life: 10 }
+    { id: 'e4', projectId: 'p2', number: 'ECM-4', description: 'Water Conservation', category: 'Water', cost: 150000, savings: 25000, life: 10 },
+    { id: 'e5', projectId: 'p1', number: 'ECM-1', description: 'LED Lighting Retrofit', category: 'Lighting', cost: 620000, savings: 78000, life: 15 },
+    { id: 'e6', projectId: 'p1', number: 'ECM-2', description: 'Chiller Optimization', category: 'HVAC', cost: 1450000, savings: 92000, life: 20 },
+    { id: 'e7', projectId: 'p1', number: 'ECM-3', description: 'BAS Upgrade', category: 'Controls', cost: 480000, savings: 54000, life: 15 }
   ],
   milestones: [
     { id: 'm1', projectId: 'p1', name: 'Kickoff Meeting', dueDate: '2024-01-15', status: 'completed', assignedTo: 'Martin' },
@@ -222,8 +225,37 @@ export const seedData = {
   mvData: [
     { id: 'mv1', projectId: 'p3', year: 1, guaranteed: 150000, calculated: 155000, driftDetected: false },
     { id: 'mv2', projectId: 'p3', year: 2, guaranteed: 154500, calculated: 152000, driftDetected: false },
-    { id: 'mv3', projectId: 'p3', year: 3, guaranteed: 159135, calculated: 140000, driftDetected: true }
+    { id: 'mv3', projectId: 'p3', year: 3, guaranteed: 159135, calculated: 140000, driftDetected: true },
+    { id: 'mv4', projectId: 'p1', year: 1, guaranteed: 180000, calculated: 195000, driftDetected: false },
+    { id: 'mv5', projectId: 'p1', year: 2, guaranteed: 185400, calculated: 188000, driftDetected: false }
   ],
+  buildingSavings: (() => {
+    // Georgia cooling profile weights: Jan-Dec (higher Jun-Aug, lower winter)
+    const weights = [0.055, 0.052, 0.065, 0.078, 0.095, 0.135, 0.140, 0.138, 0.098, 0.072, 0.042, 0.030];
+    function distribute(annual: number): number[] {
+      const result = weights.map(w => Math.round(annual * w));
+      // Absorb rounding error into December
+      const sum = result.reduce((a, b) => a + b, 0);
+      result[11] += annual - sum;
+      return result;
+    }
+    // Actual monthly weights vary slightly per building for realism
+    const overWeights = [0.054, 0.051, 0.064, 0.080, 0.098, 0.138, 0.142, 0.140, 0.100, 0.070, 0.038, 0.025];
+    function distributeOver(annual: number): number[] {
+      const result = overWeights.map(w => Math.round(annual * w));
+      const sum = result.reduce((a, b) => a + b, 0);
+      result[11] += annual - sum;
+      return result;
+    }
+    return [
+      { id: 'bs1', projectId: 'p1', buildingName: 'Clayton County HS', baselineAnnualKwh: 2340000, currentAnnualKwh: 2150000, monthlyBaseline: distribute(2340000), monthlyActual: distribute(2150000) },
+      { id: 'bs2', projectId: 'p1', buildingName: 'Clayton County MS', baselineAnnualKwh: 1850000, currentAnnualKwh: 1920000, monthlyBaseline: distribute(1850000), monthlyActual: distributeOver(1920000) },
+      { id: 'bs3', projectId: 'p1', buildingName: 'Jonesboro Elementary', baselineAnnualKwh: 980000, currentAnnualKwh: 870000, monthlyBaseline: distribute(980000), monthlyActual: distribute(870000) },
+      { id: 'bs4', projectId: 'p1', buildingName: 'Riverdale Elementary', baselineAnnualKwh: 1120000, currentAnnualKwh: 1045000, monthlyBaseline: distribute(1120000), monthlyActual: distribute(1045000) },
+      { id: 'bs5', projectId: 'p1', buildingName: 'Admin Building', baselineAnnualKwh: 540000, currentAnnualKwh: 510000, monthlyBaseline: distribute(540000), monthlyActual: distribute(510000) },
+      { id: 'bs6', projectId: 'p1', buildingName: 'Transportation Center', baselineAnnualKwh: 420000, currentAnnualKwh: 395000, monthlyBaseline: distribute(420000), monthlyActual: distribute(395000) },
+    ];
+  })(),
   lessonsLearned: [
     { id: 'll1', title: 'Honeywell Lighting Controls Integration', projectId: 'p2', category: 'Technical', description: 'Wireless controls had interference issues with existing school wifi.', recommendation: 'Require dedicated frequency survey before approving wireless controls submittal.' }
   ],

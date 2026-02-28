@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useStore } from '@/store';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
+import { BuildingSavingsChart } from '@/components/BuildingSavingsChart';
 
 const PHASES = ['Prospect', 'Audit', 'IGEA', 'RFP', 'Contract', 'Construction', 'M&V', 'Closeout'];
 const PHASE_DESCRIPTIONS: Record<string, { next: string; est: string }> = {
@@ -395,6 +396,8 @@ export function ClientPortal() {
               </div>
             </div>
           </div>
+
+          <BuildingSavingsChart projectId={selectedProjectId} projectPhase={project.phase} />
 
           {pMvData.length > 0 ? (
             <div className="bg-white border border-gray-200 rounded-xl p-6">
