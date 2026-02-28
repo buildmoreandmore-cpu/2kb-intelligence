@@ -232,10 +232,9 @@ export function Drawings({ projectId }: { projectId: string }) {
             <div className="flex-1 bg-[#080B10] relative overflow-hidden flex items-center justify-center p-6">
               <div className="relative w-full max-w-5xl aspect-[4/3] bg-[#121C35] rounded-xl shadow-2xl border border-neutral-200 overflow-hidden">
                 <img
-                  src={`https://picsum.photos/seed/${drawing.id}base/1400/1050?grayscale`}
-                  alt="Drawing Placeholder"
-                  className="w-full h-full object-cover opacity-40"
-                  referrerPolicy="no-referrer"
+                  src="/assets/floor-plan.jpg"
+                  alt={`${drawing.name} Floor Plan`}
+                  className="w-full h-full object-cover opacity-40 grayscale"
                 />
 
                 {/* Grid overlay — architectural feel */}

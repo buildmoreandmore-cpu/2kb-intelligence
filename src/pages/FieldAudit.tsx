@@ -3,6 +3,24 @@ import { useStore } from '@/store';
 import { Camera, Upload, Mic, AlertTriangle, Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+const ASSET_IMAGES: Record<string, string> = {
+  'Chiller': '/assets/chiller.jpg',
+  'AHU': '/assets/ahu.jpg',
+  'Cooling Tower': '/assets/cooling-tower.jpg',
+  'Pump': '/assets/pump.jpg',
+  'Lighting Panel': '/assets/lighting.jpg',
+  'Lighting': '/assets/office-lighting.jpg',
+  'BAS Controller': '/assets/controls.jpg',
+  'Domestic HW Heater': '/assets/water-heater.jpg',
+  'Boiler': '/assets/boiler.jpg',
+  'VFD': '/assets/electrical.jpg',
+  'Cooling Unit': '/assets/cooling-unit.jpg',
+  'Pool Heater': '/assets/pool.jpg',
+  'DOAS Unit': '/assets/ventilation.jpg',
+  'Generator': '/assets/generator.jpg',
+  'UPS System': '/assets/controls.jpg',
+};
+
 export function FieldAudit({ projectId }: { projectId?: string }) {
   const [activeTab, setActiveTab] = useState<'capture' | 'assets'>('assets');
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,11 +116,10 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
               {filteredAssets.map((asset) => (
                 <div key={asset.id} className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden hover:border-emerald-500/50 transition-colors group cursor-pointer">
                   <div className="h-48 relative bg-[#0F1829]">
-                    <img 
-                      src={`https://picsum.photos/seed/${asset.id}/400/300?blur=2`} 
-                      alt={asset.type}
+                    <img
+                      src={ASSET_IMAGES[asset.type] || '/assets/industrial.jpg'}
+                      alt={`${asset.manufacturer} ${asset.model} ${asset.type}`}
                       className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                      referrerPolicy="no-referrer"
                     />
                     <div className="absolute top-3 right-3 flex gap-2">
                       {asset.flags.length > 0 && (
