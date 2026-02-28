@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
 import { Calculator, TrendingUp, AlertTriangle, CheckCircle2, DollarSign, Leaf, Search, Filter, Plus } from 'lucide-react';
+import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
 
 export function FinancialModeling({ projectId }: { projectId?: string }) {
   const projects = useStore(state => state.projects);
   const ecms = useStore(state => state.ecms);
-  
+  const pricingReview = useStore(state => state.pricingReview);
+
   const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[1].id); // Default to project with ECMs
   const [term, setTerm] = useState(15);
   const [interestRate, setInterestRate] = useState(4.5);
   const [elecEscalation, setElecEscalation] = useState(3.0);
+  const [subTab, setSubTab] = useState<'ecm' | 'pricing'>('ecm');
   
   const projectEcms = ecms.filter(e => e.projectId === selectedProjectId);
   
@@ -64,10 +67,29 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
               </button>
             </div>
           </div>
+
+          <div className="flex space-x-4 mt-4">
+            {[
+              { id: 'ecm', label: 'ECM Bundle Builder' },
+              { id: 'pricing', label: 'Pricing Review' },
+            ].map(t => (
+              <button
+                key={t.id}
+                onClick={() => setSubTab(t.id as any)}
+                className={cn(
+                  'pb-2 text-sm font-medium border-b-2 transition-colors',
+                  subTab === t.id ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-gray-500 hover:text-gray-900'
+                )}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
       <div className="flex-1 overflow-y-auto p-8 max-w-7xl mx-auto w-full space-y-8">
+        {subTab === 'ecm' && (<>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 bg-[#FFFFFF] border border-[#EAEDF3] rounded-xl overflow-hidden">
             <div className="p-6 border-b border-[#EAEDF3] flex items-center justify-between">
@@ -195,7 +217,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
               const isPositive = cf.net >= 0;
               return (
                 <div key={cf.year} className="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
-                  <div 
+                  <div
                     className={`w-full rounded-t-sm transition-colors ${isPositive ? 'bg-emerald-500/80 hover:bg-emerald-400' : 'bg-red-500/80 hover:bg-red-400'}`}
                     style={{ height: `${Math.max(height, 2)}%` }}
                   >
@@ -209,6 +231,112 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
             })}
           </div>
         </div>
+        </>)}
+
+        {/* ─── PRICING REVIEW TAB ─── */}
+        {subTab === 'pricing' && (() => {
+          const items = pricingReview.filter(p => p.projectId === selectedProjectId);
+          const totalEsco = items.reduce((s, i) => s + i.escoCost, 0);
+          const totalBenchMid = items.reduce((s, i) => s + i.benchMid, 0);
+          const overallVariance = totalBenchMid > 0 ? ((totalEsco - totalBenchMid) / totalBenchMid) * 100 : 0;
+          const flagged = items.filter(i => {
+            const variance = ((i.escoCost - i.benchHigh) / i.benchHigh) * 100;
+            return variance > 10;
+          }).length;
+
+          const getStatus = (item: typeof items[0]) => {
+            if (item.escoCost >= item.benchLow && item.escoCost <= item.benchHigh) return 'within';
+            const aboveHigh = ((item.escoCost - item.benchHigh) / item.benchHigh) * 100;
+            if (aboveHigh > 25 || item.escoCost < item.benchLow * 0.75) return 'outlier';
+            if (aboveHigh > 0) return 'review';
+            return 'within';
+          };
+
+          return (
+            <div className="space-y-6">
+              {/* Summary stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white border border-[#EAEDF3] rounded-xl p-5">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Total Proposed</p>
+                  <p className="text-xl font-bold text-gray-900 font-mono">${totalEsco.toLocaleString()}</p>
+                </div>
+                <div className="bg-white border border-[#EAEDF3] rounded-xl p-5">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Benchmark Mid</p>
+                  <p className="text-xl font-bold text-gray-900 font-mono">${totalBenchMid.toLocaleString()}</p>
+                </div>
+                <div className="bg-white border border-[#EAEDF3] rounded-xl p-5">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Overall Variance</p>
+                  <p className={cn('text-xl font-bold font-mono', overallVariance > 10 ? 'text-red-600' : overallVariance > 5 ? 'text-amber-600' : 'text-emerald-600')}>
+                    {overallVariance > 0 ? '+' : ''}{overallVariance.toFixed(1)}%
+                  </p>
+                </div>
+                <div className="bg-white border border-[#EAEDF3] rounded-xl p-5">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Flagged Items</p>
+                  <p className={cn('text-xl font-bold', flagged > 0 ? 'text-amber-600' : 'text-emerald-600')}>{flagged}</p>
+                </div>
+              </div>
+
+              {/* Pricing table */}
+              <div className="bg-white border border-[#EAEDF3] rounded-xl overflow-hidden">
+                <div className="p-6 border-b border-[#EAEDF3] flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-gray-900">Line Item Pricing Review</h3>
+                  <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#EAEDF3] border border-[#D4D8E2] rounded-lg text-xs font-medium text-gray-600 hover:bg-[#D4D8E2] transition-colors">
+                    <Icon icon="solar:export-bold-duotone" className="w-3.5 h-3.5" />
+                    Export Pricing Review
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-neutral-400 uppercase bg-[#F8FAFB] border-b border-[#EAEDF3]">
+                      <tr>
+                        <th className="px-6 py-4 font-medium">ECM Description</th>
+                        <th className="px-6 py-4 font-medium text-right">ESCO Proposed</th>
+                        <th className="px-6 py-4 font-medium text-right">Bench Low</th>
+                        <th className="px-6 py-4 font-medium text-right">Bench Mid</th>
+                        <th className="px-6 py-4 font-medium text-right">Bench High</th>
+                        <th className="px-6 py-4 font-medium text-right">Variance</th>
+                        <th className="px-6 py-4 font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#EAEDF3]">
+                      {items.map(item => {
+                        const status = getStatus(item);
+                        const variance = ((item.escoCost - item.benchMid) / item.benchMid) * 100;
+                        return (
+                          <tr key={item.id} className="hover:bg-[#F0F2F6] transition-colors">
+                            <td className="px-6 py-4">
+                              <p className="font-medium text-gray-900">{item.description}</p>
+                              <p className="text-xs text-gray-400 mt-1 italic">{item.internalNote}</p>
+                            </td>
+                            <td className="px-6 py-4 text-right font-mono text-gray-900">${item.escoCost.toLocaleString()}</td>
+                            <td className="px-6 py-4 text-right font-mono text-gray-500">${item.benchLow.toLocaleString()}</td>
+                            <td className="px-6 py-4 text-right font-mono text-gray-500">${item.benchMid.toLocaleString()}</td>
+                            <td className="px-6 py-4 text-right font-mono text-gray-500">${item.benchHigh.toLocaleString()}</td>
+                            <td className={cn('px-6 py-4 text-right font-mono', variance > 15 ? 'text-red-600' : variance > 5 ? 'text-amber-600' : 'text-emerald-600')}>
+                              {variance > 0 ? '+' : ''}{variance.toFixed(1)}%
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={cn('px-2.5 py-1 rounded text-xs font-medium border',
+                                status === 'within' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                status === 'review' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                'bg-red-50 text-red-600 border-red-200'
+                              )}>
+                                {status === 'within' ? 'Within Range' : status === 'review' ? 'Review' : 'Outlier'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {items.length === 0 && (
+                        <tr><td colSpan={7} className="px-6 py-8 text-center text-gray-500">No pricing review data for this project.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
