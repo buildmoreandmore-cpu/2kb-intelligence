@@ -89,7 +89,7 @@ export function ClientPortal() {
   const ownerObligations = pObligations.filter(o => o.responsibleParty === 'Owner' || o.status === 'Coming Due' || o.status === 'Overdue');
   const completedObligations = pObligations.filter(o => o.status === 'Completed').length;
   const totalObligationsCount = pObligations.length;
-  const pricingReviewed = pPricing.filter(p => !p.clientSummary.includes('Under')).length;
+  const pricingReviewed = pPricing.filter(p => !(p.clientSummary || '').includes('Under')).length;
 
   const phaseInfo = PHASE_DESCRIPTIONS[project.phase] || { next: '', est: '' };
 
@@ -639,7 +639,8 @@ export function ClientPortal() {
               <div className="p-5 border-b border-gray-100"><h3 className="text-sm font-semibold text-gray-900">Pricing Verification</h3></div>
               <div className="divide-y divide-gray-100">
                 {pPricing.map(p => {
-                  const isVerified = !p.clientSummary.includes('Under') && !p.clientSummary.includes('pending');
+                  const summary = p.clientSummary || '';
+                  const isVerified = !summary.includes('Under') && !summary.includes('pending');
                   return (
                     <div key={p.id} className="px-5 py-4 flex items-center justify-between">
                       <div>
@@ -751,7 +752,7 @@ export function ClientPortal() {
                 <div key={t.id} className="px-5 py-5 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-11 h-11 rounded-full bg-[#0D918C]/15 flex items-center justify-center">
-                      <span className="text-sm font-semibold text-[#2A9A1E]">{t.name.split(' ').map(n => n[0]).join('')}</span>
+                      <span className="text-sm font-semibold text-[#2A9A1E]">{(t.name || '').split(' ').map((n: string) => n[0]).join('')}</span>
                     </div>
                     <div><p className="text-sm font-semibold text-gray-900">{t.name}</p><p className="text-xs text-gray-500">{t.role}</p></div>
                   </div>
