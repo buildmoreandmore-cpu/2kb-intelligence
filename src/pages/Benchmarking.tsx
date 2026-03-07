@@ -27,7 +27,7 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
   const replaceBatch = useStore(state => state.replaceBatch);
 
   const [activeTab, setActiveTab] = useState<'energy' | 'capital'>('energy');
-  const [selectedBuildingId, setSelectedBuildingId] = useState(buildings[0].id);
+  const [selectedBuildingId, setSelectedBuildingId] = useState(buildings[0]?.id || '');
   const [importModal, setImportModal] = useState<'drive' | 'energystar' | 'sharepoint' | null>(null);
   const [importStatus, setImportStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [deletingBatchId, setDeletingBatchId] = useState<string | null>(null);
