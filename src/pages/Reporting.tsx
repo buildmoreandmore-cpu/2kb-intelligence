@@ -44,6 +44,8 @@ function StatusBadge({ status }: { status: string }) {
 // Council/Board Presentation Slides
 function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any[], risks: any[] }) {
   const [copiedSlide, setCopiedSlide] = useState<number | null>(null);
+  const mvData = useStore(state => state.mvData);
+  const milestones = useStore(state => state.milestones);
 
   const handleCopy = (idx: number, text: string) => {
     navigator.clipboard.writeText(text).catch(() => {});
@@ -54,6 +56,12 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
   const totalCost = ecms.reduce((s, e) => s + e.cost, 0);
   const totalSavings = ecms.reduce((s, e) => s + e.savings, 0);
   const co2Reduced = Math.round(totalSavings * 0.000744 * 1000); // rough tCO2e
+  const projMv = mvData.filter(d => d.projectId === project.id);
+  const totalGuaranteed = projMv.reduce((s: number, d: any) => s + d.guaranteed, 0);
+  const totalCalculated = projMv.reduce((s: number, d: any) => s + d.calculated, 0);
+  const achievement = totalGuaranteed > 0 ? Math.round((totalCalculated / totalGuaranteed) * 100) : 0;
+  const npv = totalSavings > 0 ? Math.round(totalSavings * 12.46 - totalCost) : 0; // 20yr @ 5%
+  const projMilestones = milestones.filter((m: any) => m.projectId === project.id);
 
   const slides = [
     {
@@ -88,12 +96,12 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
             <span className="text-sm text-[#7A8BA8] mb-1">/ year guaranteed savings</span>
           </div>
           <div className="w-full bg-[#0F1829] rounded-full h-3 border border-[#1E2A45] overflow-hidden">
-            <div className="bg-[#0D918C] h-full rounded-full progress-bar-fill" style={{ width: '94%' }} />
+            <div className="bg-[#0D918C] h-full rounded-full progress-bar-fill" style={{ width: `${Math.min(achievement, 100)}%` }} />
           </div>
-          <p className="text-xs text-[#7A8BA8]">Achievement rate: <span className="text-[#37BB26] font-semibold">94%</span> of guaranteed baseline</p>
+          <p className="text-xs text-[#7A8BA8]">Achievement rate: <span className="text-[#37BB26] font-semibold">{achievement > 0 ? `${achievement}%` : 'N/A'}</span> of guaranteed baseline</p>
         </div>
       ),
-      copyText: `Savings Performance\nAnnual Guaranteed Savings: $${totalSavings.toLocaleString()}\nAchievement Rate: 94%`
+      copyText: `Savings Performance\nAnnual Guaranteed Savings: $${totalSavings.toLocaleString()}\nAchievement Rate: ${achievement > 0 ? `${achievement}%` : 'N/A'}`
     },
     {
       title: 'Financial Summary',
@@ -104,7 +112,7 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
             { label: 'Total Project Investment', val: `$${(totalCost / 1000000).toFixed(2)}M`, highlight: false },
             { label: 'Annual Energy Savings', val: `$${totalSavings.toLocaleString()}`, highlight: true },
             { label: 'Simple Payback', val: totalSavings > 0 ? `${(totalCost / totalSavings).toFixed(1)} years` : 'N/A', highlight: false },
-            { label: 'NPV (20yr, 5%)', val: '$425,000', highlight: true },
+            { label: 'NPV (20yr, 5%)', val: npv > 0 ? `$${npv.toLocaleString()}` : 'N/A', highlight: true },
           ].map(({ label, val, highlight }) => (
             <div key={label} className="flex items-center justify-between py-2 border-b border-[#1E2A45] last:border-0">
               <span className="text-sm text-[#7A8BA8]">{label}</span>
@@ -113,7 +121,7 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
           ))}
         </div>
       ),
-      copyText: `Financial Summary\nTotal Investment: $${(totalCost / 1000000).toFixed(2)}M\nAnnual Savings: $${totalSavings.toLocaleString()}\nNPV: $425,000`
+      copyText: `Financial Summary\nTotal Investment: $${(totalCost / 1000000).toFixed(2)}M\nAnnual Savings: $${totalSavings.toLocaleString()}\nNPV: ${npv > 0 ? `$${npv.toLocaleString()}` : 'N/A'}`
     },
     {
       title: 'Risk Summary',
@@ -172,23 +180,20 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
       icon: <CheckSquare className="w-5 h-5 text-blue-600" />,
       content: (
         <div className="space-y-2">
-          {[
-            { text: 'ESCO final proposal review', done: true },
-            { text: 'Council contract approval vote', done: false },
-            { text: 'Construction mobilization', done: false },
-            { text: 'M&V baseline period begins', done: false },
-          ].map(({ text, done }) => (
-            <div key={text} className="flex items-center gap-3 py-2 border-b border-[#1E2A45] last:border-0">
-              {done
+          {projMilestones.length > 0 ? projMilestones.slice(0, 4).map((m: any) => (
+            <div key={m.id} className="flex items-center gap-3 py-2 border-b border-[#1E2A45] last:border-0">
+              {m.status === 'completed'
                 ? <CheckCircle className="w-4 h-4 text-[#37BB26] flex-shrink-0" />
                 : <CircleDot className="w-4 h-4 text-[#5A6B88] flex-shrink-0" />
               }
-              <span className={cn("text-sm", done ? "text-[#5A6B88] line-through" : "text-[#CBD2DF]")}>{text}</span>
+              <span className={cn("text-sm", m.status === 'completed' ? "text-[#5A6B88] line-through" : "text-[#CBD2DF]")}>{m.name}</span>
             </div>
-          ))}
+          )) : (
+            <p className="text-sm text-[#7A8BA8]">No milestones defined yet.</p>
+          )}
         </div>
       ),
-      copyText: `Next Steps\n• ESCO final proposal review (Done)\n• Council contract approval vote\n• Construction mobilization\n• M&V baseline period begins`
+      copyText: `Next Steps\n${projMilestones.slice(0, 4).map((m: any) => `• ${m.name} (${m.status})`).join('\n') || '• No milestones defined'}`
     },
   ];
 
@@ -237,6 +242,27 @@ function CouncilPresentation({ project, ecms, risks }: { project: any, ecms: any
 function OnePageSummary({ project, risks }: { project: any, risks: any[] }) {
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
+  const mvData = useStore(state => state.mvData);
+  const milestones = useStore(state => state.milestones);
+  const ecms = useStore(state => state.ecms);
+  const tasks = useStore(state => state.tasks);
+
+  const projMv = mvData.filter((d: any) => d.projectId === project.id);
+  const totalGuaranteed = projMv.reduce((s: number, d: any) => s + d.guaranteed, 0);
+  const totalCalculated = projMv.reduce((s: number, d: any) => s + d.calculated, 0);
+  const achievementRate = totalGuaranteed > 0 ? Math.round((totalCalculated / totalGuaranteed) * 100) : 0;
+  const variance = totalCalculated - totalGuaranteed;
+  const onTrack = achievementRate >= 90;
+  const projMilestones = milestones.filter((m: any) => m.projectId === project.id);
+  const projEcms = ecms.filter((e: any) => e.projectId === project.id);
+  const projTasks = tasks.filter((t: any) => t.projectId === project.id);
+  const PHASE_ORDER = ['Prospect', 'Audit', 'IGEA', 'RFP', 'Contract', 'Construction', 'M&V', 'Closeout'];
+  const phaseIdx = PHASE_ORDER.indexOf(project.phase);
+  const progressPct = Math.round(((phaseIdx + 1) / PHASE_ORDER.length) * 100);
+  const nextMilestone = projMilestones.find((m: any) => m.status !== 'completed');
+  const nextMilestoneDays = nextMilestone?.dueDate
+    ? Math.max(0, Math.round((new Date(nextMilestone.dueDate).getTime() - Date.now()) / 86400000))
+    : null;
 
   const handleGenerate = () => {
     setGenerating(true);
@@ -282,8 +308,8 @@ function OnePageSummary({ project, risks }: { project: any, risks: any[] }) {
             <div className="space-y-2">
               {[
                 { label: 'Phase', val: project.phase },
-                { label: 'Progress', val: '47% Complete' },
-                { label: 'Next Milestone', val: '45 days' },
+                { label: 'Progress', val: `${progressPct}% Complete` },
+                { label: 'Next Milestone', val: nextMilestoneDays !== null ? `${nextMilestoneDays} days` : 'None set' },
                 { label: 'ESCO', val: project.esco },
               ].map(({ label, val }) => (
                 <div key={label} className="flex justify-between text-sm">
@@ -299,9 +325,9 @@ function OnePageSummary({ project, risks }: { project: any, risks: any[] }) {
             <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-3 pb-2 border-b border-neutral-200">Financial Health</h3>
             <div className="space-y-2">
               {[
-                { label: 'Savings On Track', val: 'YES ✓', green: true },
-                { label: 'Achievement Rate', val: '94%', green: true },
-                { label: 'YTD Variance', val: '+$18,200', green: true },
+                { label: 'Savings On Track', val: projMv.length > 0 ? (onTrack ? 'YES' : 'NO') : 'N/A', green: onTrack },
+                { label: 'Achievement Rate', val: projMv.length > 0 ? `${achievementRate}%` : 'N/A', green: achievementRate >= 90 },
+                { label: 'YTD Variance', val: projMv.length > 0 ? `${variance >= 0 ? '+' : ''}$${Math.abs(variance).toLocaleString()}` : 'N/A', green: variance >= 0 },
                 { label: 'Contract Value', val: `$${(project.value / 1000000).toFixed(1)}M`, green: false },
               ].map(({ label, val, green }) => (
                 <div key={label} className="flex justify-between text-sm">
@@ -335,17 +361,19 @@ function OnePageSummary({ project, risks }: { project: any, risks: any[] }) {
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-3 pb-2 border-b border-neutral-200">30-Day Outlook</h3>
             <div className="space-y-1.5">
-              {[
-                'Final submittal review (ECM-3)',
-                'Site inspection — Building 2',
-                'Contractor coordination meeting',
-                'Draft M&V plan for Year 2',
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-1.5 text-xs text-neutral-600">
-                  <ChevronRight className="w-3 h-3 text-[#37BB26] flex-shrink-0 mt-0.5" />
-                  {item}
-                </div>
-              ))}
+              {(() => {
+                const upcoming = [
+                  ...projMilestones.filter((m: any) => m.status !== 'completed').slice(0, 2).map((m: any) => m.name),
+                  ...projTasks.filter((t: any) => t.status !== 'Done').slice(0, 2).map((t: any) => t.title),
+                ];
+                if (upcoming.length === 0) return <p className="text-xs text-neutral-400">No upcoming items.</p>;
+                return upcoming.map((item: string) => (
+                  <div key={item} className="flex items-start gap-1.5 text-xs text-neutral-600">
+                    <ChevronRight className="w-3 h-3 text-[#37BB26] flex-shrink-0 mt-0.5" />
+                    {item}
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         </div>
@@ -354,19 +382,23 @@ function OnePageSummary({ project, risks }: { project: any, risks: any[] }) {
         <div className="px-8 pb-6">
           <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-3 pb-2 border-b border-neutral-200">Key Decisions Needed</h3>
           <div className="grid grid-cols-3 gap-3">
-            {[
-              { text: 'Approve CO-01 scope extension', urgent: true },
-              { text: 'Confirm M&V Option A or B', urgent: false },
-              { text: 'Council presentation date', urgent: false },
-            ].map(({ text, urgent }) => (
-              <div key={text} className={cn(
-                "p-2.5 rounded-lg border text-xs",
-                urgent ? "bg-amber-50 border-amber-200 text-amber-800" : "bg-neutral-50 border-neutral-200 text-neutral-700"
-              )}>
-                {urgent && <span className="block text-[9px] font-bold text-amber-600 uppercase mb-1">Action Required</span>}
-                {text}
-              </div>
-            ))}
+            {(() => {
+              const decisions = [
+                ...projTasks.filter((t: any) => t.priority === 'High' && t.status !== 'Done').slice(0, 2).map((t: any) => ({ text: t.title, urgent: true })),
+                ...projMilestones.filter((m: any) => m.status === 'overdue').slice(0, 1).map((m: any) => ({ text: `${m.name} — overdue`, urgent: true })),
+                ...projMilestones.filter((m: any) => m.status === 'in progress').slice(0, 1).map((m: any) => ({ text: m.name, urgent: false })),
+              ].slice(0, 3);
+              if (decisions.length === 0) return <p className="text-xs text-neutral-400 col-span-3">No pending decisions.</p>;
+              return decisions.map(({ text, urgent }) => (
+                <div key={text} className={cn(
+                  "p-2.5 rounded-lg border text-xs",
+                  urgent ? "bg-amber-50 border-amber-200 text-amber-800" : "bg-neutral-50 border-neutral-200 text-neutral-700"
+                )}>
+                  {urgent && <span className="block text-[9px] font-bold text-amber-600 uppercase mb-1">Action Required</span>}
+                  {text}
+                </div>
+              ));
+            })()}
           </div>
         </div>
 
