@@ -8,6 +8,8 @@ import { AuditTrailPanel } from '@/components/AuditTrailPanel';
 import { FreshnessBadge } from '@/components/FreshnessBadge';
 import { LockIndicator } from '@/components/LockIndicator';
 import { SharePointImportModal, SECTION_CONFIGS } from '@/components/SharePointImportModal';
+import { useToastStore } from '@/stores/toastStore';
+import { useConfirmStore } from '@/stores/confirmStore';
 
 export function MV({ projectId }: { projectId?: string }) {
   const projects = useStore(state => state.projects);
@@ -18,6 +20,8 @@ export function MV({ projectId }: { projectId?: string }) {
   const addImportRecord = useStore(state => state.addImportRecord);
   const deleteItem = useStore(state => state.deleteItem);
   const currentUser = useStore(state => state.users).find(u => u.id === useStore.getState().currentUserId);
+  const addToast = useToastStore(s => s.addToast);
+  const confirmDel = useConfirmStore(s => s.confirm);
 
   const [showImportModal, setShowImportModal] = useState(false);
   const [showDriftAlert, setShowDriftAlert] = useState(true);
@@ -249,7 +253,7 @@ export function MV({ projectId }: { projectId?: string }) {
                         {data.importBatchId && (
                           <td className="px-2 py-4">
                             <button
-                              onClick={() => deleteItem('mvData', data.id)}
+                              onClick={async () => { if (await confirmDel('Delete M&V data?', 'This action cannot be undone.')) { deleteItem('mvData', data.id); addToast('M&V data deleted'); } }}
                               className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                               title="Delete imported row"
                             >

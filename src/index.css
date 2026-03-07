@@ -466,3 +466,47 @@ html {
   table { display: block; overflow-x: auto; white-space: nowrap; }
   thead, tbody, tr { display: table; width: 100%; table-layout: auto; }
 }
+
+/* =============================================
+   PRINT STYLESHEET
+   ============================================= */
+@media print {
+  /* Hide non-content elements */
+  nav, header, .nav-item, .mode-pill,
+  button, .btn-primary, .card-hover,
+  [class*="sidebar"], [class*="AIAssistant"],
+  [class*="toast"], [class*="CommandPalette"],
+  [class*="ConfirmDialog"], [class*="modal-backdrop"] {
+    display: none !important;
+  }
+
+  /* Reset backgrounds for print */
+  body, main, div {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Full-width content */
+  .flex-1 { width: 100% !important; }
+  main { overflow: visible !important; }
+
+  /* Table readability */
+  table { border-collapse: collapse; }
+  th, td {
+    border: 1px solid #ddd !important;
+    color: black !important;
+    padding: 6px 12px !important;
+  }
+  thead { background: #f3f4f6 !important; }
+
+  /* Page breaks */
+  .bg-\\[\\#121C35\\] { page-break-inside: avoid; }
+
+  /* Disable animations */
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

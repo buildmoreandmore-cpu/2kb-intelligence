@@ -19,6 +19,7 @@ export function Drawings({ projectId }: { projectId: string }) {
   const [showVersionHistory, setShowVersionHistory] = useState<string | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [drawingForm, setDrawingForm] = useState({ filename: '', type: 'Floor Plan', buildingId: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const drawing = drawings.find(d => d.id === selectedDrawing);
 
@@ -205,7 +206,10 @@ export function Drawings({ projectId }: { projectId: string }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-white">Upload Drawing</h3><button onClick={() => setShowUploadModal(false)} className="text-[#7A8BA8] hover:text-white"><X className="w-4 h-4" /></button></div>
-            <input placeholder="Filename (e.g. Main-Building-L1.pdf)" value={drawingForm.filename} onChange={e => setDrawingForm(f => ({ ...f, filename: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88]" />
+            <div>
+              <input placeholder="Filename (e.g. Main-Building-L1.pdf)" value={drawingForm.filename} onChange={e => { setDrawingForm(f => ({ ...f, filename: e.target.value })); setErrors(e2 => ({ ...e2, drwFile: '' })); }} className={`w-full bg-[#0F1829] border rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88] ${errors.drwFile ? 'border-red-500' : 'border-[#1E2A45]'}`} />
+              {errors.drwFile && <p className="text-[10px] text-red-400 mt-1">{errors.drwFile}</p>}
+            </div>
             <select value={drawingForm.type} onChange={e => setDrawingForm(f => ({ ...f, type: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white">
               {DRAWING_TYPES.filter(t => t !== 'All').map(t => <option key={t}>{t}</option>)}
             </select>
@@ -215,7 +219,7 @@ export function Drawings({ projectId }: { projectId: string }) {
             </select>
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={() => setShowUploadModal(false)} className="px-4 py-2 text-sm text-[#7A8BA8] hover:text-white">Cancel</button>
-              <button onClick={() => { if (!drawingForm.filename) return; addDrawing({ ...drawingForm, projectId, version: 'v1.0', date: new Date().toISOString().split('T')[0], by: 'Current User', annotations: 0 }); setDrawingForm({ filename: '', type: 'Floor Plan', buildingId: '' }); setShowUploadModal(false); }} className="px-4 py-2 bg-[#0B7A76] text-white text-sm font-medium rounded-lg hover:bg-[#096A66]">Upload</button>
+              <button onClick={() => { if (!drawingForm.filename) { setErrors({ drwFile: 'Filename is required' }); return; } addDrawing({ ...drawingForm, projectId, version: 'v1.0', date: new Date().toISOString().split('T')[0], by: 'Current User', annotations: 0 }); setDrawingForm({ filename: '', type: 'Floor Plan', buildingId: '' }); setShowUploadModal(false); setErrors({}); }} className="px-4 py-2 bg-[#0B7A76] text-white text-sm font-medium rounded-lg hover:bg-[#096A66]">Upload</button>
             </div>
           </div>
         </div>

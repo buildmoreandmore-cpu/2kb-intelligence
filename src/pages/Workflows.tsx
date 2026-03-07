@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 import { EditableField } from '@/components/EditableField';
 import { AuditTrailPanel } from '@/components/AuditTrailPanel';
 import { SharePointImportModal, SECTION_CONFIGS } from '@/components/SharePointImportModal';
+import { useToastStore } from '@/stores/toastStore';
+import { useConfirmStore } from '@/stores/confirmStore';
 
 export function Workflows() {
   const tasks = useStore(state => state.tasks);
@@ -18,6 +20,8 @@ export function Workflows() {
   const addImportRecord = useStore(state => state.addImportRecord);
   const deleteItem = useStore(state => state.deleteItem);
   const currentUserId = useStore(state => state.currentUserId);
+  const addToast = useToastStore(s => s.addToast);
+  const confirmDel = useConfirmStore(s => s.confirm);
   const users = useStore(state => state.users);
 
   const currentUser = users.find(u => u.id === currentUserId);
@@ -217,7 +221,7 @@ export function Workflows() {
                       {task.importBatchId && (
                         <td className="px-2 py-4">
                           <button
-                            onClick={() => deleteItem('tasks', task.id)}
+                            onClick={async () => { if (await confirmDel('Delete task?', 'This action cannot be undone.')) { deleteItem('tasks', task.id); addToast('Task deleted'); } }}
                             className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                             title="Delete imported row"
                           >

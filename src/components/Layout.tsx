@@ -23,6 +23,9 @@ import { useStore, ServiceLineMode } from '@/store';
 import { AIAssistant } from './AIAssistant';
 import { getFreshnessStatus } from '@/lib/freshness';
 import { ProjectFileImport } from './ProjectFileImport';
+import { ToastContainer } from './ToastContainer';
+import { ConfirmDialog } from './ConfirmDialog';
+import { CommandPalette } from './CommandPalette';
 
 const allNavigation = [
   { name: 'Dashboard', href: '/app', icon: LayoutDashboard, modes: ['Full', 'OR'], badgeKey: null as string | null, freshnessModule: null as string | null },
@@ -342,6 +345,11 @@ export function Layout() {
       {showProjectImport && (
         <ProjectFileImport onClose={() => setShowProjectImport(false)} />
       )}
+
+      {/* Global UI overlays */}
+      <ToastContainer />
+      <ConfirmDialog />
+      <CommandPalette />
     </div>
   );
 }

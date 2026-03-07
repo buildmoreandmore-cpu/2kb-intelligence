@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { ShieldCheck, Calendar, FileText, AlertTriangle, GitPullRequest, FileCheck, Plus, Filter, CalendarPlus, FileSpreadsheet, X } from 'lucide-react';
+import { ShieldCheck, Calendar, FileText, AlertTriangle, GitPullRequest, FileCheck, Plus, Filter, CalendarPlus, FileSpreadsheet, X, CalendarDays, LayoutGrid, GripVertical, Columns3 } from 'lucide-react';
 import { ExportButton } from '@/components/ExportButton';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
@@ -9,6 +9,11 @@ import { AuditTrailPanel } from '@/components/AuditTrailPanel';
 import { LockIndicator } from '@/components/LockIndicator';
 import { downloadICS } from '@/lib/ics';
 import { SharePointImportModal, SECTION_CONFIGS, type SectionImportConfig } from '@/components/SharePointImportModal';
+import { useToastStore } from '@/stores/toastStore';
+import { useConfirmStore } from '@/stores/confirmStore';
+import { EmptyState } from '@/components/EmptyState';
+import { MilestoneCalendar } from '@/components/MilestoneCalendar';
+import { BulkActions } from '@/components/BulkActions';
 
 export function Governance({ projectId }: { projectId?: string }) {
   const projects = useStore(state => state.projects);
@@ -22,11 +27,14 @@ export function Governance({ projectId }: { projectId?: string }) {
   const addCustomColumns = useStore(state => state.addCustomColumns);
   const addImportRecord = useStore(state => state.addImportRecord);
   const deleteItem = useStore(state => state.deleteItem);
+  const editField = useStore(state => state.editField);
   const currentUser = useStore(state => state.users).find(u => u.id === useStore.getState().currentUserId);
 
   const addMilestone = useStore(state => state.addMilestone);
   const addRisk = useStore(state => state.addRisk);
   const addChangeOrder = useStore(state => state.addChangeOrder);
+  const addToast = useToastStore(s => s.addToast);
+  const confirm = useConfirmStore(s => s.confirm);
 
   const [activeTab, setActiveTab] = useState<'pipeline' | 'milestones' | 'risks' | 'co' | 'submittals' | 'obligations'>('pipeline');
   const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[0]?.id || '');
@@ -38,6 +46,11 @@ export function Governance({ projectId }: { projectId?: string }) {
   const [milestoneForm, setMilestoneForm] = useState({ name: '', dueDate: '', status: 'pending', assignedTo: '' });
   const [riskForm, setRiskForm] = useState({ description: '', category: 'Schedule', severity: 'Medium', owner: '' });
   const [coForm, setCoForm] = useState({ number: '', description: '', requestedBy: '', cost: '', days: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [milestoneCalendarView, setMilestoneCalendarView] = useState(false);
+  const [coKanbanView, setCoKanbanView] = useState(false);
+  const [selectedRiskIds, setSelectedRiskIds] = useState<Set<string>>(new Set());
+  const [dragOverCol, setDragOverCol] = useState<string | null>(null);
 
   const phases = ['Prospect', 'Audit', 'IGEA', 'RFP', 'Contract', 'Construction', 'M&V', 'Closeout'];
   const project = projects.find(p => p.id === selectedProjectId);
@@ -149,6 +162,14 @@ export function Governance({ projectId }: { projectId?: string }) {
             <div className="p-6 border-b border-[#1E2A45] flex items-center justify-between">
               <h3 className="text-sm font-semibold text-white">Project Milestones</h3>
               <div className="flex items-center gap-2">
+                <div className="flex items-center bg-[#0F1829] border border-[#1E2A45] rounded-lg p-0.5">
+                  <button onClick={() => setMilestoneCalendarView(false)} className={cn("px-2.5 py-1 text-[10px] font-medium rounded-md transition-colors", !milestoneCalendarView ? "bg-[#1E2A45] text-white" : "text-[#7A8BA8] hover:text-white")}>
+                    <LayoutGrid className="w-3 h-3" />
+                  </button>
+                  <button onClick={() => setMilestoneCalendarView(true)} className={cn("px-2.5 py-1 text-[10px] font-medium rounded-md transition-colors", milestoneCalendarView ? "bg-[#1E2A45] text-white" : "text-[#7A8BA8] hover:text-white")}>
+                    <CalendarDays className="w-3 h-3" />
+                  </button>
+                </div>
                 <button onClick={() => setImportSection('milestones')} className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0D918C]/10 border border-[#0D918C]/30 rounded-lg text-xs font-medium text-[#0D918C] hover:bg-[#0D918C]/20 transition-colors duration-150">
                   <FileSpreadsheet className="w-3.5 h-3.5" />
                   Import
@@ -159,6 +180,11 @@ export function Governance({ projectId }: { projectId?: string }) {
                 </button>
               </div>
             </div>
+            {milestoneCalendarView ? (
+              <div className="p-6">
+                <MilestoneCalendar milestones={milestones.filter(m => m.projectId === selectedProjectId)} />
+              </div>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
                 <thead className="text-xs text-neutral-400 uppercase bg-[#0F1829] border-b border-[#1E2A45]">
@@ -195,7 +221,7 @@ export function Governance({ projectId }: { projectId?: string }) {
                           </button>
                           {milestone.importBatchId && (
                             <button
-                              onClick={() => deleteItem('milestones', milestone.id)}
+                              onClick={async () => { if (await confirm('Delete milestone?', 'This action cannot be undone.')) { deleteItem('milestones', milestone.id); addToast('Milestone deleted'); } }}
                               className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                               title="Delete imported row"
                             >
@@ -208,12 +234,13 @@ export function Governance({ projectId }: { projectId?: string }) {
                   ))}
                   {milestones.filter(m => m.projectId === selectedProjectId).length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-[#7A8BA8]">No milestones found for this project.</td>
+                      <td colSpan={5}><EmptyState icon={Calendar} title="No milestones yet" description="Add milestones to track project deliverables and deadlines." action={{ label: 'Add Milestone', onClick: () => setShowMilestoneModal(true) }} /></td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
+            )}
           </div>
         )}
 
@@ -236,6 +263,20 @@ export function Governance({ projectId }: { projectId?: string }) {
               <table className="w-full text-sm text-left">
                 <thead className="text-xs text-neutral-400 uppercase bg-[#0F1829] border-b border-[#1E2A45]">
                   <tr>
+                    <th className="px-3 py-4 w-10">
+                      <input
+                        type="checkbox"
+                        checked={risks.filter(r => r.projectId === selectedProjectId).length > 0 && risks.filter(r => r.projectId === selectedProjectId).every(r => selectedRiskIds.has(r.id))}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedRiskIds(new Set(risks.filter(r => r.projectId === selectedProjectId).map(r => r.id)));
+                          } else {
+                            setSelectedRiskIds(new Set());
+                          }
+                        }}
+                        className="w-3.5 h-3.5 rounded border-[#2A3A5C] bg-[#0F1829] text-[#0D918C] focus:ring-[#0D918C]"
+                      />
+                    </th>
                     <th className="px-6 py-4 font-medium">Description</th>
                     <th className="px-6 py-4 font-medium">Category</th>
                     <th className="px-6 py-4 font-medium">Severity</th>
@@ -245,7 +286,22 @@ export function Governance({ projectId }: { projectId?: string }) {
                 </thead>
                 <tbody className="divide-y divide-[#1E2A45]">
                   {risks.filter(r => r.projectId === selectedProjectId).map((risk) => (
-                    <tr key={risk.id} className="hover:bg-[#1A2544] transition-colors">
+                    <tr key={risk.id} className={cn("hover:bg-[#1A2544] transition-colors", selectedRiskIds.has(risk.id) && "bg-[#0D918C]/5")}>
+                      <td className="px-3 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedRiskIds.has(risk.id)}
+                          onChange={() => {
+                            setSelectedRiskIds(prev => {
+                              const next = new Set(prev);
+                              if (next.has(risk.id)) next.delete(risk.id);
+                              else next.add(risk.id);
+                              return next;
+                            });
+                          }}
+                          className="w-3.5 h-3.5 rounded border-[#2A3A5C] bg-[#0F1829] text-[#0D918C] focus:ring-[#0D918C]"
+                        />
+                      </td>
                       <td className="px-6 py-4 font-medium text-white max-w-md">
                         <EditableField value={risk.description} entityType="risk" entityId={risk.id} field="description" projectId={selectedProjectId} />
                         <AuditTrailPanel entityType="risk" entityId={risk.id} />
@@ -261,7 +317,7 @@ export function Governance({ projectId }: { projectId?: string }) {
                       {risk.importBatchId && (
                         <td className="px-2 py-4">
                           <button
-                            onClick={() => deleteItem('risks', risk.id)}
+                            onClick={async () => { if (await confirm('Delete risk?', 'This action cannot be undone.')) { deleteItem('risks', risk.id); addToast('Risk deleted'); } }}
                             className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                             title="Delete imported row"
                           >
@@ -273,19 +329,40 @@ export function Governance({ projectId }: { projectId?: string }) {
                   ))}
                   {risks.filter(r => r.projectId === selectedProjectId).length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-[#7A8BA8]">No risks logged for this project.</td>
+                      <td colSpan={6}><EmptyState icon={AlertTriangle} title="No risks logged" description="Log risks to track project threats and mitigations." action={{ label: 'Log Risk', onClick: () => setShowRiskModal(true) }} /></td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
+            <BulkActions
+              count={selectedRiskIds.size}
+              onDelete={async () => {
+                if (await confirm(`Delete ${selectedRiskIds.size} risks?`, 'This action cannot be undone.')) {
+                  selectedRiskIds.forEach(id => deleteItem('risks', id));
+                  addToast(`${selectedRiskIds.size} risks deleted`);
+                  setSelectedRiskIds(new Set());
+                }
+              }}
+              onClear={() => setSelectedRiskIds(new Set())}
+            />
           </div>
         )}
 
         {activeTab === 'co' && (
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
             <div className="p-6 border-b border-[#1E2A45] flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Change Orders</h3>
+              <div className="flex items-center gap-3">
+                <h3 className="text-sm font-semibold text-white">Change Orders</h3>
+                <div className="flex items-center bg-[#0F1829] rounded-lg border border-[#1E2A45] p-0.5">
+                  <button onClick={() => setCoKanbanView(false)} className={cn("px-2 py-1 rounded text-xs font-medium transition-colors", !coKanbanView ? "bg-[#1E2A45] text-white" : "text-[#5A6B88] hover:text-white")}>
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => setCoKanbanView(true)} className={cn("px-2 py-1 rounded text-xs font-medium transition-colors", coKanbanView ? "bg-[#1E2A45] text-white" : "text-[#5A6B88] hover:text-white")}>
+                    <Columns3 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
               <div className="flex items-center gap-2">
                 <button onClick={() => setImportSection('changeOrders')} className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0D918C]/10 border border-[#0D918C]/30 rounded-lg text-xs font-medium text-[#0D918C] hover:bg-[#0D918C]/20 transition-colors duration-150">
                   <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -297,59 +374,127 @@ export function Governance({ projectId }: { projectId?: string }) {
                 </button>
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-neutral-400 uppercase bg-[#0F1829] border-b border-[#1E2A45]">
-                  <tr>
-                    <th className="px-6 py-4 font-medium">CO #</th>
-                    <th className="px-6 py-4 font-medium">Description</th>
-                    <th className="px-6 py-4 font-medium">Requested By</th>
-                    <th className="px-6 py-4 font-medium">Cost</th>
-                    <th className="px-6 py-4 font-medium">Days</th>
-                    <th className="px-6 py-4 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#1E2A45]">
-                  {changeOrders.filter(co => co.projectId === selectedProjectId).map((co) => {
-                    const coLock = lockRecords.find(l => l.entityType === 'changeOrder' && l.entityId === co.id);
-                    return (
-                      <tr key={co.id} className="hover:bg-[#1A2544] transition-colors">
-                        <td className="px-6 py-4 font-mono text-[#9AA5B8]">{co.number}</td>
-                        <td className="px-6 py-4 font-medium text-white">
-                          {coLock ? (
-                            <span className="inline-flex items-center gap-2">
-                              {co.description}
-                              <LockIndicator lock={coLock} />
-                            </span>
-                          ) : (
-                            <EditableField value={co.description} entityType="changeOrder" entityId={co.id} field="description" projectId={selectedProjectId} />
-                          )}
-                          <AuditTrailPanel entityType="changeOrder" entityId={co.id} />
-                        </td>
-                        <td className="px-6 py-4 text-[#9AA5B8]">{co.requestedBy}</td>
-                        <td className="px-6 py-4 text-[#9AA5B8] font-mono">${co.cost.toLocaleString()}</td>
-                        <td className="px-6 py-4 text-[#9AA5B8]">{co.days}</td>
-                        <td className="px-6 py-4">
+
+            {coKanbanView ? (
+              <div className="grid grid-cols-3 gap-4 p-6">
+                {(['Pending', 'Approved', 'Completed'] as const).map(col => {
+                  const colOrders = changeOrders.filter(co => co.projectId === selectedProjectId && co.status === col);
+                  return (
+                    <div
+                      key={col}
+                      onDragOver={(e) => { e.preventDefault(); setDragOverCol(col); }}
+                      onDragLeave={() => setDragOverCol(null)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragOverCol(null);
+                        const coId = e.dataTransfer.getData('text/plain');
+                        if (coId) {
+                          editField('changeOrder', coId, 'status', col, `Moved to ${col}`, selectedProjectId);
+                          addToast(`Change order moved to ${col}`);
+                        }
+                      }}
+                      className={cn(
+                        "bg-[#0F1829] border rounded-xl p-4 min-h-[300px] transition-colors",
+                        dragOverCol === col ? "border-[#0D918C]/60 bg-[#0D918C]/5" : "border-[#1E2A45]"
+                      )}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
                           <span className={cn(
-                            "px-2.5 py-1 rounded text-xs font-medium border",
-                            co.status === 'Approved' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                            co.status === 'Rejected' ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                            "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                          )}>
-                            {co.status.toUpperCase()}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {changeOrders.filter(co => co.projectId === selectedProjectId).length === 0 && (
+                            "w-2 h-2 rounded-full",
+                            col === 'Pending' ? 'bg-amber-500' : col === 'Approved' ? 'bg-emerald-500' : 'bg-blue-500'
+                          )} />
+                          <h4 className="text-xs font-semibold text-white uppercase tracking-wider">{col}</h4>
+                        </div>
+                        <span className="text-[10px] font-medium text-[#5A6B88] bg-[#1E2A45] px-1.5 py-0.5 rounded">{colOrders.length}</span>
+                      </div>
+                      <div className="space-y-2">
+                        {colOrders.map(co => (
+                          <div
+                            key={co.id}
+                            draggable
+                            onDragStart={(e) => { e.dataTransfer.setData('text/plain', co.id); e.dataTransfer.effectAllowed = 'move'; }}
+                            className="bg-[#121C35] border border-[#1E2A45] rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-[#2A3A5C] transition-colors group"
+                          >
+                            <div className="flex items-start gap-2">
+                              <GripVertical className="w-3.5 h-3.5 text-[#3A4B68] mt-0.5 flex-shrink-0 group-hover:text-[#5A6B88]" />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-mono text-[10px] text-[#5A6B88]">{co.number}</span>
+                                </div>
+                                <p className="text-xs font-medium text-white truncate">{co.description}</p>
+                                <div className="flex items-center gap-3 mt-2 text-[10px] text-[#5A6B88]">
+                                  <span>${co.cost.toLocaleString()}</span>
+                                  <span>{co.days}d</span>
+                                  <span>{co.requestedBy}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {colOrders.length === 0 && (
+                          <div className="text-center py-8 text-[10px] text-[#5A6B88]">Drop here</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-neutral-400 uppercase bg-[#0F1829] border-b border-[#1E2A45]">
                     <tr>
-                      <td colSpan={6} className="px-6 py-8 text-center text-[#7A8BA8]">No change orders found for this project.</td>
+                      <th className="px-6 py-4 font-medium">CO #</th>
+                      <th className="px-6 py-4 font-medium">Description</th>
+                      <th className="px-6 py-4 font-medium">Requested By</th>
+                      <th className="px-6 py-4 font-medium">Cost</th>
+                      <th className="px-6 py-4 font-medium">Days</th>
+                      <th className="px-6 py-4 font-medium">Status</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-[#1E2A45]">
+                    {changeOrders.filter(co => co.projectId === selectedProjectId).map((co) => {
+                      const coLock = lockRecords.find(l => l.entityType === 'changeOrder' && l.entityId === co.id);
+                      return (
+                        <tr key={co.id} className="hover:bg-[#1A2544] transition-colors">
+                          <td className="px-6 py-4 font-mono text-[#9AA5B8]">{co.number}</td>
+                          <td className="px-6 py-4 font-medium text-white">
+                            {coLock ? (
+                              <span className="inline-flex items-center gap-2">
+                                {co.description}
+                                <LockIndicator lock={coLock} />
+                              </span>
+                            ) : (
+                              <EditableField value={co.description} entityType="changeOrder" entityId={co.id} field="description" projectId={selectedProjectId} />
+                            )}
+                            <AuditTrailPanel entityType="changeOrder" entityId={co.id} />
+                          </td>
+                          <td className="px-6 py-4 text-[#9AA5B8]">{co.requestedBy}</td>
+                          <td className="px-6 py-4 text-[#9AA5B8] font-mono">${co.cost.toLocaleString()}</td>
+                          <td className="px-6 py-4 text-[#9AA5B8]">{co.days}</td>
+                          <td className="px-6 py-4">
+                            <span className={cn(
+                              "px-2.5 py-1 rounded text-xs font-medium border",
+                              co.status === 'Approved' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+                              co.status === 'Rejected' ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                              "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                            )}>
+                              {co.status.toUpperCase()}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {changeOrders.filter(co => co.projectId === selectedProjectId).length === 0 && (
+                      <tr>
+                        <td colSpan={6}><EmptyState icon={FileText} title="No change orders" description="Add change orders to track scope modifications and cost impacts." action={{ label: 'Add Change Order', onClick: () => setShowCOModal(true) }} /></td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
@@ -393,7 +538,7 @@ export function Governance({ projectId }: { projectId?: string }) {
                   ))}
                   {submittals.filter(s => s.projectId === selectedProjectId).length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-6 py-8 text-center text-[#7A8BA8]">No submittals found for this project.</td>
+                      <td colSpan={4}><EmptyState icon={FileCheck} title="No submittals" description="Import submittals to track document review workflows." /></td>
                     </tr>
                   )}
                 </tbody>
@@ -551,7 +696,7 @@ export function Governance({ projectId }: { projectId?: string }) {
                               {o.contractRef}
                               {o.importBatchId && (
                                 <button
-                                  onClick={() => deleteItem(SECTION_CONFIGS[activeTab === 'obligations' ? 'contractObligations' : 'milestones']?.storeKey || 'contractObligations', o.id)}
+                                  onClick={async () => { if (await confirm('Delete obligation?', 'This action cannot be undone.')) { deleteItem(SECTION_CONFIGS[activeTab === 'obligations' ? 'contractObligations' : 'milestones']?.storeKey || 'contractObligations', o.id); addToast('Obligation deleted'); } }}
                                   className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                                   title="Delete imported row"
                                 >
@@ -563,7 +708,7 @@ export function Governance({ projectId }: { projectId?: string }) {
                         </tr>
                       ))}
                       {filtered.length === 0 && (
-                        <tr><td colSpan={6} className="px-6 py-8 text-center text-[#7A8BA8]">No obligations found.</td></tr>
+                        <tr><td colSpan={6}><EmptyState icon={ShieldCheck} title="No obligations found" description="Import contract obligations to track compliance and deadlines." /></td></tr>
                       )}
                     </tbody>
                   </table>
@@ -579,15 +724,21 @@ export function Governance({ projectId }: { projectId?: string }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-white">Add Milestone</h3><button onClick={() => setShowMilestoneModal(false)} className="text-[#7A8BA8] hover:text-white"><X className="w-4 h-4" /></button></div>
-            <input placeholder="Milestone name" value={milestoneForm.name} onChange={e => setMilestoneForm(f => ({ ...f, name: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88]" />
-            <input type="date" value={milestoneForm.dueDate} onChange={e => setMilestoneForm(f => ({ ...f, dueDate: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white" />
+            <div>
+              <input placeholder="Milestone name" value={milestoneForm.name} onChange={e => { setMilestoneForm(f => ({ ...f, name: e.target.value })); setErrors(e2 => ({ ...e2, msName: '' })); }} className={`w-full bg-[#0F1829] border rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88] ${errors.msName ? 'border-red-500' : 'border-[#1E2A45]'}`} />
+              {errors.msName && <p className="text-[10px] text-red-400 mt-1">{errors.msName}</p>}
+            </div>
+            <div>
+              <input type="date" value={milestoneForm.dueDate} onChange={e => { setMilestoneForm(f => ({ ...f, dueDate: e.target.value })); setErrors(e2 => ({ ...e2, msDue: '' })); }} className={`w-full bg-[#0F1829] border rounded-lg px-3 py-2 text-sm text-white ${errors.msDue ? 'border-red-500' : 'border-[#1E2A45]'}`} />
+              {errors.msDue && <p className="text-[10px] text-red-400 mt-1">{errors.msDue}</p>}
+            </div>
             <select value={milestoneForm.status} onChange={e => setMilestoneForm(f => ({ ...f, status: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white">
               <option value="pending">Pending</option><option value="in-progress">In Progress</option><option value="completed">Completed</option>
             </select>
             <input placeholder="Assigned to" value={milestoneForm.assignedTo} onChange={e => setMilestoneForm(f => ({ ...f, assignedTo: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88]" />
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={() => setShowMilestoneModal(false)} className="px-4 py-2 text-sm text-[#7A8BA8] hover:text-white">Cancel</button>
-              <button onClick={() => { if (!milestoneForm.name) return; addMilestone({ ...milestoneForm, projectId: selectedProjectId }); setMilestoneForm({ name: '', dueDate: '', status: 'pending', assignedTo: '' }); setShowMilestoneModal(false); }} className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">Add</button>
+              <button onClick={() => { const e: Record<string, string> = {}; if (!milestoneForm.name) e.msName = 'Name is required'; if (!milestoneForm.dueDate) e.msDue = 'Due date is required'; if (Object.keys(e).length) { setErrors(e); return; } addMilestone({ ...milestoneForm, projectId: selectedProjectId }); setMilestoneForm({ name: '', dueDate: '', status: 'pending', assignedTo: '' }); setShowMilestoneModal(false); setErrors({}); addToast('Milestone added'); }} className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">Add</button>
             </div>
           </div>
         </div>
@@ -598,7 +749,10 @@ export function Governance({ projectId }: { projectId?: string }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-white">Log Risk</h3><button onClick={() => setShowRiskModal(false)} className="text-[#7A8BA8] hover:text-white"><X className="w-4 h-4" /></button></div>
-            <textarea placeholder="Risk description" value={riskForm.description} onChange={e => setRiskForm(f => ({ ...f, description: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88] min-h-[80px]" />
+            <div>
+              <textarea placeholder="Risk description" value={riskForm.description} onChange={e => { setRiskForm(f => ({ ...f, description: e.target.value })); setErrors(e2 => ({ ...e2, riskDesc: '' })); }} className={`w-full bg-[#0F1829] border rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88] min-h-[80px] ${errors.riskDesc ? 'border-red-500' : 'border-[#1E2A45]'}`} />
+              {errors.riskDesc && <p className="text-[10px] text-red-400 mt-1">{errors.riskDesc}</p>}
+            </div>
             <select value={riskForm.category} onChange={e => setRiskForm(f => ({ ...f, category: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white">
               <option>Schedule</option><option>Financial</option><option>Technical</option><option>Regulatory</option><option>Operational</option>
             </select>
@@ -608,7 +762,7 @@ export function Governance({ projectId }: { projectId?: string }) {
             <input placeholder="Risk owner" value={riskForm.owner} onChange={e => setRiskForm(f => ({ ...f, owner: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88]" />
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={() => setShowRiskModal(false)} className="px-4 py-2 text-sm text-[#7A8BA8] hover:text-white">Cancel</button>
-              <button onClick={() => { if (!riskForm.description) return; addRisk({ ...riskForm, projectId: selectedProjectId, status: 'Open' }); setRiskForm({ description: '', category: 'Schedule', severity: 'Medium', owner: '' }); setShowRiskModal(false); }} className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">Add</button>
+              <button onClick={() => { if (!riskForm.description) { setErrors({ riskDesc: 'Description is required' }); return; } addRisk({ ...riskForm, projectId: selectedProjectId, status: 'Open' }); setRiskForm({ description: '', category: 'Schedule', severity: 'Medium', owner: '' }); setShowRiskModal(false); setErrors({}); addToast('Risk logged'); }} className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">Add</button>
             </div>
           </div>
         </div>
@@ -619,8 +773,10 @@ export function Governance({ projectId }: { projectId?: string }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-white">Add Change Order</h3><button onClick={() => setShowCOModal(false)} className="text-[#7A8BA8] hover:text-white"><X className="w-4 h-4" /></button></div>
-            <input placeholder="CO Number (e.g. CO-004)" value={coForm.number} onChange={e => setCoForm(f => ({ ...f, number: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88]" />
-            <input placeholder="Description" value={coForm.description} onChange={e => setCoForm(f => ({ ...f, description: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88]" />
+            <input placeholder="CO Number (e.g. CO-004)" value={coForm.number} onChange={e => { setCoForm(f => ({ ...f, number: e.target.value })); setErrors(e2 => ({ ...e2, coNum: '' })); }} className={`w-full bg-[#0F1829] border rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88] ${errors.coNum ? 'border-red-500' : 'border-[#1E2A45]'}`} />
+            {errors.coNum && <p className="text-[10px] text-red-400 mt-1">{errors.coNum}</p>}
+            <input placeholder="Description" value={coForm.description} onChange={e => { setCoForm(f => ({ ...f, description: e.target.value })); setErrors(e2 => ({ ...e2, coDesc: '' })); }} className={`w-full bg-[#0F1829] border rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88] ${errors.coDesc ? 'border-red-500' : 'border-[#1E2A45]'}`} />
+            {errors.coDesc && <p className="text-[10px] text-red-400 mt-1">{errors.coDesc}</p>}
             <input placeholder="Requested by" value={coForm.requestedBy} onChange={e => setCoForm(f => ({ ...f, requestedBy: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88]" />
             <div className="grid grid-cols-2 gap-3">
               <input type="number" placeholder="Cost ($)" value={coForm.cost} onChange={e => setCoForm(f => ({ ...f, cost: e.target.value }))} className="bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88]" />
@@ -628,7 +784,7 @@ export function Governance({ projectId }: { projectId?: string }) {
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={() => setShowCOModal(false)} className="px-4 py-2 text-sm text-[#7A8BA8] hover:text-white">Cancel</button>
-              <button onClick={() => { if (!coForm.description) return; addChangeOrder({ ...coForm, cost: Number(coForm.cost) || 0, days: Number(coForm.days) || 0, projectId: selectedProjectId, status: 'Pending' }); setCoForm({ number: '', description: '', requestedBy: '', cost: '', days: '' }); setShowCOModal(false); }} className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">Add</button>
+              <button onClick={() => { const e: Record<string, string> = {}; if (!coForm.number) e.coNum = 'CO number is required'; if (!coForm.description) e.coDesc = 'Description is required'; if (Object.keys(e).length) { setErrors(e); return; } addChangeOrder({ ...coForm, cost: Number(coForm.cost) || 0, days: Number(coForm.days) || 0, projectId: selectedProjectId, status: 'Pending' }); setCoForm({ number: '', description: '', requestedBy: '', cost: '', days: '' }); setShowCOModal(false); setErrors({}); addToast('Change order added'); }} className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">Add</button>
             </div>
           </div>
         </div>

@@ -9,6 +9,8 @@ import { AuditTrailPanel } from '@/components/AuditTrailPanel';
 import { FreshnessBadge } from '@/components/FreshnessBadge';
 import { LockIndicator } from '@/components/LockIndicator';
 import { SharePointImportModal, SECTION_CONFIGS } from '@/components/SharePointImportModal';
+import { useToastStore } from '@/stores/toastStore';
+import { useConfirmStore } from '@/stores/confirmStore';
 
 export function FinancialModeling({ projectId }: { projectId?: string }) {
   const projects = useStore(state => state.projects);
@@ -29,7 +31,10 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showEcmModal, setShowEcmModal] = useState(false);
   const [ecmForm, setEcmForm] = useState({ number: '', description: '', category: 'HVAC', cost: '', savings: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const addECM = useStore(state => state.addECM);
+  const addToast = useToastStore(s => s.addToast);
+  const confirm = useConfirmStore(s => s.confirm);
   
   const selectedProject = projects.find(p => p.id === selectedProjectId);
   const projectEcms = ecms.filter(e => e.projectId === selectedProjectId);
@@ -172,7 +177,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
                       {ecm.importBatchId && (
                         <td className="px-2 py-4">
                           <button
-                            onClick={() => deleteItem('ecms', ecm.id)}
+                            onClick={async () => { if (await confirm('Delete ECM?', 'This action cannot be undone.')) { deleteItem('ecms', ecm.id); addToast('ECM deleted'); } }}
                             className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                             title="Delete imported row"
                           >
@@ -407,8 +412,14 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-white">Add ECM</h3><button onClick={() => setShowEcmModal(false)} className="text-[#7A8BA8] hover:text-white"><X className="w-4 h-4" /></button></div>
-            <input placeholder="ECM Number (e.g. ECM-005)" value={ecmForm.number} onChange={e => setEcmForm(f => ({ ...f, number: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88]" />
-            <input placeholder="Description" value={ecmForm.description} onChange={e => setEcmForm(f => ({ ...f, description: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88]" />
+            <div>
+              <input placeholder="ECM Number (e.g. ECM-005)" value={ecmForm.number} onChange={e => { setEcmForm(f => ({ ...f, number: e.target.value })); setErrors(e2 => ({ ...e2, ecmNum: '' })); }} className={`w-full bg-[#0F1829] border rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88] ${errors.ecmNum ? 'border-red-500' : 'border-[#1E2A45]'}`} />
+              {errors.ecmNum && <p className="text-[10px] text-red-400 mt-1">{errors.ecmNum}</p>}
+            </div>
+            <div>
+              <input placeholder="Description" value={ecmForm.description} onChange={e => { setEcmForm(f => ({ ...f, description: e.target.value })); setErrors(e2 => ({ ...e2, ecmDesc: '' })); }} className={`w-full bg-[#0F1829] border rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88] ${errors.ecmDesc ? 'border-red-500' : 'border-[#1E2A45]'}`} />
+              {errors.ecmDesc && <p className="text-[10px] text-red-400 mt-1">{errors.ecmDesc}</p>}
+            </div>
             <select value={ecmForm.category} onChange={e => setEcmForm(f => ({ ...f, category: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white">
               <option>HVAC</option><option>Lighting</option><option>Building Envelope</option><option>Controls</option><option>Water</option><option>Renewable</option>
             </select>
@@ -418,7 +429,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={() => setShowEcmModal(false)} className="px-4 py-2 text-sm text-[#7A8BA8] hover:text-white">Cancel</button>
-              <button onClick={() => { if (!ecmForm.description) return; addECM({ ...ecmForm, cost: Number(ecmForm.cost) || 0, savings: Number(ecmForm.savings) || 0, life: 15, projectId: selectedProjectId }); setEcmForm({ number: '', description: '', category: 'HVAC', cost: '', savings: '' }); setShowEcmModal(false); }} className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">Add</button>
+              <button onClick={() => { const e: Record<string, string> = {}; if (!ecmForm.number) e.ecmNum = 'ECM number is required'; if (!ecmForm.description) e.ecmDesc = 'Description is required'; if (Object.keys(e).length) { setErrors(e); return; } addECM({ ...ecmForm, cost: Number(ecmForm.cost) || 0, savings: Number(ecmForm.savings) || 0, life: 15, projectId: selectedProjectId }); setEcmForm({ number: '', description: '', category: 'HVAC', cost: '', savings: '' }); setShowEcmModal(false); setErrors({}); addToast('ECM added'); }} className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">Add</button>
             </div>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type Phase = 'Prospect' | 'Audit' | 'IGEA' | 'RFP' | 'Contract' | 'Construction' | 'M&V' | 'Closeout';
 export type ServiceLineMode = 'Full' | 'Audit' | 'OR' | 'Construction';
@@ -147,7 +148,9 @@ type StoreType = typeof seedData & {
   logout: () => void;
 };
 
-export const useStore = create<StoreType>((set) => ({
+export const useStore = create<StoreType>()(
+  persist(
+  (set) => ({
   ...seedData,
   setServiceLineMode: (mode) => set({ serviceLineMode: mode }),
   addProject: (project) => set((state) => ({ projects: [...state.projects, { ...project, id: `p${Date.now()}` }] })),
@@ -315,4 +318,14 @@ export const useStore = create<StoreType>((set) => ({
     sessionStorage.removeItem('2kb_auth');
     set({ isAuthenticated: false, authUser: null });
   },
-}));
+}),
+  {
+    name: '2kb-store',
+    storage: createJSONStorage(() => localStorage),
+    partialize: (state) => {
+      // Exclude auth and UI transient state from persistence
+      const { isAuthenticated, authUser, currentUserId, showProjectImport, ...rest } = state;
+      return rest as any;
+    },
+  }
+));

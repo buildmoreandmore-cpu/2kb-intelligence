@@ -7,6 +7,9 @@ import { EditableField } from '@/components/EditableField';
 import { AuditTrailPanel } from '@/components/AuditTrailPanel';
 import { FreshnessBadge } from '@/components/FreshnessBadge';
 import { SharePointImportModal, SECTION_CONFIGS } from '@/components/SharePointImportModal';
+import { useToastStore } from '@/stores/toastStore';
+import { useConfirmStore } from '@/stores/confirmStore';
+import { EmptyState } from '@/components/EmptyState';
 
 export function Construction({ projectId }: { projectId?: string }) {
   const projects = useStore(state => state.projects);
@@ -19,12 +22,15 @@ export function Construction({ projectId }: { projectId?: string }) {
   const currentUser = useStore(state => state.users).find(u => u.id === useStore.getState().currentUserId);
 
   const addInspectionFinding = useStore(state => state.addInspectionFinding);
+  const addToast = useToastStore(s => s.addToast);
+  const confirm = useConfirmStore(s => s.confirm);
 
   const [activeTab, setActiveTab] = useState<'tracker' | 'inspections'>('tracker');
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[0]?.id || '');
   const [showFindingModal, setShowFindingModal] = useState(false);
   const [findingForm, setFindingForm] = useState({ date: '', ecm: '', type: 'Quality Issue', severity: 'Medium', description: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const projectEcms = ecms.filter(e => e.projectId === selectedProjectId);
   const projectFindings = inspectionFindings.filter(f => f.projectId === selectedProjectId);
@@ -183,7 +189,7 @@ export function Construction({ projectId }: { projectId?: string }) {
                   })}
                   {projectEcms.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-6 py-8 text-center text-[#7A8BA8]">No ECMs found for this project.</td>
+                      <td colSpan={4}><EmptyState icon={Hammer} title="No ECMs tracked" description="Import or add ECMs in the Financial Modeling module to track installation progress." /></td>
                     </tr>
                   )}
                 </tbody>
@@ -253,7 +259,7 @@ export function Construction({ projectId }: { projectId?: string }) {
                       {finding.importBatchId && (
                         <td className="px-2 py-4">
                           <button
-                            onClick={() => deleteItem('inspectionFindings', finding.id)}
+                            onClick={async () => { if (await confirm('Delete finding?', 'This action cannot be undone.')) { deleteItem('inspectionFindings', finding.id); addToast('Finding deleted'); } }}
                             className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                             title="Delete imported row"
                           >
@@ -265,7 +271,7 @@ export function Construction({ projectId }: { projectId?: string }) {
                   ))}
                   {projectFindings.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-6 py-8 text-center text-[#7A8BA8]">No inspection findings logged for this project.</td>
+                      <td colSpan={6}><EmptyState icon={ClipboardList} title="No inspection findings" description="Log findings from site inspections to track quality and scope." action={{ label: 'Log Finding', onClick: () => setShowFindingModal(true) }} /></td>
                     </tr>
                   )}
                 </tbody>
@@ -287,10 +293,13 @@ export function Construction({ projectId }: { projectId?: string }) {
             <select value={findingForm.severity} onChange={e => setFindingForm(f => ({ ...f, severity: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white">
               <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
             </select>
-            <textarea placeholder="Description" value={findingForm.description} onChange={e => setFindingForm(f => ({ ...f, description: e.target.value }))} className="w-full bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88] min-h-[80px]" />
+            <div>
+              <textarea placeholder="Description" value={findingForm.description} onChange={e => { setFindingForm(f => ({ ...f, description: e.target.value })); setErrors(e2 => ({ ...e2, findDesc: '' })); }} className={`w-full bg-[#0F1829] border rounded-lg px-3 py-2 text-sm text-white placeholder-[#5A6B88] min-h-[80px] ${errors.findDesc ? 'border-red-500' : 'border-[#1E2A45]'}`} />
+              {errors.findDesc && <p className="text-[10px] text-red-400 mt-1">{errors.findDesc}</p>}
+            </div>
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={() => setShowFindingModal(false)} className="px-4 py-2 text-sm text-[#7A8BA8] hover:text-white">Cancel</button>
-              <button onClick={() => { if (!findingForm.description) return; addInspectionFinding({ ...findingForm, date: findingForm.date || new Date().toISOString().split('T')[0], projectId: selectedProjectId, status: 'Open' }); setFindingForm({ date: '', ecm: '', type: 'Quality Issue', severity: 'Medium', description: '' }); setShowFindingModal(false); }} className="px-4 py-2 bg-[#0B7A76] text-white text-sm font-medium rounded-lg hover:bg-[#096A66]">Add</button>
+              <button onClick={() => { if (!findingForm.description) { setErrors({ findDesc: 'Description is required' }); return; } addInspectionFinding({ ...findingForm, date: findingForm.date || new Date().toISOString().split('T')[0], projectId: selectedProjectId, status: 'Open' }); setFindingForm({ date: '', ecm: '', type: 'Quality Issue', severity: 'Medium', description: '' }); setShowFindingModal(false); setErrors({}); addToast('Finding logged'); }} className="px-4 py-2 bg-[#0B7A76] text-white text-sm font-medium rounded-lg hover:bg-[#096A66]">Add</button>
             </div>
           </div>
         </div>

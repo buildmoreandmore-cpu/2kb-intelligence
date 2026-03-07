@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 import { EditableField } from '@/components/EditableField';
 import { AuditTrailPanel } from '@/components/AuditTrailPanel';
 import { SharePointImportModal, SECTION_CONFIGS } from '@/components/SharePointImportModal';
+import { useToastStore } from '@/stores/toastStore';
+import { useConfirmStore } from '@/stores/confirmStore';
 
 export function KnowledgeBase() {
   const benchmarks = useStore(state => state.benchmarks);
@@ -15,6 +17,8 @@ export function KnowledgeBase() {
   const addImportRecord = useStore(state => state.addImportRecord);
   const deleteItem = useStore(state => state.deleteItem);
   const currentUser = useStore(state => state.users).find(u => u.id === useStore.getState().currentUserId);
+  const addToast = useToastStore(s => s.addToast);
+  const confirmDel = useConfirmStore(s => s.confirm);
 
   const [activeTab, setActiveTab] = useState<'benchmarks' | 'lessons' | 'templates'>('benchmarks');
   const [searchQuery, setSearchQuery] = useState('');
@@ -155,7 +159,7 @@ export function KnowledgeBase() {
                           </span>
                           {benchmark.importBatchId && (
                             <button
-                              onClick={() => deleteItem('benchmarks', benchmark.id)}
+                              onClick={async () => { if (await confirmDel('Delete benchmark?', 'This action cannot be undone.')) { deleteItem('benchmarks', benchmark.id); addToast('Benchmark deleted'); } }}
                               className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                               title="Delete imported row"
                             >

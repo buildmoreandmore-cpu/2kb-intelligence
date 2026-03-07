@@ -7,6 +7,10 @@ import { EditableField } from '@/components/EditableField';
 import { AuditTrailPanel } from '@/components/AuditTrailPanel';
 import { FreshnessBadge } from '@/components/FreshnessBadge';
 import { SharePointImportModal, SECTION_CONFIGS } from '@/components/SharePointImportModal';
+import { useToastStore } from '@/stores/toastStore';
+import { useConfirmStore } from '@/stores/confirmStore';
+import { EmptyState } from '@/components/EmptyState';
+import { BulkActions } from '@/components/BulkActions';
 
 const ASSET_IMAGES: Record<string, string> = {
   'Chiller': '/assets/chiller.jpg',
@@ -34,6 +38,7 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
   const [conditionFilter, setConditionFilter] = useState<string>('All');
   const [typeFilter, setTypeFilter] = useState<string>('All');
   const [buildingFilter, setBuildingFilter] = useState<string>('All');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const allAssets = useStore(state => state.assets);
   const projects = useStore(state => state.projects);
@@ -43,6 +48,8 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
   const addImportRecord = useStore(state => state.addImportRecord);
   const deleteItem = useStore(state => state.deleteItem);
   const currentUser = useStore(state => state.users).find(u => u.id === useStore.getState().currentUserId);
+  const addToast = useToastStore(s => s.addToast);
+  const confirm = useConfirmStore(s => s.confirm);
 
   let displayAssets = allAssets;
   
@@ -207,10 +214,13 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAssets.map((asset) => (
-                <div key={asset.id} className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden hover:border-[#0D918C]/50 transition-colors group cursor-pointer relative">
+                <div key={asset.id} className={cn("bg-[#121C35] border rounded-xl overflow-hidden hover:border-[#0D918C]/50 transition-colors group cursor-pointer relative", selectedIds.has(asset.id) ? 'border-[#0D918C] ring-1 ring-[#0D918C]/30' : 'border-[#1E2A45]')}>
+                  <label className="absolute top-2 right-2 z-10" onClick={e => e.stopPropagation()}>
+                    <input type="checkbox" checked={selectedIds.has(asset.id)} onChange={() => setSelectedIds(prev => { const next = new Set(prev); next.has(asset.id) ? next.delete(asset.id) : next.add(asset.id); return next; })} className="w-4 h-4 rounded border-[#2A3A5C] bg-[#0F1829] text-[#0D918C] focus:ring-[#0D918C]" />
+                  </label>
                   {asset.importBatchId && (
                     <button
-                      onClick={(e) => { e.stopPropagation(); deleteItem('assets', asset.id); }}
+                      onClick={async (e) => { e.stopPropagation(); if (await confirm('Delete asset?', 'This action cannot be undone.')) { deleteItem('assets', asset.id); addToast('Asset deleted'); } }}
                       className="absolute top-2 left-2 z-10 p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors bg-[#121C35]/80 backdrop-blur-sm"
                       title="Delete imported row"
                     >
@@ -294,7 +304,7 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
                 </div>
               ))}
               {filteredAssets.length === 0 && (
-                <div className="col-span-full p-8 text-center text-[#7A8BA8]">No assets found.</div>
+                <div className="col-span-full"><EmptyState icon={Camera} title="No assets found" description="Import asset data or start a new capture to build your equipment inventory." action={{ label: 'New Capture', onClick: () => setActiveTab('capture') }} /></div>
               )}
             </div>
           </div>
@@ -333,6 +343,11 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
           </div>
         )}
       </div>
+      <BulkActions
+        count={selectedIds.size}
+        onDelete={async () => { if (await confirm('Delete selected assets?', `${selectedIds.size} assets will be permanently deleted.`)) { selectedIds.forEach(id => deleteItem('assets', id)); addToast(`${selectedIds.size} assets deleted`); setSelectedIds(new Set()); } }}
+        onClear={() => setSelectedIds(new Set())}
+      />
       {showImportModal && (
         <SharePointImportModal
           sectionConfig={SECTION_CONFIGS.assets}

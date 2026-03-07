@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
 import { cn } from '@/lib/utils';
 import {
   BarChart3, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2,
   DollarSign, Leaf, Activity, Clock, FileText, ArrowUpRight,
-  ChevronRight, Zap, ShieldAlert, CircleDot, Database
+  ChevronRight, Zap, ShieldAlert, CircleDot, Database, GitCompare, X
 } from 'lucide-react';
 import { getFreshnessStatus, daysSinceUpdate } from '@/lib/freshness';
 import { ExportButton } from '@/components/ExportButton';
@@ -18,6 +18,8 @@ export function Dashboard() {
   const navigate = useNavigate();
   const mode = useStore(s => s.serviceLineMode);
   const projects = useStore(s => s.projects);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
   const risks = useStore(s => s.risks);
   const milestones = useStore(s => s.milestones);
   const mvData = useStore(s => s.mvData);
@@ -173,7 +175,18 @@ export function Dashboard() {
              'Construction management overview'}
           </p>
         </div>
-        <ExportButton
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setCompareMode(!compareMode); setCompareIds([]); }}
+            className={cn(
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+              compareMode ? "bg-[#0D918C] text-white" : "bg-[#1E2A45] border border-[#2A3A5C] text-[#9AA5B8] hover:bg-[#2A3A5C]"
+            )}
+          >
+            <GitCompare className="w-3.5 h-3.5" />
+            Compare
+          </button>
+          <ExportButton
           variant="compact"
           filename="portfolio-summary"
           sheets={[
@@ -182,6 +195,7 @@ export function Dashboard() {
             { name: 'Recent Tasks', data: tasks.slice(0, 20).map(t => ({ 'Task': t.title, 'Project': projects.find(p => p.id === t.projectId)?.name || '', 'Assignee': t.assignedTo, 'Priority': t.priority, 'Due Date': t.dueDate, 'Status': t.status })) },
           ]}
         />
+        </div>
       </div>
 
       {/* Row 1: Primary KPIs — compact, dense */}
@@ -241,6 +255,75 @@ export function Dashboard() {
           ))}
         </div>
       )}
+
+      {/* Compare mode selection prompt */}
+      {compareMode && compareIds.length < 2 && (
+        <div className="bg-[#0D918C]/10 border border-[#0D918C]/30 rounded-lg px-4 py-3 flex items-center justify-between">
+          <p className="text-xs text-[#0D918C]">
+            <span className="font-semibold">Compare mode:</span> Select {2 - compareIds.length} project{compareIds.length === 0 ? 's' : ''} from the pipeline below
+          </p>
+          <button onClick={() => { setCompareMode(false); setCompareIds([]); }} className="text-[#5A6B88] hover:text-white"><X className="w-3.5 h-3.5" /></button>
+        </div>
+      )}
+
+      {/* Side-by-side comparison card */}
+      {compareMode && compareIds.length === 2 && (() => {
+        const [a, b] = compareIds.map(id => projects.find(p => p.id === id)!).filter(Boolean);
+        if (!a || !b) return null;
+        const aEcms = ecms.filter(e => e.projectId === a.id).length;
+        const bEcms = ecms.filter(e => e.projectId === b.id).length;
+        const aRisks = risks.filter(r => r.projectId === a.id).length;
+        const bRisks = risks.filter(r => r.projectId === b.id).length;
+        const aMv = mvData.filter(d => d.projectId === a.id);
+        const bMv = mvData.filter(d => d.projectId === b.id);
+        const aSavings = aMv.reduce((s, d) => s + d.calculated, 0);
+        const bSavings = bMv.reduce((s, d) => s + d.calculated, 0);
+        const aMilestones = milestones.filter(m => m.projectId === a.id);
+        const bMilestones = milestones.filter(m => m.projectId === b.id);
+        const aComplete = aMilestones.length > 0 ? Math.round((aMilestones.filter(m => m.status === 'completed').length / aMilestones.length) * 100) : 0;
+        const bComplete = bMilestones.length > 0 ? Math.round((bMilestones.filter(m => m.status === 'completed').length / bMilestones.length) * 100) : 0;
+
+        const rows = [
+          { label: 'Phase', a: a.phase, b: b.phase },
+          { label: 'Capital Value', a: `$${(a.value / 1000000).toFixed(1)}M`, b: `$${(b.value / 1000000).toFixed(1)}M` },
+          { label: 'Risk Score', a: a.riskScore, b: b.riskScore, better: 'lower' as const },
+          { label: 'ECMs', a: aEcms, b: bEcms },
+          { label: 'Open Risks', a: aRisks, b: bRisks, better: 'lower' as const },
+          { label: 'Total Savings', a: `$${(aSavings / 1000).toFixed(0)}K`, b: `$${(bSavings / 1000).toFixed(0)}K` },
+          { label: 'Completion', a: `${aComplete}%`, b: `${bComplete}%` },
+        ];
+
+        return (
+          <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#1E2A45] flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-white">Project Comparison</h3>
+              <button onClick={() => { setCompareIds([]); setCompareMode(false); }} className="text-[#5A6B88] hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[#0F1829] border-b border-[#1E2A45]">
+                  <tr>
+                    <th className="px-5 py-3 text-left text-[10px] font-medium text-[#5A6B88] uppercase tracking-wider w-1/3">Metric</th>
+                    <th className="px-5 py-3 text-center text-xs font-semibold text-white w-1/3">{a.name}</th>
+                    <th className="px-5 py-3 text-center text-xs font-semibold text-white w-1/3">{b.name}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#1E2A45]">
+                  {rows.map(row => (
+                    <tr key={row.label} className="hover:bg-[#1A2544] transition-colors">
+                      <td className="px-5 py-3 text-xs font-medium text-[#7A8BA8]">{row.label}</td>
+                      <td className="px-5 py-3 text-center text-sm font-semibold text-white">{row.a}</td>
+                      <td className="px-5 py-3 text-center text-sm font-semibold text-white">{row.b}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Alert Strip — only shows if there are alerts */}
       {alerts.length > 0 && (
@@ -321,8 +404,17 @@ export function Dashboard() {
               return (
                 <div
                   key={project.id}
-                  onClick={() => navigate(`/app/projects/${project.id}`)}
-                  className="group px-5 py-4 hover:bg-[#1A2544] cursor-pointer transition-colors"
+                  onClick={() => {
+                    if (compareMode && compareIds.length < 2) {
+                      if (!compareIds.includes(project.id)) setCompareIds(prev => [...prev, project.id]);
+                    } else if (!compareMode) {
+                      navigate(`/app/projects/${project.id}`);
+                    }
+                  }}
+                  className={cn(
+                    "group px-5 py-4 cursor-pointer transition-colors",
+                    compareIds.includes(project.id) ? "bg-[#0D918C]/10 border-l-2 border-l-[#0D918C]" : "hover:bg-[#1A2544]"
+                  )}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1 min-w-0">
