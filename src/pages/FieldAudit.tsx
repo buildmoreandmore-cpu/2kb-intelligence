@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { Camera, Upload, Mic, AlertTriangle, Search, Filter, FileSpreadsheet } from 'lucide-react';
+import { Camera, Upload, Mic, AlertTriangle, Search, Filter, FileSpreadsheet, X } from 'lucide-react';
 import { ExportButton } from '@/components/ExportButton';
 import { cn } from '@/lib/utils';
 import { EditableField } from '@/components/EditableField';
@@ -37,6 +37,7 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
   const addBatch = useStore(state => state.addBatch);
   const addCustomColumns = useStore(state => state.addCustomColumns);
   const addImportRecord = useStore(state => state.addImportRecord);
+  const deleteItem = useStore(state => state.deleteItem);
 
   let displayAssets = allAssets;
   
@@ -60,7 +61,7 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
           <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-white tracking-tight">Field Audit & Asset Intelligence</h1>
+                <h1 className="text-lg md:text-2xl font-bold text-white tracking-tight">Field Audit & Asset Intelligence</h1>
                 {projectId && <FreshnessBadge projectId={projectId} module="Assets" showTimestamp />}
               </div>
               <p className="text-sm text-[#7A8BA8] mt-1">Capture equipment data, transcribe notes, and flag deficiencies.</p>
@@ -115,7 +116,7 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
         {activeTab === 'assets' ? (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <div className="relative w-96">
+              <div className="relative w-full md:w-96">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                 <input 
                   type="text" 
@@ -152,7 +153,16 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAssets.map((asset) => (
-                <div key={asset.id} className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden hover:border-[#0D918C]/50 transition-colors group cursor-pointer">
+                <div key={asset.id} className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden hover:border-[#0D918C]/50 transition-colors group cursor-pointer relative">
+                  {asset.importBatchId && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); deleteItem('assets', asset.id); }}
+                      className="absolute top-2 left-2 z-10 p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors bg-[#121C35]/80 backdrop-blur-sm"
+                      title="Delete imported row"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                   <div className="h-48 relative bg-[#0F1829]">
                     <img
                       src={ASSET_IMAGES[asset.type] || '/assets/industrial.jpg'}
@@ -287,6 +297,7 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
               user: 'Martin',
               fileName: fName,
               batchId,
+              storeKey: 'assets',
             });
           }}
         />

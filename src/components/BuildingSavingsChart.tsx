@@ -6,14 +6,7 @@ const PHASES = ['Prospect', 'Audit', 'IGEA', 'RFP', 'Contract', 'Construction', 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const CO2_FACTOR = 0.000417; // tCO2 per kWh — EPA eGRID Southeast
 
-const SHORT_NAMES: Record<string, string> = {
-  'Clayton County HS': 'HS',
-  'Clayton County MS': 'MS',
-  'Jonesboro Elementary': 'Jonesboro Elem',
-  'Riverdale Elementary': 'Riverdale Elem',
-  'Admin Building': 'Admin',
-  'Transportation Center': 'Transport',
-};
+const SHORT_NAMES: Record<string, string> = {};
 
 interface Props {
   projectId: string;

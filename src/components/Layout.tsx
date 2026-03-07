@@ -17,11 +17,13 @@ import {
   UserCog,
   Menu,
   X,
+  Layers,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStore, ServiceLineMode } from '@/store';
 import { AIAssistant } from './AIAssistant';
 import { getFreshnessStatus } from '@/lib/freshness';
+import { ProjectFileImport } from './ProjectFileImport';
 
 const allNavigation = [
   { name: 'Dashboard', href: '/app', icon: LayoutDashboard, modes: ['Full', 'OR'], badgeKey: null as string | null, freshnessModule: null as string | null },
@@ -52,6 +54,7 @@ export function Layout() {
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showProjectImport, setShowProjectImport] = useState(false);
   const mode = useStore(state => state.serviceLineMode);
   const logout = useStore(state => state.logout);
   const setMode = useStore(state => state.setServiceLineMode);
@@ -74,11 +77,13 @@ export function Layout() {
   const getWorstFreshness = (module: string): 'fresh' | 'amber' | 'red' => {
     const config = freshnessConfig.find(c => c.module === module);
     if (!config) return 'fresh';
+    // Only check modules that have at least one timestamp recorded (i.e. data was imported/updated)
+    const relevantKeys = Object.keys(moduleLastUpdated).filter(k => k.endsWith(`-${module}`));
+    if (relevantKeys.length === 0) return 'fresh';
     let worst: 'fresh' | 'amber' | 'red' = 'fresh';
-    for (const p of projects) {
-      const key = `${p.id}-${module}`;
+    for (const key of relevantKeys) {
       const lastUpdated = moduleLastUpdated[key];
-      if (!lastUpdated) { worst = 'red'; break; }
+      if (!lastUpdated) continue;
       const status = getFreshnessStatus(lastUpdated, config);
       if (status === 'red') { worst = 'red'; break; }
       if (status === 'amber' && worst === 'fresh') worst = 'amber';
@@ -177,6 +182,13 @@ export function Layout() {
         </div>
 
         <div className="border-t border-[#1E2A45] pt-3 mt-3">
+          <button
+            onClick={() => { setShowProjectImport(true); setMobileMenuOpen(false); }}
+            className="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#7A8BA8] hover:bg-[#121C35] hover:text-white w-full text-left"
+          >
+            <Layers className="w-4 h-4 flex-shrink-0" />
+            <span>Import Project File</span>
+          </button>
           <NavLink
             to="/app/settings"
             onClick={() => setMobileMenuOpen(false)}
@@ -325,6 +337,11 @@ export function Layout() {
 
       {/* AI Assistant */}
       <AIAssistant />
+
+      {/* Project File Import Modal */}
+      {showProjectImport && (
+        <ProjectFileImport onClose={() => setShowProjectImport(false)} />
+      )}
     </div>
   );
 }

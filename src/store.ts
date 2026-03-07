@@ -47,22 +47,9 @@ export const seedData = {
   isAuthenticated: !!sessionStorage.getItem('2kb_auth'),
   authUser: sessionStorage.getItem('2kb_auth') || null as string | null,
   serviceLineMode: 'Full' as ServiceLineMode,
-  organizations: [
-    { id: 'o1', name: 'Clayton County School District' },
-    { id: 'o2', name: 'City of Morrow' },
-    { id: 'o3', name: 'Henry County Government' }
-  ],
-  buildings: [
-    { id: 'b1', orgId: 'o1', name: 'Lincoln Elementary', type: 'K-12 School', sqft: 68000, yearBuilt: 1972 },
-    { id: 'b2', orgId: 'o2', name: 'City Hall Annex', type: 'Office', sqft: 42000, yearBuilt: 1985 },
-    { id: 'b3', orgId: 'o2', name: 'Westside Recreation Center', type: 'Recreation', sqft: 31000, yearBuilt: 1994 },
-    { id: 'b4', orgId: 'o3', name: 'Public Safety Complex', type: 'Public Safety', sqft: 55000, yearBuilt: 1968 }
-  ],
-  projects: [
-    { id: 'p1', orgId: 'o1', name: 'Clayton County Schools ESPC', phase: 'M&V' as Phase, esco: 'Trane', value: 8500000, riskScore: 35, engineer: 'Martin' },
-    { id: 'p2', orgId: 'o2', name: 'City of Morrow Municipal', phase: 'IGEA' as Phase, esco: 'Honeywell', value: 4200000, riskScore: 58, engineer: 'Sarah' },
-    { id: 'p3', orgId: 'o3', name: 'Henry County Public Safety', phase: 'Construction' as Phase, esco: 'Johnson Controls', value: 7800000, riskScore: 72, engineer: 'David' }
-  ],
+  organizations: [] as any[],
+  buildings: [] as any[],
+  projects: [] as any[],
   assets: [] as any[],
   utilityBills: [] as any[],
   ecms: [] as any[],
@@ -136,12 +123,15 @@ type StoreType = typeof seedData & {
   addImportRecord: (record: any) => void;
   // SharePoint Import
   addUtilityBillsBatch: (bills: any[], importBatchId: string) => void;
+  /** @deprecated Use deleteBatch(storeKey, importBatchId) instead */
   deleteImportBatch: (importBatchId: string) => void;
   addCustomColumns: (columns: CustomColumnDef[]) => void;
   updateImportRecordStatus: (id: string, status: string) => void;
   // Generic batch import for any section
   addBatch: (storeKey: string, items: any[], importBatchId: string) => void;
   deleteBatch: (storeKey: string, importBatchId: string) => void;
+  deleteItem: (storeKey: string, itemId: string) => void;
+  replaceBatch: (storeKey: string, oldBatchId: string, newItems: any[], newBatchId: string) => void;
   // Auth
   login: (email: string, password: string) => boolean;
   logout: () => void;
@@ -280,6 +270,18 @@ export const useStore = create<StoreType>((set) => ({
     const arr = (state as any)[storeKey];
     if (!Array.isArray(arr)) return {};
     return { [storeKey]: arr.filter((item: any) => item.importBatchId !== importBatchId) };
+  }),
+  deleteItem: (storeKey, itemId) => set((state) => {
+    const arr = (state as any)[storeKey];
+    if (!Array.isArray(arr)) return {};
+    return { [storeKey]: arr.filter((item: any) => item.id !== itemId) };
+  }),
+  replaceBatch: (storeKey, oldBatchId, newItems, newBatchId) => set((state) => {
+    const arr = (state as any)[storeKey];
+    if (!Array.isArray(arr)) return {};
+    const filtered = arr.filter((item: any) => item.importBatchId !== oldBatchId);
+    const tagged = newItems.map((item, i) => ({ ...item, id: `${storeKey.charAt(0)}${Date.now()}_${i}`, importBatchId: newBatchId }));
+    return { [storeKey]: [...filtered, ...tagged] };
   }),
   // ─── Auth ───
   login: (email, password) => {

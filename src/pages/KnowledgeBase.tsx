@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { BookOpen, Search, Filter, Lightbulb, TrendingDown, DollarSign, FileText, FileSpreadsheet } from 'lucide-react';
+import { BookOpen, Search, Filter, Lightbulb, TrendingDown, DollarSign, FileText, FileSpreadsheet, X } from 'lucide-react';
 import { ExportButton } from '@/components/ExportButton';
 import { cn } from '@/lib/utils';
 import { EditableField } from '@/components/EditableField';
@@ -13,6 +13,7 @@ export function KnowledgeBase() {
   const addBatch = useStore(state => state.addBatch);
   const addCustomColumns = useStore(state => state.addCustomColumns);
   const addImportRecord = useStore(state => state.addImportRecord);
+  const deleteItem = useStore(state => state.deleteItem);
 
   const [activeTab, setActiveTab] = useState<'benchmarks' | 'lessons' | 'templates'>('benchmarks');
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,7 +24,7 @@ export function KnowledgeBase() {
       <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-3 md:px-8 py-6">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Knowledge Capture & Institutional Memory</h1>
+            <h1 className="text-lg md:text-2xl font-bold text-white tracking-tight">Knowledge Capture & Institutional Memory</h1>
             <p className="text-sm text-[#7A8BA8] mt-1">Store historical data, benchmark costs/savings, prevent repeating mistakes.</p>
           </div>
           <div className="flex items-center gap-3">
@@ -87,7 +88,7 @@ export function KnowledgeBase() {
 
       <div className="flex-1 overflow-y-auto p-3 md:p-8 max-w-7xl mx-auto w-full space-y-8">
         <div className="flex items-center justify-between">
-          <div className="relative w-96">
+          <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input 
               type="text" 
@@ -147,9 +148,20 @@ export function KnowledgeBase() {
                         />
                       </td>
                       <td className="px-6 py-4 text-[#9AA5B8]">
-                        <span className="px-2.5 py-1 rounded bg-[#1E2A45] text-xs font-medium border border-[#2A3A5C]">
-                          {benchmark.source}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-1 rounded bg-[#1E2A45] text-xs font-medium border border-[#2A3A5C]">
+                            {benchmark.source}
+                          </span>
+                          {benchmark.importBatchId && (
+                            <button
+                              onClick={() => deleteItem('benchmarks', benchmark.id)}
+                              className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                              title="Delete imported row"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                         <AuditTrailPanel entityType="benchmark" entityId={benchmark.id} />
                       </td>
                     </tr>
@@ -244,7 +256,7 @@ export function KnowledgeBase() {
           onComplete={(batchId, count, fName, customCols, items) => {
             addBatch('benchmarks', items, batchId);
             if (customCols.length > 0) addCustomColumns(customCols);
-            addImportRecord({ type: 'Benchmarks', source: 'SharePoint', date: new Date().toISOString(), records: count, status: 'Success', user: 'Martin', fileName: fName, batchId });
+            addImportRecord({ type: 'Benchmarks', source: 'SharePoint', date: new Date().toISOString(), records: count, status: 'Success', user: 'Martin', fileName: fName, batchId, storeKey: 'benchmarks' });
           }}
         />
       )}

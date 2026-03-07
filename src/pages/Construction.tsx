@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { HardHat, AlertTriangle, CheckCircle2, Search, Filter, Plus, ClipboardList, Hammer, FileSpreadsheet } from 'lucide-react';
+import { HardHat, AlertTriangle, CheckCircle2, Search, Filter, Plus, ClipboardList, Hammer, FileSpreadsheet, X } from 'lucide-react';
 import { ExportButton } from '@/components/ExportButton';
 import { cn } from '@/lib/utils';
 import { EditableField } from '@/components/EditableField';
@@ -15,10 +15,11 @@ export function Construction({ projectId }: { projectId?: string }) {
   const addBatch = useStore(state => state.addBatch);
   const addCustomColumns = useStore(state => state.addCustomColumns);
   const addImportRecord = useStore(state => state.addImportRecord);
+  const deleteItem = useStore(state => state.deleteItem);
 
   const [activeTab, setActiveTab] = useState<'tracker' | 'inspections'>('tracker');
   const [showImportModal, setShowImportModal] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[2].id); // Default to construction project
+  const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[0]?.id || '');
 
   const projectEcms = ecms.filter(e => e.projectId === selectedProjectId);
   const projectFindings = inspectionFindings.filter(f => f.projectId === selectedProjectId);
@@ -34,7 +35,7 @@ export function Construction({ projectId }: { projectId?: string }) {
           <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-white tracking-tight">Construction Oversight</h1>
+                <h1 className="text-lg md:text-2xl font-bold text-white tracking-tight">Construction Oversight</h1>
                 {projectId && <FreshnessBadge module="Inspection" entityId={projectId} />}
               </div>
               <p className="text-sm text-[#7A8BA8] mt-1">Track installation progress, inspections, and scope deviations.</p>
@@ -101,21 +102,21 @@ export function Construction({ projectId }: { projectId?: string }) {
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
             <h3 className="text-sm font-medium text-[#7A8BA8] uppercase tracking-wider mb-2">Total ECMs</h3>
             <div className="flex items-end gap-3">
-              <span className="text-4xl font-bold text-white">{totalEcms}</span>
+              <span className="text-2xl md:text-4xl font-bold text-white">{totalEcms}</span>
             </div>
           </div>
 
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
             <h3 className="text-sm font-medium text-[#7A8BA8] uppercase tracking-wider mb-2">Open Findings</h3>
             <div className="flex items-end gap-3">
-              <span className="text-4xl font-bold text-amber-500">{openFindings}</span>
+              <span className="text-2xl md:text-4xl font-bold text-amber-500">{openFindings}</span>
             </div>
           </div>
 
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
             <h3 className="text-sm font-medium text-[#7A8BA8] uppercase tracking-wider mb-2">Scope Deviations</h3>
             <div className="flex items-end gap-3">
-              <span className={`text-4xl font-bold ${scopeDeviations > 0 ? 'text-red-500' : 'text-[#37BB26]'}`}>
+              <span className={`text-2xl md:text-4xl font-bold ${scopeDeviations > 0 ? 'text-red-500' : 'text-[#37BB26]'}`}>
                 {scopeDeviations}
               </span>
             </div>
@@ -245,6 +246,17 @@ export function Construction({ projectId }: { projectId?: string }) {
                           <AuditTrailPanel entityType="inspectionFinding" entityId={finding.id} />
                         </div>
                       </td>
+                      {finding.importBatchId && (
+                        <td className="px-2 py-4">
+                          <button
+                            onClick={() => deleteItem('inspectionFindings', finding.id)}
+                            className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                            title="Delete imported row"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                   {projectFindings.length === 0 && (
@@ -276,6 +288,7 @@ export function Construction({ projectId }: { projectId?: string }) {
               user: 'Martin',
               fileName: fName,
               batchId,
+              storeKey: 'inspectionFindings',
             });
           }}
         />

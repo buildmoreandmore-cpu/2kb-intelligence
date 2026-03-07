@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { ShieldCheck, Calendar, FileText, AlertTriangle, GitPullRequest, FileCheck, Plus, Filter, CalendarPlus, FileSpreadsheet } from 'lucide-react';
+import { ShieldCheck, Calendar, FileText, AlertTriangle, GitPullRequest, FileCheck, Plus, Filter, CalendarPlus, FileSpreadsheet, X } from 'lucide-react';
 import { ExportButton } from '@/components/ExportButton';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
@@ -21,9 +21,10 @@ export function Governance({ projectId }: { projectId?: string }) {
   const addBatch = useStore(state => state.addBatch);
   const addCustomColumns = useStore(state => state.addCustomColumns);
   const addImportRecord = useStore(state => state.addImportRecord);
+  const deleteItem = useStore(state => state.deleteItem);
 
   const [activeTab, setActiveTab] = useState<'pipeline' | 'milestones' | 'risks' | 'co' | 'submittals' | 'obligations'>('pipeline');
-  const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[0].id);
+  const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[0]?.id || '');
   const [catFilter, setCatFilter] = useState<string>('All');
   const [importSection, setImportSection] = useState<string | null>(null);
 
@@ -36,7 +37,7 @@ export function Governance({ projectId }: { projectId?: string }) {
         <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-3 md:px-8 py-6">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Owner's Rep Governance</h1>
+              <h1 className="text-lg md:text-xl md:text-2xl font-bold text-white tracking-tight">Owner's Rep Governance</h1>
               <p className="text-sm text-[#7A8BA8] mt-1">Track project phases, milestones, documents, and risks.</p>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -173,13 +174,24 @@ export function Governance({ projectId }: { projectId?: string }) {
                       </td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{milestone.assignedTo}</td>
                       <td className="px-6 py-4">
-                        <button
-                          onClick={() => downloadICS(milestone.name, milestone.dueDate, `Milestone: ${milestone.name} — Assigned to: ${milestone.assignedTo}`)}
-                          className="p-1 text-[#5A6B88] hover:text-emerald-400 transition-colors"
-                          title="Add to Calendar"
-                        >
-                          <CalendarPlus className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => downloadICS(milestone.name, milestone.dueDate, `Milestone: ${milestone.name} — Assigned to: ${milestone.assignedTo}`)}
+                            className="p-1 text-[#5A6B88] hover:text-emerald-400 transition-colors"
+                            title="Add to Calendar"
+                          >
+                            <CalendarPlus className="w-4 h-4" />
+                          </button>
+                          {milestone.importBatchId && (
+                            <button
+                              onClick={() => deleteItem('milestones', milestone.id)}
+                              className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                              title="Delete imported row"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -235,6 +247,17 @@ export function Governance({ projectId }: { projectId?: string }) {
                         <EditableField value={risk.status} entityType="risk" entityId={risk.id} field="status" projectId={selectedProjectId} type="select" options={['Open', 'Mitigated', 'Closed']} />
                       </td>
                       <td className="px-6 py-4 text-[#9AA5B8]">{risk.owner}</td>
+                      {risk.importBatchId && (
+                        <td className="px-2 py-4">
+                          <button
+                            onClick={() => deleteItem('risks', risk.id)}
+                            className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                            title="Delete imported row"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                   {risks.filter(r => r.projectId === selectedProjectId).length === 0 && (
@@ -338,19 +361,19 @@ export function Governance({ projectId }: { projectId?: string }) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-5">
                   <p className="text-xs text-[#7A8BA8] uppercase tracking-wider mb-1">Total Obligations</p>
-                  <p className="text-2xl font-bold text-white">{total}</p>
+                  <p className="text-lg md:text-xl md:text-2xl font-bold text-white">{total}</p>
                 </div>
                 <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-5">
                   <p className="text-xs text-[#7A8BA8] uppercase tracking-wider mb-1">Completed</p>
-                  <p className="text-2xl font-bold text-emerald-600">{completed}</p>
+                  <p className="text-lg md:text-xl md:text-2xl font-bold text-emerald-600">{completed}</p>
                 </div>
                 <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-5">
                   <p className="text-xs text-[#7A8BA8] uppercase tracking-wider mb-1">Coming Due</p>
-                  <p className="text-2xl font-bold text-amber-600">{comingDue}</p>
+                  <p className="text-lg md:text-xl md:text-2xl font-bold text-amber-600">{comingDue}</p>
                 </div>
                 <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-5">
                   <p className="text-xs text-[#7A8BA8] uppercase tracking-wider mb-1">Overdue</p>
-                  <p className={cn('text-2xl font-bold', overdue > 0 ? 'text-red-600' : 'text-emerald-600')}>{overdue}</p>
+                  <p className={cn('text-lg md:text-xl md:text-2xl font-bold', overdue > 0 ? 'text-red-600' : 'text-emerald-600')}>{overdue}</p>
                 </div>
               </div>
 
@@ -463,7 +486,20 @@ export function Governance({ projectId }: { projectId?: string }) {
                           <td className="px-6 py-4">
                             <EditableField value={o.status} entityType="contractObligation" entityId={o.id} field="status" projectId={selectedProjectId} type="select" options={['On Track', 'At Risk', 'Overdue', 'Complete']} />
                           </td>
-                          <td className="px-6 py-4 text-xs text-[#5A6B88]">{o.contractRef}</td>
+                          <td className="px-6 py-4 text-xs text-[#5A6B88]">
+                            <div className="flex items-center gap-1">
+                              {o.contractRef}
+                              {o.importBatchId && (
+                                <button
+                                  onClick={() => deleteItem(SECTION_CONFIGS[activeTab === 'obligations' ? 'contractObligations' : 'milestones']?.storeKey || 'contractObligations', o.id)}
+                                  className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                                  title="Delete imported row"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
                         </tr>
                       ))}
                       {filtered.length === 0 && (
@@ -487,7 +523,7 @@ export function Governance({ projectId }: { projectId?: string }) {
           onComplete={(batchId, count, fName, customCols, items) => {
             addBatch(SECTION_CONFIGS[importSection].storeKey, items, batchId);
             if (customCols.length > 0) addCustomColumns(customCols);
-            addImportRecord({ type: SECTION_CONFIGS[importSection].sectionName, source: 'SharePoint', date: new Date().toISOString(), records: count, status: 'Success', user: 'Martin', fileName: fName, batchId });
+            addImportRecord({ type: SECTION_CONFIGS[importSection].sectionName, source: 'SharePoint', date: new Date().toISOString(), records: count, status: 'Success', user: 'Martin', fileName: fName, batchId, storeKey: SECTION_CONFIGS[importSection].storeKey });
           }}
         />
       )}

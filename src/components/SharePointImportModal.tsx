@@ -192,7 +192,7 @@ interface ColumnMapping {
   mapping: MappingChoice;
 }
 
-function fuzzyMatchGeneric(header: string, fields: SectionFieldDef[]): MappingChoice {
+export function fuzzyMatchGeneric(header: string, fields: SectionFieldDef[]): MappingChoice {
   const normalized = header.toLowerCase().trim().replace(/[_\-./]/g, ' ').replace(/\s+/g, ' ');
   for (const field of fields) {
     for (const alias of field.aliases) {
@@ -213,13 +213,15 @@ export interface SharePointImportModalProps {
   /** Optional context to attach to every imported record (e.g. buildingId, projectId) */
   contextFields?: Record<string, any>;
   contextLabel?: string;          // e.g. "Lincoln Elementary" or "Clayton County Schools ESPC"
+  /** When set, the modal operates in "Replace Import" mode — swaps old batch data */
+  replaceBatchId?: string;
   onClose: () => void;
   onComplete: (batchId: string, count: number, fileName: string, customCols: CustomColumnDef[], items: any[]) => void;
 }
 
 type Step = 'upload' | 'mapping' | 'importing' | 'success';
 
-export function SharePointImportModal({ sectionConfig, contextFields, contextLabel, onClose, onComplete }: SharePointImportModalProps) {
+export function SharePointImportModal({ sectionConfig, contextFields, contextLabel, replaceBatchId, onClose, onComplete }: SharePointImportModalProps) {
   const { knownFields, sectionName, defaults } = sectionConfig;
   const projects = useStore(state => state.projects);
 
@@ -244,6 +246,57 @@ export function SharePointImportModal({ sectionConfig, contextFields, contextLab
     const extraColumns = mappings.filter(m => m.mapping === 'custom').map(m => m.header);
     const unmappedCount = mappings.filter(m => m.mapping === 'skip').length;
     return { missingFields, extraColumns, unmappedCount, totalFileColumns: mappings.length, mappedCount: mappedKeys.size };
+  }, [parsed, mappings, knownFields]);
+
+  // Validation Warnings: scan parsed rows for data quality issues
+  const validationWarnings = useMemo(() => {
+    if (!parsed || mappings.length === 0) return null;
+    const warnings: string[] = [];
+    const activeMappings = mappings.filter(m => m.mapping !== 'skip' && m.mapping !== 'custom');
+
+    // Check for empty required fields
+    activeMappings.forEach(m => {
+      const emptyCount = parsed.rows.filter(r => {
+        const val = r[m.header];
+        return val === '' || val === null || val === undefined;
+      }).length;
+      if (emptyCount > 0) {
+        const fieldDef = knownFields.find(f => f.key === m.mapping);
+        warnings.push(`${emptyCount} empty value${emptyCount > 1 ? 's' : ''} in "${fieldDef?.label || m.mapping}"`);
+      }
+    });
+
+    // Check for non-numeric values in number-typed columns
+    activeMappings.forEach(m => {
+      const fieldDef = knownFields.find(f => f.key === m.mapping);
+      if (fieldDef?.type === 'number') {
+        const badCount = parsed.rows.filter(r => {
+          const val = r[m.header];
+          if (val === '' || val === null || val === undefined) return false;
+          return isNaN(parseFloat(String(val).replace(/[$,]/g, '')));
+        }).length;
+        if (badCount > 0) {
+          warnings.push(`${badCount} non-numeric value${badCount > 1 ? 's' : ''} in "${fieldDef.label}"`);
+        }
+      }
+    });
+
+    // Check for duplicate keys in the first mapped string field
+    const firstStringMapping = activeMappings.find(m => {
+      const fieldDef = knownFields.find(f => f.key === m.mapping);
+      return !fieldDef?.type || fieldDef.type === 'string';
+    });
+    if (firstStringMapping) {
+      const values = parsed.rows.map(r => String(r[firstStringMapping.header] ?? '').trim()).filter(Boolean);
+      const seen = new Set<string>();
+      const dupes = new Set<string>();
+      values.forEach(v => { if (seen.has(v)) dupes.add(v); seen.add(v); });
+      if (dupes.size > 0) {
+        warnings.push(`${dupes.size} duplicate value${dupes.size > 1 ? 's' : ''} in "${knownFields.find(f => f.key === firstStringMapping.mapping)?.label || firstStringMapping.mapping}"`);
+      }
+    }
+
+    return warnings.length > 0 ? warnings : null;
   }, [parsed, mappings, knownFields]);
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -379,7 +432,7 @@ export function SharePointImportModal({ sectionConfig, contextFields, contextLab
               <FileSpreadsheet className="w-4 h-4 text-[#0D918C]" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-white">Import {sectionName} from SharePoint</h3>
+              <h3 className="text-base font-semibold text-white">{replaceBatchId ? `Replace ${sectionName} Import` : `Import ${sectionName} from SharePoint`}</h3>
               {contextLabel && <p className="text-xs text-[#7A8BA8]">{contextLabel}</p>}
             </div>
           </div>
@@ -484,6 +537,20 @@ export function SharePointImportModal({ sectionConfig, contextFields, contextLab
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Validation Warnings */}
+              {validationWarnings && (
+                <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-3 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-400" />
+                    <span className="text-xs font-semibold text-amber-400">Data Quality Warnings ({validationWarnings.length})</span>
+                  </div>
+                  {validationWarnings.map((w, i) => (
+                    <p key={i} className="text-[11px] text-amber-300/80 pl-6">• {w}</p>
+                  ))}
+                  <p className="text-[10px] text-[#5A6B88] pl-6">Warnings won't block import — data will be imported as-is.</p>
                 </div>
               )}
 
@@ -667,7 +734,12 @@ export function SharePointImportModal({ sectionConfig, contextFields, contextLab
                     : "bg-[#1E2A45] text-[#5A6B88] cursor-not-allowed"
                 )}
               >
-                Import {parsed?.rows.length} Rows
+                {replaceBatchId ? `Replace with ${parsed?.rows.length} Rows` : `Import ${parsed?.rows.length} Rows`}
+                {validationWarnings && (
+                  <span className="ml-1.5 px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-semibold rounded-full border border-amber-500/30">
+                    {validationWarnings.length}
+                  </span>
+                )}
               </button>
             </div>
           </div>

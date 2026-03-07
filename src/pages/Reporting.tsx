@@ -391,7 +391,7 @@ export function Reporting({ projectId }: { projectId?: string }) {
   const lockRecords = useStore(state => state.lockRecords);
 
   const [activeTab, setActiveTab] = useState<'generate' | 'history' | 'qa'>('generate');
-  const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[1].id);
+  const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[0]?.id || '');
   const [reportType, setReportType] = useState('IGEA Report');
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});

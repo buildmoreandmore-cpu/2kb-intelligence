@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { LineChart, AlertTriangle, CheckCircle2, TrendingDown, Leaf, FileText, FileSpreadsheet } from 'lucide-react';
+import { LineChart, AlertTriangle, CheckCircle2, TrendingDown, Leaf, FileText, FileSpreadsheet, X } from 'lucide-react';
 import { ExportButton } from '@/components/ExportButton';
 import { cn } from '@/lib/utils';
 import { EditableField } from '@/components/EditableField';
@@ -16,10 +16,11 @@ export function MV({ projectId }: { projectId?: string }) {
   const addBatch = useStore(state => state.addBatch);
   const addCustomColumns = useStore(state => state.addCustomColumns);
   const addImportRecord = useStore(state => state.addImportRecord);
+  const deleteItem = useStore(state => state.deleteItem);
 
   const [showImportModal, setShowImportModal] = useState(false);
 
-  const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[2].id); // Default to construction/M&V project
+  const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[0]?.id || '');
   const projectMvData = mvData.filter(d => d.projectId === selectedProjectId);
 
   const totalGuaranteed = projectMvData.reduce((sum, d) => sum + d.guaranteed, 0);
@@ -36,7 +37,7 @@ export function MV({ projectId }: { projectId?: string }) {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-white tracking-tight">Measurement & Verification</h1>
+                <h1 className="text-lg md:text-2xl font-bold text-white tracking-tight">Measurement & Verification</h1>
                 {projectId && <FreshnessBadge module="M&V" entityId={projectId} />}
               </div>
               <p className="text-sm text-[#7A8BA8] mt-1">Track post-retrofit savings vs guarantee and detect performance drift.</p>
@@ -106,14 +107,14 @@ export function MV({ projectId }: { projectId?: string }) {
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
             <h3 className="text-sm font-medium text-[#7A8BA8] uppercase tracking-wider mb-2">Total Guaranteed</h3>
             <div className="flex items-end gap-3">
-              <span className="text-4xl font-bold text-white">${totalGuaranteed.toLocaleString()}</span>
+              <span className="text-2xl md:text-4xl font-bold text-white">${totalGuaranteed.toLocaleString()}</span>
             </div>
           </div>
 
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
             <h3 className="text-sm font-medium text-[#7A8BA8] uppercase tracking-wider mb-2">Total Achieved</h3>
             <div className="flex items-end gap-3">
-              <span className={`text-4xl font-bold ${totalCalculated >= totalGuaranteed ? 'text-[#37BB26]' : 'text-amber-500'}`}>
+              <span className={`text-2xl md:text-4xl font-bold ${totalCalculated >= totalGuaranteed ? 'text-[#37BB26]' : 'text-amber-500'}`}>
                 ${totalCalculated.toLocaleString()}
               </span>
             </div>
@@ -122,7 +123,7 @@ export function MV({ projectId }: { projectId?: string }) {
           <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
             <h3 className="text-sm font-medium text-[#7A8BA8] uppercase tracking-wider mb-2">Achievement Rate</h3>
             <div className="flex items-end gap-3">
-              <span className={`text-4xl font-bold ${achievementRate >= 100 ? 'text-[#37BB26]' : 'text-amber-500'}`}>
+              <span className={`text-2xl md:text-4xl font-bold ${achievementRate >= 100 ? 'text-[#37BB26]' : 'text-amber-500'}`}>
                 {achievementRate.toFixed(1)}%
               </span>
             </div>
@@ -243,6 +244,17 @@ export function MV({ projectId }: { projectId?: string }) {
                             {!isShortfall ? 'SURPLUS' : 'SHORTFALL'}
                           </span>
                         </td>
+                        {data.importBatchId && (
+                          <td className="px-2 py-4">
+                            <button
+                              onClick={() => deleteItem('mvData', data.id)}
+                              className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                              title="Delete imported row"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
@@ -275,6 +287,7 @@ export function MV({ projectId }: { projectId?: string }) {
               user: 'Martin',
               fileName: fName,
               batchId,
+              storeKey: 'mvData',
             });
           }}
         />

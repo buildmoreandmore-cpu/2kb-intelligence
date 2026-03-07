@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { CheckCircle2, Clock, AlertCircle, Plus, Filter, Calendar, FileSpreadsheet } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, Plus, Filter, Calendar, FileSpreadsheet, X } from 'lucide-react';
 import { ExportButton } from '@/components/ExportButton';
 import { cn } from '@/lib/utils';
 import { EditableField } from '@/components/EditableField';
@@ -14,6 +14,7 @@ export function Workflows() {
   const addBatch = useStore(state => state.addBatch);
   const addCustomColumns = useStore(state => state.addCustomColumns);
   const addImportRecord = useStore(state => state.addImportRecord);
+  const deleteItem = useStore(state => state.deleteItem);
 
   const [filter, setFilter] = useState<'all' | 'my' | 'overdue'>('my');
   const [showImportModal, setShowImportModal] = useState(false);
@@ -29,7 +30,7 @@ export function Workflows() {
       <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-3 md:px-8 py-6">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Productivity & Workflow</h1>
+            <h1 className="text-lg md:text-2xl font-bold text-white tracking-tight">Productivity & Workflow</h1>
             <p className="text-sm text-[#7A8BA8] mt-1">Manage tasks, approvals, and automated reminders.</p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
@@ -203,6 +204,17 @@ export function Workflows() {
                           />
                         </div>
                       </td>
+                      {task.importBatchId && (
+                        <td className="px-2 py-4">
+                          <button
+                            onClick={() => deleteItem('tasks', task.id)}
+                            className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                            title="Delete imported row"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -225,7 +237,7 @@ export function Workflows() {
           onComplete={(batchId, count, fName, customCols, items) => {
             addBatch('tasks', items, batchId);
             if (customCols.length > 0) addCustomColumns(customCols);
-            addImportRecord({ type: 'Tasks', source: 'SharePoint', date: new Date().toISOString(), records: count, status: 'Success', user: 'Martin', fileName: fName, batchId });
+            addImportRecord({ type: 'Tasks', source: 'SharePoint', date: new Date().toISOString(), records: count, status: 'Success', user: 'Martin', fileName: fName, batchId, storeKey: 'tasks' });
           }}
         />
       )}

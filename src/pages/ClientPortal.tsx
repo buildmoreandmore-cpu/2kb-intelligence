@@ -44,7 +44,7 @@ export function ClientPortal() {
   const timelineItems = useStore(s => s.timelineItems);
 
   const [activeTab, setActiveTab] = useState<Tab>('overview');
-  const [selectedProjectId, setSelectedProjectId] = useState(projects[0].id);
+  const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id || '');
 
   const project = projects.find(p => p.id === selectedProjectId)!;
   const pMilestones = milestones.filter(m => m.projectId === selectedProjectId);

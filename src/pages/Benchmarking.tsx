@@ -19,16 +19,19 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
   const addImportRecord = useStore(state => state.addImportRecord);
   const customColumns = useStore(state => state.customColumns);
   const addUtilityBillsBatch = useStore(state => state.addUtilityBillsBatch);
-  const deleteImportBatch = useStore(state => state.deleteImportBatch);
+  const deleteBatchGeneric = useStore(state => state.deleteBatch);
   const addCustomColumns = useStore(state => state.addCustomColumns);
   const updateImportRecordStatus = useStore(state => state.updateImportRecordStatus);
   const importHistory = useStore(state => state.importHistory);
+  const deleteItem = useStore(state => state.deleteItem);
+  const replaceBatch = useStore(state => state.replaceBatch);
 
   const [activeTab, setActiveTab] = useState<'energy' | 'capital'>('energy');
   const [selectedBuildingId, setSelectedBuildingId] = useState(buildings[0].id);
   const [importModal, setImportModal] = useState<'drive' | 'energystar' | 'sharepoint' | null>(null);
   const [importStatus, setImportStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [deletingBatchId, setDeletingBatchId] = useState<string | null>(null);
+  const [replacingBatchId, setReplacingBatchId] = useState<string | null>(null);
 
   const addBatch = useStore(state => state.addBatch);
 
@@ -402,6 +405,17 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                               {bill.customFields?.[col.key] != null ? String(bill.customFields[col.key]) : '—'}
                             </td>
                           ))}
+                          {isImported && (
+                            <td className="px-2 py-4">
+                              <button
+                                onClick={() => deleteItem('utilityBills', bill.id)}
+                                className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                                title="Delete imported row"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       );
                     })}
@@ -436,17 +450,26 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                             "text-[10px] font-semibold px-2 py-0.5 rounded border",
                             imp.status === 'Success' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
                             imp.status === 'Rolled Back' ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+                            imp.status === 'Replaced' ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
                             "bg-[#1E2A45] text-[#7A8BA8] border-[#2A3A5C]"
                           )}>
                             {imp.status}
                           </span>
+                          {imp.status === 'Success' && imp.batchId && (
+                            <button
+                              onClick={() => setReplacingBatchId(imp.batchId)}
+                              className="px-2 py-1 text-[10px] font-medium text-[#0D918C] bg-[#0D918C]/10 border border-[#0D918C]/20 rounded hover:bg-[#0D918C]/20 transition-colors"
+                            >
+                              Replace
+                            </button>
+                          )}
                           {imp.status === 'Success' && imp.batchId && (
                             deletingBatchId === imp.batchId ? (
                               <div className="flex items-center gap-2">
                                 <span className="text-[10px] text-red-400">Delete all imported rows?</span>
                                 <button
                                   onClick={() => {
-                                    deleteImportBatch(imp.batchId);
+                                    deleteBatchGeneric(imp.storeKey || 'utilityBills', imp.batchId);
                                     updateImportRecordStatus(imp.id, 'Rolled Back');
                                     setDeletingBatchId(null);
                                   }}
@@ -718,12 +741,7 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                       ) : (
                         <>
                           <div className="flex items-center gap-2 text-xs text-[#7A8BA8]">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span>Lincoln Elementary — ENERGY STAR Score: 72</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-[#7A8BA8]">
-                            <span className="w-2 h-2 rounded-full bg-amber-500" />
-                            <span>City Hall Annex — ENERGY STAR Score: 45</span>
+                            <span>No buildings connected yet. Import utility data to see ENERGY STAR scores.</span>
                           </div>
                         </>
                       )}
@@ -797,7 +815,39 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
               user: 'Martin',
               fileName: fName,
               batchId,
+              storeKey: 'utilityBills',
             });
+          }}
+        />
+      )}
+
+      {/* Replace Import Modal */}
+      {replacingBatchId && selectedBuilding && (
+        <SharePointImportModal
+          sectionConfig={SECTION_CONFIGS.utilityBills}
+          contextFields={{ buildingId: selectedBuilding.id }}
+          contextLabel={selectedBuilding.name}
+          replaceBatchId={replacingBatchId}
+          onClose={() => setReplacingBatchId(null)}
+          onComplete={(batchId, count, fName, customCols, items) => {
+            replaceBatch('utilityBills', replacingBatchId, items, batchId);
+            if (customCols.length > 0) addCustomColumns(customCols);
+            // Mark old record as replaced
+            const oldRecord = importHistory.find((r: any) => r.batchId === replacingBatchId);
+            if (oldRecord) updateImportRecordStatus(oldRecord.id, 'Replaced');
+            addImportRecord({
+              type: 'Utility Bills',
+              source: 'SharePoint',
+              date: new Date().toISOString(),
+              records: count,
+              status: 'Success',
+              user: 'Martin',
+              fileName: fName,
+              batchId,
+              storeKey: 'utilityBills',
+              replacedBatchId: replacingBatchId,
+            });
+            setReplacingBatchId(null);
           }}
         />
       )}

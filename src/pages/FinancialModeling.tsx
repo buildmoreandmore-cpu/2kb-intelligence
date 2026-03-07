@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { Calculator, TrendingUp, AlertTriangle, CheckCircle2, DollarSign, Leaf, Search, Filter, Plus, FileSpreadsheet } from 'lucide-react';
+import { Calculator, TrendingUp, AlertTriangle, CheckCircle2, DollarSign, Leaf, Search, Filter, Plus, FileSpreadsheet, X } from 'lucide-react';
 import { ExportButton } from '@/components/ExportButton';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
@@ -18,8 +18,9 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
   const addBatch = useStore(state => state.addBatch);
   const addCustomColumns = useStore(state => state.addCustomColumns);
   const addImportRecord = useStore(state => state.addImportRecord);
+  const deleteItem = useStore(state => state.deleteItem);
 
-  const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[1].id); // Default to project with ECMs
+  const [selectedProjectId, setSelectedProjectId] = useState(projectId || projects[0]?.id || '');
   const [term, setTerm] = useState(15);
   const [interestRate, setInterestRate] = useState(4.5);
   const [elecEscalation, setElecEscalation] = useState(3.0);
@@ -65,7 +66,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
         <div className="flex-shrink-0 border-b border-[#1E2A45] bg-[#121C35] px-3 md:px-8 py-6">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight inline-flex items-center gap-3">
+              <h1 className="text-lg md:text-2xl font-bold text-white tracking-tight inline-flex items-center gap-3">
                 Financial Modeling & ESPC Structuring
                 {projectId && <FreshnessBadge projectId={projectId} module="Financial" showTimestamp />}
               </h1>
@@ -164,6 +165,17 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
                       <td className="px-6 py-4 text-right text-[#9AA5B8] font-mono">
                         <EditableField value={ecm.life} entityType="ecm" entityId={ecm.id} field="life" projectId={selectedProjectId} type="number" formatter={(v) => `${v} yrs`} />
                       </td>
+                      {ecm.importBatchId && (
+                        <td className="px-2 py-4">
+                          <button
+                            onClick={() => deleteItem('ecms', ecm.id)}
+                            className="p-1 text-[#5A6B88] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                            title="Delete imported row"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -405,6 +417,7 @@ export function FinancialModeling({ projectId }: { projectId?: string }) {
               user: 'Martin',
               fileName: fName,
               batchId,
+              storeKey: 'ecms',
             });
           }}
         />

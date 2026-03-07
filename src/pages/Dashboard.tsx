@@ -22,6 +22,7 @@ export function Dashboard() {
   const tasks = useStore(s => s.tasks);
   const reports = useStore(s => s.reports);
   const assets = useStore(s => s.assets);
+  const buildings = useStore(s => s.buildings);
   const activityFeed = useStore(s => s.activityFeed);
   const contractObligations = useStore(s => s.contractObligations);
   const inspectionFindings = useStore(s => s.inspectionFindings);
@@ -32,7 +33,7 @@ export function Dashboard() {
   // Computed KPIs
   const totalValue = projects.reduce((sum, p) => sum + p.value, 0);
   const highRisks = risks.filter(r => r.severity === 'High' || r.severity === 'Critical').length;
-  const avgRisk = Math.round(projects.reduce((sum, p) => sum + p.riskScore, 0) / projects.length);
+  const avgRisk = projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + p.riskScore, 0) / projects.length) : 0;
   const totalGuaranteed = mvData.reduce((sum, d) => sum + d.guaranteed, 0);
   const totalCalculated = mvData.reduce((sum, d) => sum + d.calculated, 0);
   const avgAchievement = totalGuaranteed > 0 ? Math.round((totalCalculated / totalGuaranteed) * 100) : 0;
@@ -102,7 +103,7 @@ export function Dashboard() {
   const modeKpis = useMemo(() => {
     if (mode === 'Audit') return [
       { label: 'Assets Captured', value: assets.length, icon: Activity, color: 'text-cyan-400', trend: '+3 this week' },
-      { label: 'Buildings Surveyed', value: 4, icon: BarChart3, color: 'text-blue-400', trend: '4 of 4' },
+      { label: 'Buildings Surveyed', value: buildings.length, icon: BarChart3, color: 'text-blue-400', trend: null },
       { label: 'Deficiencies Flagged', value: assets.filter(a => a.flags.length > 0).length, icon: AlertTriangle, color: 'text-amber-400', trend: null },
       { label: 'ECMs Identified', value: ecms.length, icon: Zap, color: 'text-[#37BB26]', trend: null },
     ];
@@ -115,8 +116,8 @@ export function Dashboard() {
     if (mode === 'Construction') return [
       { label: 'Inspections', value: inspectionFindings.length, icon: CheckCircle2, color: 'text-[#37BB26]', trend: `${inspectionFindings.filter(i => i.status === 'Open').length} open` },
       { label: 'Scope Deviations', value: inspectionFindings.filter(i => i.type === 'Deviation from Scope').length, icon: AlertTriangle, color: 'text-amber-400', trend: null },
-      { label: '% Installed', value: '62%', icon: Activity, color: 'text-blue-400', trend: null },
-      { label: 'Change Orders', value: 1, icon: FileText, color: 'text-cyan-400', trend: '$45K approved' },
+      { label: 'ECMs Tracked', value: ecms.length, icon: Activity, color: 'text-blue-400', trend: null },
+      { label: 'Open Tasks', value: tasks.filter(t => t.status !== 'Completed').length, icon: FileText, color: 'text-cyan-400', trend: null },
     ];
     return null;
   }, [mode, assets, ecms, avgAchievement, driftDetected, reports, reportsDue, highRisks, inspectionFindings]);
@@ -145,13 +146,7 @@ export function Dashboard() {
 
   // Extended activity feed
   const feedItems = useMemo(() => {
-    const items = [
-      ...activityFeed.map(a => ({ ...a, timeAgo: '2h ago' })),
-      { id: 'af3', type: 'inspection', title: 'Inspection Completed', description: 'David completed inspection #14 at Henry County', user: 'David', date: '2024-03-26T08:00:00Z', timeAgo: 'yesterday' },
-      { id: 'af4', type: 'report', title: 'Report Submitted', description: 'Sarah submitted Council Presentation draft for City of Morrow', user: 'Sarah', date: '2024-03-25T16:00:00Z', timeAgo: '2 days ago' },
-      { id: 'af5', type: 'pricing', title: 'Pricing Outlier', description: 'System flagged ECM-2 chiller pricing 22% above benchmark', user: 'System', date: '2024-03-25T14:00:00Z', timeAgo: '2 days ago' },
-    ];
-    return items.slice(0, 6);
+    return activityFeed.map(a => ({ ...a, timeAgo: '2h ago' })).slice(0, 6);
   }, [activityFeed]);
 
   return (
@@ -185,7 +180,7 @@ export function Dashboard() {
           { label: 'Capital Exposure', value: `$${(totalValue / 1000000).toFixed(1)}M`, icon: DollarSign, color: 'text-[#37BB26]', trend: null, trendUp: true },
           { label: 'Avg Risk Score', value: avgRisk, icon: Activity, color: avgRisk > 55 ? 'text-amber-400' : 'text-[#37BB26]', trend: avgRisk > 55 ? 'Elevated' : 'Normal', trendUp: false },
           { label: 'High/Crit Risks', value: highRisks, icon: AlertTriangle, color: highRisks > 0 ? 'text-red-400' : 'text-[#37BB26]', trend: null, trendUp: false },
-          { label: 'Carbon Avoided', value: '1,240', icon: Leaf, color: 'text-purple-400', trend: 'tCO2e', trendUp: true },
+          { label: 'Carbon Avoided', value: '—', icon: Leaf, color: 'text-purple-400', trend: 'tCO2e', trendUp: true },
           { label: 'Open Tasks', value: openTasks, icon: Zap, color: 'text-cyan-400', trend: null, trendUp: true },
         ].map((kpi, i) => (
           <div key={kpi.label} className="kpi-card bg-[#121C35] border border-[#1E2A45] rounded-lg px-4 py-3 animate-stat-pop" style={{ animationDelay: `${i * 0.04}s` }}>
@@ -301,6 +296,9 @@ export function Dashboard() {
             </button>
           </div>
           <div className="divide-y divide-[#1E2A45]">
+            {projects.length === 0 && (
+              <div className="px-5 py-8 text-center text-xs text-[#5A6B88]">No projects yet. Import project data to get started.</div>
+            )}
             {projects.map(project => {
               const phaseIdx = PHASE_ORDER.indexOf(project.phase as any);
               const progressPct = ((phaseIdx + 1) / PHASE_ORDER.length) * 100;
@@ -415,14 +413,14 @@ export function Dashboard() {
               <h3 className="text-sm font-semibold text-white">Recent Activity</h3>
             </div>
             <div className="divide-y divide-[#1E2A45]">
-              {feedItems.map(item => (
+              {feedItems.length === 0 ? (
+                <div className="px-5 py-6 text-center text-xs text-[#5A6B88]">No recent activity</div>
+              ) : feedItems.map(item => (
                 <div key={item.id} className="px-5 py-3 flex items-start gap-3">
                   <div className={cn(
                     "mt-0.5 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold",
                     item.user === 'System' ? 'bg-amber-500/15 text-amber-400' :
-                    item.user === 'Martin' ? 'bg-[#0D918C]/15 text-[#37BB26]' :
-                    item.user === 'Sarah' ? 'bg-blue-500/15 text-blue-400' :
-                    'bg-purple-500/15 text-purple-400'
+                    'bg-[#0D918C]/15 text-[#37BB26]'
                   )}>
                     {item.user === 'System' ? <CircleDot className="w-3 h-3" /> : item.user.charAt(0)}
                   </div>

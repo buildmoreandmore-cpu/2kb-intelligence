@@ -14,11 +14,11 @@ const SUGGESTED_QUERIES = [
   'Show me all assets with R-22 refrigerant',
   'What buildings have the highest EUI?',
   'Flag all critical deficiencies across the portfolio',
-  'Summarize the City of Morrow IGEA status',
   'Which ECMs have the best payback?',
-  'Are we on track for Year 3 M&V guarantee?',
-  'Draft an executive summary for Henry County',
+  'Are we on track for M&V guarantees?',
   'What risks need attention this week?',
+  'Summarize project status',
+  'Draft an executive summary',
 ];
 
 export function AIAssistant() {
@@ -220,7 +220,8 @@ RULES:
 
     if (q.includes('m&v') || q.includes('guarantee') || q.includes('drift') || q.includes('savings')) {
       const driftYears = mvData.filter(d => d.driftDetected);
-      return `**M&V Performance Summary — Henry County Public Safety**\n\n${mvData.map(d => {
+      const mvProject = projects.find(p => mvData.some(d => d.projectId === p.id));
+      return `**M&V Performance Summary${mvProject ? ` — ${mvProject.name}` : ''}**\n\n${mvData.map(d => {
         const pct = Math.round((d.calculated / d.guaranteed) * 100);
         const status = d.driftDetected ? '🔴 DRIFT' : pct >= 100 ? '🟢 ON TRACK' : '🟡 WATCH';
         return `• Year ${d.year}: Guaranteed $${d.guaranteed.toLocaleString()} | Actual $${d.calculated.toLocaleString()} | ${pct}% ${status}`;
@@ -228,10 +229,14 @@ RULES:
     }
 
     if (q.includes('payback') || q.includes('ecm') || q.includes('best')) {
-      return `**ECM Analysis — City of Morrow Municipal**\n\n${ecms.map(e => {
-        const payback = (e.cost / e.savings).toFixed(1);
+      const ecmProject = projects.find(p => ecms.some(e => e.projectId === p.id));
+      if (ecms.length === 0) return 'No ECMs found in the portfolio. Import ECM data to see payback analysis.';
+      const sorted = [...ecms].sort((a, b) => (a.cost / a.savings) - (b.cost / b.savings));
+      const best = sorted[0];
+      return `**ECM Analysis${ecmProject ? ` — ${ecmProject.name}` : ''}**\n\n${sorted.map(e => {
+        const payback = e.savings > 0 ? (e.cost / e.savings).toFixed(1) : 'N/A';
         return `• **${e.number}: ${e.description}**\n  Cost: $${e.cost.toLocaleString()} | Annual Savings: $${e.savings.toLocaleString()} | Payback: ${payback} yrs | Life: ${e.life} yrs`;
-      }).sort((a, b) => parseFloat(a.split('Payback: ')[1]) - parseFloat(b.split('Payback: ')[1])).join('\n\n')}\n\nBest payback: Water Conservation at ${(150000/25000).toFixed(1)} years. Best lifecycle value: LED Lighting (15-year savings of $${(65000 * 15 - 450000).toLocaleString()}).`;
+      }).join('\n\n')}\n\nBest payback: ${best.description} at ${best.savings > 0 ? (best.cost / best.savings).toFixed(1) : 'N/A'} years.`;
     }
 
     return `I can help with:\n\n• **Asset queries** — "Show R-22 equipment" or "List critical assets"\n• **Energy analysis** — "What buildings have highest EUI?"\n• **Financial review** — "Which ECMs have best payback?"\n• **M&V tracking** — "Are we on track for guarantees?"\n• **Risk monitoring** — "What risks need attention?"\n• **Report drafting** — "Draft executive summary for [project]"\n\nTry asking a specific question about your portfolio.`;
