@@ -39,21 +39,27 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
   const [typeFilter, setTypeFilter] = useState<string>('All');
   const [buildingFilter, setBuildingFilter] = useState<string>('All');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [uploadedPhotos, setUploadedPhotos] = useState<Array<{ id: string; file: File; preview: string; name: string }>>([]);
+  const [captureProjectId, setCaptureProjectId] = useState<string>(projectId || '');
+  const [uploadedPhotos, setUploadedPhotos] = useState<Array<{ id: string; file: File; preview: string; name: string; projectId: string }>>([]);
   const [dragOver, setDragOver] = useState(false);
   const captureInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoFiles = useCallback((files: FileList | File[]) => {
     const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
     if (imageFiles.length === 0) return;
+    if (!captureProjectId) {
+      addToast('Select a project before uploading photos', 'warning');
+      return;
+    }
     const newPhotos = imageFiles.map(file => ({
       id: `photo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       file,
       preview: URL.createObjectURL(file),
       name: file.name,
+      projectId: captureProjectId,
     }));
     setUploadedPhotos(prev => [...prev, ...newPhotos]);
-  }, []);
+  }, [captureProjectId, addToast]);
 
   const removePhoto = useCallback((id: string) => {
     setUploadedPhotos(prev => {
@@ -348,7 +354,22 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
           <div className="max-w-3xl mx-auto space-y-6">
             <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
               <div className="p-6 border-b border-[#1E2A45] bg-[#0F1829]">
-                <h3 className="text-lg font-medium text-white mb-2">AI Extraction Queue</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-medium text-white">AI Extraction Queue</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#7A8BA8]">Project:</span>
+                    <select
+                      value={captureProjectId}
+                      onChange={e => setCaptureProjectId(e.target.value)}
+                      className="bg-[#121C35] border border-[#1E2A45] text-[#CBD2DF] text-xs rounded-lg px-2 py-1.5 focus:ring-[#0D918C] focus:border-[#0D918C] min-w-[200px]"
+                    >
+                      <option value="">Select a project...</option>
+                      {projects.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 <p className="text-sm text-[#7A8BA8]">Upload nameplate photos, wide shots, or inspection documents. Claude Vision will extract structured data and flag deficiencies automatically.</p>
               </div>
 
@@ -407,6 +428,7 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
                       </button>
                       <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/70 to-transparent">
                         <p className="text-[10px] text-white truncate">{photo.name}</p>
+                        <p className="text-[9px] text-[#7A8BA8] truncate">{projects.find(p => p.id === photo.projectId)?.name || 'No project'}</p>
                       </div>
                     </div>
                   ))}
