@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStore, UserRole } from '@/store';
+import { supabase } from '@/lib/supabase';
 import { UserRoleBadge } from '@/components/UserRoleBadge';
 import { cn } from '@/lib/utils';
 import {
@@ -22,6 +23,8 @@ import {
   Download,
   Upload,
   History,
+  Lock,
+  CheckCircle,
 } from 'lucide-react';
 import { Icon } from '@iconify/react';
 
@@ -119,14 +122,41 @@ export function Settings() {
 /* ─── Profile Tab ─── */
 function ProfileTab({
   currentUser,
-  users,
-  onSwitchUser,
 }: {
-  currentUser: typeof useStore extends (s: infer S) => any ? never : any;
+  currentUser: any;
   users: any[];
   onSwitchUser: (userId: string) => void;
 }) {
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState(false);
+
   if (!currentUser) return null;
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSuccess(false);
+    if (newPw.length < 8) { setPwError('Password must be at least 8 characters'); return; }
+    if (newPw !== confirmPw) { setPwError('Passwords do not match'); return; }
+    setPwLoading(true);
+    // Re-authenticate first to verify current password
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: currentUser.email,
+      password: currentPw,
+    });
+    if (signInError) { setPwError('Current password is incorrect'); setPwLoading(false); return; }
+    const { error } = await supabase.auth.updateUser({ password: newPw });
+    setPwLoading(false);
+    if (error) { setPwError(error.message); } else {
+      setPwSuccess(true);
+      setCurrentPw(''); setNewPw(''); setConfirmPw('');
+      setTimeout(() => setPwSuccess(false), 4000);
+    }
+  };
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -146,8 +176,7 @@ function ProfileTab({
           </div>
         </div>
 
-        {/* Project Roles */}
-        {Object.keys(currentUser.projectRoles).length > 0 && (
+        {Object.keys(currentUser.projectRoles || {}).length > 0 && (
           <div className="mt-4 pt-4 border-t border-[#1E2A45]">
             <p className="text-xs font-medium text-[#7A8BA8] uppercase tracking-wider mb-2">Project Role Overrides</p>
             <div className="space-y-1.5">
@@ -162,48 +191,64 @@ function ProfileTab({
         )}
       </div>
 
-      {/* User Switcher (simulates auth) */}
+      {/* Change Password */}
       <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
-        <h2 className="text-base font-semibold text-white mb-2">Switch User</h2>
-        <p className="text-xs text-[#7A8BA8] mb-4">Simulate different user roles for demonstration purposes.</p>
-        <div className="space-y-2">
-          {users.map(user => (
-            <button
-              key={user.id}
-              onClick={() => onSwitchUser(user.id)}
-              className={cn(
-                'w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors',
-                user.id === currentUser.id
-                  ? 'bg-[#0D918C]/10 border-[#0D918C]/25'
-                  : 'bg-[#0F1829] border-[#1E2A45] hover:bg-[#1E2A45]'
-              )}
-            >
-              <div className={cn(
-                'w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border',
-                user.id === currentUser.id
-                  ? 'bg-[#0D918C]/15 border-[#0D918C]/25'
-                  : 'bg-[#1E2A45] border-[#2A3A5C]'
-              )}>
-                <span className={cn(
-                  'text-xs font-semibold',
-                  user.id === currentUser.id ? 'text-[#37BB26]' : 'text-[#7A8BA8]'
-                )}>
-                  {user.initials}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={cn('text-sm font-medium', user.id === currentUser.id ? 'text-white' : 'text-[#CBD2DF]')}>
-                  {user.name}
-                </p>
-                <p className="text-xs text-[#5A6B88] truncate">{user.email}</p>
-              </div>
-              <UserRoleBadge role={user.defaultRole} />
-              {user.id === currentUser.id && (
-                <span className="w-2 h-2 rounded-full bg-[#0D918C] flex-shrink-0" />
-              )}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 mb-4">
+          <Lock className="w-4 h-4 text-[#7A8BA8]" />
+          <h2 className="text-base font-semibold text-white">Change Password</h2>
         </div>
+        <form onSubmit={handleChangePassword} className="space-y-4">
+          <div>
+            <label className="block text-xs text-[#7A8BA8] mb-1.5">Current Password</label>
+            <input
+              type="password"
+              value={currentPw}
+              onChange={e => setCurrentPw(e.target.value)}
+              required
+              placeholder="Enter current password"
+              className="w-full px-3 py-2.5 bg-[#0F1829] border border-[#1E2A45] rounded-lg text-sm text-white placeholder:text-[#5A6B88] focus:outline-none focus:ring-2 focus:ring-[#0D918C] focus:border-transparent transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-[#7A8BA8] mb-1.5">New Password</label>
+            <input
+              type="password"
+              value={newPw}
+              onChange={e => setNewPw(e.target.value)}
+              required
+              placeholder="At least 8 characters"
+              className="w-full px-3 py-2.5 bg-[#0F1829] border border-[#1E2A45] rounded-lg text-sm text-white placeholder:text-[#5A6B88] focus:outline-none focus:ring-2 focus:ring-[#0D918C] focus:border-transparent transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-[#7A8BA8] mb-1.5">Confirm New Password</label>
+            <input
+              type="password"
+              value={confirmPw}
+              onChange={e => setConfirmPw(e.target.value)}
+              required
+              placeholder="Repeat new password"
+              className="w-full px-3 py-2.5 bg-[#0F1829] border border-[#1E2A45] rounded-lg text-sm text-white placeholder:text-[#5A6B88] focus:outline-none focus:ring-2 focus:ring-[#0D918C] focus:border-transparent transition-colors"
+            />
+          </div>
+          {pwError && (
+            <p className="text-xs text-red-400 flex items-center gap-1.5">
+              <span className="w-1 h-1 rounded-full bg-red-400 flex-shrink-0" />{pwError}
+            </p>
+          )}
+          {pwSuccess && (
+            <p className="text-xs text-[#37BB26] flex items-center gap-1.5">
+              <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />Password updated successfully
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={pwLoading}
+            className="px-4 py-2 bg-[#0D918C] hover:bg-[#0B7A76] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            {pwLoading ? 'Updating...' : 'Update Password'}
+          </button>
+        </form>
       </div>
     </div>
   );

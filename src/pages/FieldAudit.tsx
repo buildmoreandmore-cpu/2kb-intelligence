@@ -42,12 +42,15 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
   const [captureProjectId, setCaptureProjectId] = useState<string>(projectId || '');
   const [uploadedPhotos, setUploadedPhotos] = useState<Array<{ id: string; file: File; preview: string; name: string; projectId: string }>>([]);
   const [dragOver, setDragOver] = useState(false);
+  const [extracting, setExtracting] = useState(false);
+  const [extractionResults, setExtractionResults] = useState<Array<{ photoName: string; extracted: any }>>([]);
   const captureInputRef = useRef<HTMLInputElement>(null);
 
   const allAssets = useStore(state => state.assets);
   const projects = useStore(state => state.projects);
   const buildings = useStore(state => state.buildings);
   const addBatch = useStore(state => state.addBatch);
+  const addAsset = useStore(state => state.addAsset);
   const addCustomColumns = useStore(state => state.addCustomColumns);
   const addImportRecord = useStore(state => state.addImportRecord);
   const deleteItem = useStore(state => state.deleteItem);
@@ -79,6 +82,87 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
       return prev.filter(p => p.id !== id);
     });
   }, []);
+
+  const runClaudeExtraction = useCallback(async () => {
+    if (uploadedPhotos.length === 0) return;
+    setExtracting(true);
+    setExtractionResults([]);
+    const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string;
+    const results: Array<{ photoName: string; extracted: any }> = [];
+
+    for (const photo of uploadedPhotos) {
+      try {
+        const arrayBuffer = await photo.file.arrayBuffer();
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        const mediaType = (photo.file.type || 'image/jpeg') as 'image/jpeg' | 'image/png' | 'image/webp';
+
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 1024,
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+                {
+                  type: 'text',
+                  text: `You are an energy auditor. Extract equipment data from this photo.
+Return ONLY a valid JSON object with these fields (use null for any field not visible):
+{
+  "type": "equipment type (e.g. Chiller, AHU, Boiler, Pump, etc.)",
+  "manufacturer": "brand/manufacturer name",
+  "model": "model number",
+  "serialNumber": "serial number",
+  "yearInstalled": "year as string or null",
+  "condition": "Good | Fair | Poor | Critical",
+  "refrigerant": "refrigerant type if applicable",
+  "capacity": "capacity with units if visible",
+  "notes": "any other relevant observations"
+}
+Return only the JSON, no explanation.`
+                }
+              ]
+            }]
+          })
+        });
+
+        const data = await res.json();
+        const text = data.content?.[0]?.text || '{}';
+        let extracted: any = {};
+        try {
+          const match = text.match(/\{[\s\S]*\}/);
+          extracted = match ? JSON.parse(match[0]) : {};
+        } catch { extracted = {}; }
+
+        // Add to assets store
+        addAsset({
+          ...extracted,
+          projectId: photo.projectId,
+          buildingId: '',
+          importBatchId: `claude_${Date.now()}`,
+          lastAuditDate: new Date().toISOString().split('T')[0],
+          customFields: {},
+        });
+        results.push({ photoName: photo.name, extracted });
+      } catch (err) {
+        results.push({ photoName: photo.name, extracted: { error: 'Extraction failed' } });
+      }
+    }
+
+    setExtractionResults(results);
+    setExtracting(false);
+    // Clear the photo queue
+    uploadedPhotos.forEach(p => URL.revokeObjectURL(p.preview));
+    setUploadedPhotos([]);
+    addToast(`Extracted ${results.filter(r => !r.extracted.error).length} of ${results.length} assets from photos`, 'success');
+  }, [uploadedPhotos, addAsset, addToast]);
 
   let displayAssets = allAssets;
   
@@ -413,7 +497,17 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
                     <ImageIcon className="w-4 h-4 text-[#0D918C]" />
                     <span className="text-sm font-medium text-white">{uploadedPhotos.length} photo{uploadedPhotos.length !== 1 ? 's' : ''} queued</span>
                   </div>
-                  <span className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">AI extraction pending — Claude Vision not yet connected</span>
+                  <button
+                    onClick={runClaudeExtraction}
+                    disabled={extracting}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0D918C] hover:bg-[#0B7A76] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-colors"
+                  >
+                    {extracting ? (
+                      <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Extracting...</>
+                    ) : (
+                      <><Camera className="w-3.5 h-3.5" />Extract with Claude Vision</>
+                    )}
+                  </button>
                 </div>
                 <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                   {uploadedPhotos.map(photo => (
@@ -430,6 +524,32 @@ export function FieldAudit({ projectId }: { projectId?: string }) {
                         <p className="text-[10px] text-white truncate">{photo.name}</p>
                         <p className="text-[9px] text-[#7A8BA8] truncate">{projects.find(p => p.id === photo.projectId)?.name || 'No project'}</p>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {extractionResults.length > 0 && (
+              <div className="bg-[#121C35] border border-[#0D918C]/30 rounded-xl overflow-hidden">
+                <div className="p-4 border-b border-[#1E2A45] flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-[#37BB26]" />
+                  <span className="text-sm font-medium text-white">Extraction Complete — {extractionResults.filter(r => !r.extracted.error).length} assets added</span>
+                </div>
+                <div className="divide-y divide-[#1E2A45]">
+                  {extractionResults.map((r, i) => (
+                    <div key={i} className="px-4 py-3">
+                      <p className="text-xs font-medium text-[#7A8BA8] mb-1 truncate">{r.photoName}</p>
+                      {r.extracted.error ? (
+                        <p className="text-xs text-red-400">{r.extracted.error}</p>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {r.extracted.type && <span className="text-xs bg-[#0D918C]/10 text-[#37BB26] px-2 py-0.5 rounded border border-[#0D918C]/20">{r.extracted.type}</span>}
+                          {r.extracted.manufacturer && <span className="text-xs text-[#9AA5B8]">{r.extracted.manufacturer}</span>}
+                          {r.extracted.model && <span className="text-xs text-[#9AA5B8] font-mono">{r.extracted.model}</span>}
+                          {r.extracted.condition && <span className="text-xs text-amber-400">{r.extracted.condition}</span>}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

@@ -38,11 +38,11 @@ export interface CustomColumnDef {
   type: 'number' | 'string';
 }
 
-// ─── Auth Credentials (client-side demo) ───
-const AUTH_CREDENTIALS = [
-  { email: 'ruthie.norton@2kbco.com', password: 'disneyworld2', userId: 'user1' },
-  { email: 'george.buchanan@2kbco.com', password: 'disneyworld2', userId: 'user2' },
-];
+// ─── Email → store user ID mapping ───
+const EMAIL_TO_USER_ID: Record<string, string> = {
+  'ruthie.norton@2kbco.com': 'user1',
+  'george.buchanan@2kbco.com': 'user2',
+};
 
 export const seedData = {
   // ─── Auth State ───
@@ -338,9 +338,22 @@ export const useStore = create<StoreType>()(
   login: async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error || !data.user) return false;
-    const userId = data.user.id;
-    sessionStorage.setItem('2kb_auth', userId);
-    set({ isAuthenticated: true, authUser: userId, currentUserId: userId });
+    // Map Supabase UUID back to store user ID so editField/audit trail work correctly
+    const storeUserId = EMAIL_TO_USER_ID[data.user.email!] || data.user.id;
+    sessionStorage.setItem('2kb_auth', storeUserId);
+    set({ isAuthenticated: true, authUser: storeUserId, currentUserId: storeUserId });
+    // Upsert profile row so Supabase has user metadata
+    const storeUser = useStore.getState().users.find(u => u.id === storeUserId);
+    if (storeUser) {
+      supabase.from('profiles').upsert({
+        id: data.user.id,
+        name: storeUser.name,
+        initials: storeUser.initials,
+        email: storeUser.email,
+        default_role: storeUser.defaultRole,
+        project_roles: storeUser.projectRoles,
+      }).catch(console.error);
+    }
     // Load persisted project data from Supabase after login
     loadAllData().then(remote => set(remote as Partial<StoreType>)).catch(console.error);
     return true;

@@ -546,12 +546,15 @@ export function ProjectFileImport({ onClose }: ProjectFileImportProps) {
               <span className="text-xs text-[#5A6B88]">
                 {activeSheets.length} of {sheetMatches.length} sheet{sheetMatches.length !== 1 ? 's' : ''} will be imported
               </span>
+              {!selectedProjectId && activeSheets.length > 0 && (
+                <span className="text-xs text-amber-400">← Select a project first</span>
+              )}
               <button
                 onClick={startImport}
-                disabled={activeSheets.length === 0}
+                disabled={activeSheets.length === 0 || !selectedProjectId}
                 className={cn(
                   "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
-                  activeSheets.length > 0
+                  activeSheets.length > 0 && selectedProjectId
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "bg-[#1E2A45] text-[#5A6B88] cursor-not-allowed"
                 )}
