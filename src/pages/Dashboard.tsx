@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
 import { cn } from '@/lib/utils';
+import { HydratingOverlay } from '@/components/HydratingOverlay';
 import {
   BarChart3, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2,
   DollarSign, Leaf, Activity, Clock, FileText, ArrowUpRight,
@@ -18,6 +19,7 @@ export function Dashboard() {
   const navigate = useNavigate();
   const mode = useStore(s => s.serviceLineMode);
   const projects = useStore(s => s.projects);
+  const hydrating = useStore(s => s.hydrating);
   const [compareMode, setCompareMode] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const risks = useStore(s => s.risks);
@@ -163,7 +165,9 @@ export function Dashboard() {
   }, [activityFeed]);
 
   return (
-    <div className="p-3 md:p-6 max-w-[1400px] mx-auto space-y-4 md:space-y-5 animate-in fade-in duration-500">
+    <div className="p-3 md:p-6 max-w-[1400px] mx-auto space-y-4 md:space-y-5 animate-in fade-in duration-500 relative">
+      {hydrating && <HydratingOverlay message="Loading dashboard data..." />}
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -188,11 +192,67 @@ export function Dashboard() {
           </button>
           <ExportButton
           variant="compact"
-          filename="portfolio-summary"
+          filename="dashboard-summary"
           sheets={[
-            { name: 'Projects', data: projects.map(p => ({ 'Name': p.name, 'Phase': p.phase, 'ESCO': p.esco, 'Value': p.value, 'Risk Score': p.riskScore, 'Engineer': p.engineer })) },
-            { name: 'Risks', data: risks.map(r => ({ 'Risk': r.description, 'Category': r.category, 'Severity': r.severity, 'Status': r.status, 'Owner': r.owner })) },
-            { name: 'Recent Tasks', data: tasks.slice(0, 20).map(t => ({ 'Task': t.title, 'Project': projects.find(p => p.id === t.projectId)?.name || '', 'Assignee': t.assignedTo, 'Priority': t.priority, 'Due Date': t.dueDate, 'Status': t.status })) },
+            { 
+              name: 'Executive Summary', 
+              data: [{
+                'Report Date': new Date().toLocaleDateString(),
+                'Report Time': new Date().toLocaleTimeString(),
+                'Service Line Mode': mode,
+                'Total Active Projects': projects.length,
+                'Total Assets': assets.length,
+                'Total Tasks': tasks.length,
+                'Open Tasks': tasks.filter(t => t.status !== 'Done').length,
+                'High/Critical Risks': risks.filter(r => r.severity === 'High' || r.severity === 'Critical').length,
+                'Reports Due': reports.filter(r => r.status === 'Draft' || r.status === 'In Review').length,
+                'Total Portfolio Value ($M)': (totalValue / 1000000).toFixed(1),
+                'Average Risk Score': avgRisk,
+                'Average Savings Achievement (%)': avgAchievement || 'N/A',
+                'Total Guaranteed Savings ($K)': (totalGuaranteed / 1000).toFixed(0),
+                'Total Calculated Savings ($K)': (totalCalculated / 1000).toFixed(0),
+                'Stale Modules Count': staleModules.length,
+              }]
+            },
+            { 
+              name: 'Projects', 
+              data: projects.map(p => ({ 
+                'Name': p.name, 
+                'Phase': p.phase, 
+                'ESCO': p.esco, 
+                'Value ($)': p.value, 
+                'Risk Score': p.riskScore, 
+                'Engineer': p.engineer,
+                'Lifecycle Progress (%)': Math.round(((PHASE_ORDER.indexOf(p.phase as any) + 1) / PHASE_ORDER.length) * 100)
+              })) 
+            },
+            { 
+              name: 'Recent Activity', 
+              data: feedItems.map(a => ({ 
+                'User': a.user, 
+                'Action': a.description, 
+                'Time Ago': a.timeAgo,
+                'Timestamp': a.date 
+              })) 
+            },
+            {
+              name: 'Action Items',
+              data: actionItems.map(item => ({
+                'Item': item.name,
+                'Action Required': item.action,
+                'Assignee': item.assignedTo,
+                'Urgency': item.urgency,
+                'Project': item.project
+              }))
+            },
+            {
+              name: 'Alerts',
+              data: alerts.map(alert => ({
+                'Project': alert.project,
+                'Alert': alert.text,
+                'Severity': alert.severity
+              }))
+            }
           ]}
         />
         </div>

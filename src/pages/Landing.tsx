@@ -44,7 +44,7 @@ export function Landing() {
             className="group inline-flex items-center gap-3 px-8 py-4 bg-transparent text-white text-sm font-semibold rounded-full border border-white/20 hover:border-white/40 hover:bg-white/5 transition-all duration-200 min-w-[200px] justify-center"
           >
             <Icon icon="solar:monitor-bold-duotone" className="w-5 h-5 text-[#37BB26]" />
-            Client Dashboard
+            Client Portal
           </button>
         </div>
       </div>

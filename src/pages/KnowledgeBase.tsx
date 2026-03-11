@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
-import { BookOpen, Search, Filter, Lightbulb, TrendingDown, DollarSign, FileText, FileSpreadsheet, X } from 'lucide-react';
+import { BookOpen, Filter, Lightbulb, TrendingDown, DollarSign, FileText, FileSpreadsheet, X } from 'lucide-react';
 import { ExportButton } from '@/components/ExportButton';
+import { SearchBar } from '@/components/SearchBar';
 import { cn } from '@/lib/utils';
 import { EditableField } from '@/components/EditableField';
 import { AuditTrailPanel } from '@/components/AuditTrailPanel';
@@ -93,16 +94,12 @@ export function KnowledgeBase() {
 
       <div className="flex-1 overflow-y-auto p-3 md:p-8 max-w-7xl mx-auto w-full space-y-8">
         <div className="flex items-center justify-between">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-            <input 
-              type="text" 
-              placeholder="Search knowledge base..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#121C35] border border-[#1E2A45] rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#0D918C] focus:border-transparent shadow-sm"
-            />
-          </div>
+          <SearchBar
+            placeholder="Search knowledge base..."
+            value={searchQuery}
+            onChange={setSearchQuery}
+            className="w-full md:w-96"
+          />
           <button className="inline-flex items-center gap-2 px-3 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors shadow-sm">
             <Filter className="w-4 h-4" />
             Filter

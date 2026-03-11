@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Calendar, Diamond, ChevronDown, CalendarPlus, FileSpreadsheet } from 'lucide-react';
 import { downloadICS } from '@/lib/ics';
 import { SharePointImportModal, SECTION_CONFIGS } from '@/components/SharePointImportModal';
+import { SearchBar } from '@/components/SearchBar';
 
 const STATUS_COLORS: Record<string, { bar: string; text: string; dot: string }> = {
   completed:     { bar: 'bg-emerald-500', text: 'text-emerald-700', dot: 'bg-emerald-500' },
@@ -42,10 +43,25 @@ export function Timeline({ projectId }: { projectId?: string }) {
   const currentUser = useStore(s => s.users).find(u => u.id === useStore.getState().currentUserId);
   const [selectedProject, setSelectedProject] = useState(projectId || projects[0]?.id || '');
   const [showImportModal, setShowImportModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const items = useMemo(
-    () => allItems.filter(i => i.projectId === selectedProject),
-    [allItems, selectedProject]
+    () => {
+      let filtered = allItems.filter(i => i.projectId === selectedProject);
+      
+      // Apply search filter
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
+        filtered = filtered.filter(item =>
+          item.name.toLowerCase().includes(searchLower) ||
+          (item.description && item.description.toLowerCase().includes(searchLower)) ||
+          item.status.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      return filtered;
+    },
+    [allItems, selectedProject, searchQuery]
   );
 
   const project = projects.find(p => p.id === selectedProject);
@@ -108,6 +124,16 @@ export function Timeline({ projectId }: { projectId?: string }) {
           </div>
         )}
         </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="flex items-center justify-between">
+        <SearchBar
+          placeholder="Search timeline events..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          className="w-full md:w-96"
+        />
       </div>
 
       {/* Legend */}

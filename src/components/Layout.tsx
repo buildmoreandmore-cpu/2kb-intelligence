@@ -26,6 +26,7 @@ import { ProjectFileImport } from './ProjectFileImport';
 import { ToastContainer } from './ToastContainer';
 import { ConfirmDialog } from './ConfirmDialog';
 import { CommandPalette } from './CommandPalette';
+import { Breadcrumbs } from './Breadcrumbs';
 
 const allNavigation = [
   { name: 'Dashboard', href: '/app', icon: LayoutDashboard, modes: ['Full', 'OR'], badgeKey: null as string | null, freshnessModule: null as string | null },
@@ -324,6 +325,9 @@ export function Layout() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="animate-page-enter h-full">
+            <div className="pt-3 px-3 md:px-8">
+              <Breadcrumbs />
+            </div>
             <Outlet />
           </div>
         </main>

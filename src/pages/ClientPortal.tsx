@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/store';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
 import { BuildingSavingsChart } from '@/components/BuildingSavingsChart';
+import { getClientProjects } from '@/lib/clientInvites';
+import { supabase } from '@/lib/supabase';
 
 const PHASES = ['Prospect', 'Audit', 'IGEA', 'RFP', 'Contract', 'Construction', 'M&V', 'Closeout'];
 const PHASE_DESCRIPTIONS: Record<string, { next: string; est: string }> = {
@@ -27,7 +29,7 @@ const TAB_CONFIG: { id: Tab; label: string; icon: string }[] = [
 ];
 
 export function ClientPortal() {
-  const projects = useStore(s => s.projects);
+  const allProjects = useStore(s => s.projects);
   const milestones = useStore(s => s.milestones);
   const mvData = useStore(s => s.mvData);
   const inspectionFindings = useStore(s => s.inspectionFindings);
@@ -44,20 +46,89 @@ export function ClientPortal() {
   const timelineItems = useStore(s => s.timelineItems);
 
   const [activeTab, setActiveTab] = useState<Tab>('overview');
-  const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id || '');
+  const [clientProjectIds, setClientProjectIds] = useState<string[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
   const [acknowledgedNotes, setAcknowledgedNotes] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [showProjectSelector, setShowProjectSelector] = useState(false);
 
-  const project = projects.find(p => p.id === selectedProjectId);
+  // Get client's accessible projects
+  const clientProjects = allProjects.filter(p => clientProjectIds.includes(p.id));
 
-  if (!project) {
+  useEffect(() => {
+    const loadClientProjects = async () => {
+      try {
+        // Get current user email
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user?.email) {
+          setLoading(false);
+          return;
+        }
+
+        setUserEmail(user.email);
+
+        // Get projects this client has access to
+        const projectIds = await getClientProjects(user.email);
+        setClientProjectIds(projectIds);
+
+        // Auto-select project
+        if (projectIds.length === 1) {
+          // If only one project, select it automatically
+          setSelectedProjectId(projectIds[0]);
+        } else if (projectIds.length > 1) {
+          // If multiple projects, show selector or select first one
+          setSelectedProjectId(projectIds[0]);
+          setShowProjectSelector(true);
+        }
+      } catch (err) {
+        console.error('Error loading client projects:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClientProjects();
+  }, []);
+
+  // Show loading state
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0B1120] text-white">
         <div className="text-center">
-          <h2 className="text-xl font-bold mb-2">No Projects Available</h2>
-          <p className="text-[#7A8BA8] text-sm">No ESPC projects have been set up yet. Please contact your project administrator.</p>
+          <Icon icon="svg-spinners:ring-resize" className="w-8 h-8 text-[#0D918C] mx-auto mb-4" />
+          <p className="text-sm text-white/60">Loading your projects...</p>
         </div>
       </div>
     );
+  }
+
+  // Show no access message if no projects
+  if (clientProjects.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#0B1120] text-white">
+        <div className="text-center max-w-md">
+          <Icon icon="solar:shield-cross-bold-duotone" className="w-16 h-16 text-amber-400 mx-auto mb-4" />
+          <h2 className="text-xl font-bold mb-2">No Project Access</h2>
+          <p className="text-[#7A8BA8] text-sm mb-4">
+            You don't have access to any projects yet. Please contact your project administrator to request access.
+          </p>
+          {userEmail && (
+            <p className="text-xs text-[#5A6B88] bg-[#121C35] px-3 py-2 rounded-lg border border-[#1E2A45]">
+              Logged in as: {userEmail}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const project = clientProjects.find(p => p.id === selectedProjectId);
+
+  // If we have projects but no selected project, select the first one
+  if (!project && clientProjects.length > 0) {
+    setSelectedProjectId(clientProjects[0].id);
+    return null; // Re-render will happen with selected project
   }
 
   const pMilestones = milestones.filter(m => m.projectId === selectedProjectId);
@@ -99,19 +170,29 @@ export function ClientPortal() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 space-y-6">
-      {/* Project selector + phase */}
+      {/* Project header + selector */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">{project.name}</h1>
           <p className="text-sm text-gray-500 mt-0.5">ESCO: {project.esco} &middot; Owner's Rep: 2KB Energy Services</p>
+          {clientProjects.length > 1 && (
+            <p className="text-xs text-[#0D918C] mt-1">You have access to {clientProjects.length} projects</p>
+          )}
         </div>
-        <select
-          value={selectedProjectId}
-          onChange={e => { setSelectedProjectId(e.target.value); setActiveTab('overview'); }}
-          className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-[#0D918C] focus:border-[#0D918C] p-2.5 shadow-sm"
-        >
-          {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+        
+        {/* Only show project selector if client has multiple projects */}
+        {clientProjects.length > 1 && (
+          <div className="flex items-center gap-2">
+            <Icon icon="solar:buildings-bold-duotone" className="w-4 h-4 text-gray-400" />
+            <select
+              value={selectedProjectId}
+              onChange={e => { setSelectedProjectId(e.target.value); setActiveTab('overview'); }}
+              className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-[#0D918C] focus:border-[#0D918C] p-2.5 shadow-sm min-w-[200px]"
+            >
+              {clientProjects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}

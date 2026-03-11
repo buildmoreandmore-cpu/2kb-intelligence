@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useStore } from '@/store';
 import { CheckCircle2, Clock, AlertCircle, Plus, Filter, Calendar, FileSpreadsheet, X } from 'lucide-react';
 import { ExportButton } from '@/components/ExportButton';
+import { SearchBar } from '@/components/SearchBar';
 import { cn } from '@/lib/utils';
 import { EditableField } from '@/components/EditableField';
 import { AuditTrailPanel } from '@/components/AuditTrailPanel';
@@ -26,14 +27,26 @@ export function Workflows() {
 
   const currentUser = users.find(u => u.id === currentUserId);
   const [filter, setFilter] = useState<'all' | 'my' | 'overdue'>('my');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showImportModal, setShowImportModal] = useState(false);
   const [showNewTask, setShowNewTask] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', projectId: '', priority: 'Medium', dueDate: '', assignedTo: currentUser?.name || '' });
 
   const filteredTasks = tasks.filter(task => {
-    if (filter === 'my') return task.assignedTo === (currentUser?.name || '');
-    if (filter === 'overdue') return new Date(task.dueDate) < new Date() && task.status !== 'Completed';
-    return true;
+    // Apply status filter
+    let passesFilter = false;
+    if (filter === 'my') passesFilter = task.assignedTo === (currentUser?.name || '');
+    else if (filter === 'overdue') passesFilter = new Date(task.dueDate) < new Date() && task.status !== 'Completed';
+    else passesFilter = true;
+    
+    // Apply search filter
+    const searchLower = searchQuery.toLowerCase();
+    const passesSearch = !searchQuery || 
+      task.title.toLowerCase().includes(searchLower) ||
+      task.status.toLowerCase().includes(searchLower) ||
+      task.assignedTo.toLowerCase().includes(searchLower);
+    
+    return passesFilter && passesSearch;
   });
 
   return (
@@ -114,7 +127,17 @@ export function Workflows() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 md:p-8 max-w-7xl mx-auto w-full space-y-8">
+      <div className="flex-1 overflow-y-auto p-3 md:p-8 max-w-7xl mx-auto w-full space-y-6">
+        {/* Search Bar */}
+        <div className="flex items-center justify-between">
+          <SearchBar
+            placeholder="Search tasks by name, status, or assignee..."
+            value={searchQuery}
+            onChange={setSearchQuery}
+            className="w-full md:w-96"
+          />
+        </div>
+
         <div className="bg-[#121C35] border border-[#1E2A45] rounded-xl overflow-hidden">
           <div className="p-6 border-b border-[#1E2A45] flex items-center justify-between">
             <h3 className="text-sm font-semibold text-white">Task List</h3>

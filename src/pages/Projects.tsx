@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useStore } from '@/store';
 import { useNavigate } from 'react-router-dom';
-import { FolderOpen, Plus, Search, Filter, X, Layers } from 'lucide-react';
+import { FolderOpen, Plus, Filter, X, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CompletenessBar } from '@/components/CompletenessBar';
 import { getFreshnessStatus } from '@/lib/freshness';
+import { SearchBar } from '@/components/SearchBar';
 
 export function Projects() {
   const projects = useStore(state => state.projects);
@@ -58,16 +59,12 @@ export function Projects() {
         </div>
         
         <div className="flex items-center justify-between">
-          <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-            <input 
-              type="text" 
-              placeholder="Search projects..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#0F1829] border border-[#1E2A45] rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#0D918C] focus:border-transparent shadow-sm"
-            />
-          </div>
+          <SearchBar
+            placeholder="Search projects..."
+            value={searchQuery}
+            onChange={setSearchQuery}
+            className="w-96"
+          />
           <button className="inline-flex items-center gap-2 px-3 py-2 bg-[#1E2A45] border border-[#2A3A5C] rounded-lg text-sm font-medium text-[#9AA5B8] hover:bg-[#2A3A5C] transition-colors shadow-sm">
             <Filter className="w-4 h-4" />
             Filter

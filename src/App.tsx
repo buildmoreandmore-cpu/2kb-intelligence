@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { ClientLayout } from './components/ClientLayout';
@@ -13,6 +13,10 @@ import { PageSkeleton } from './components/Skeleton';
 // Eager-loaded (always needed)
 import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
+import { ClientAccept } from './pages/ClientAccept';
+import { ensureDatabaseExists } from './lib/initDatabase';
 
 // Lazy-loaded pages
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -32,12 +36,18 @@ const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.S
 const ClientPortal = lazy(() => import('./pages/ClientPortal').then(m => ({ default: m.ClientPortal })));
 
 export default function App() {
+  useEffect(() => {
+    ensureDatabaseExists();
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
         {/* Landing — portal selector */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Internal team platform (protected) */}
         <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
@@ -57,6 +67,9 @@ export default function App() {
           <Route path="settings" element={<Suspense fallback={<PageSkeleton />}><Settings /></Suspense>} />
           <Route path="*" element={<div className="p-8 text-gray-500">Module under construction</div>} />
         </Route>
+
+        {/* Client invite acceptance (public) */}
+        <Route path="/client/accept" element={<ClientAccept />} />
 
         {/* Client-facing portal (protected) */}
         <Route path="/client" element={<ProtectedRoute><ClientLayout /></ProtectedRoute>}>

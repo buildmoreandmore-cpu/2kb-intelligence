@@ -97,6 +97,7 @@ export const seedData = {
   exportHistory: [] as any[],
   showProjectImport: false,
   projectImportDefaultId: '' as string,
+  hydrating: false,
 };
 
 type StoreType = typeof seedData & {
@@ -331,8 +332,14 @@ export const useStore = create<StoreType>()(
   setProjectImportDefaultId: (id) => set({ projectImportDefaultId: id }),
   // ─── Supabase: load remote data into store ───
   loadFromSupabase: async () => {
-    const data = await loadAllData();
-    set(data as Partial<StoreType>);
+    set({ hydrating: true });
+    try {
+      const data = await loadAllData();
+      set({ ...data as Partial<StoreType>, hydrating: false });
+    } catch (error) {
+      set({ hydrating: false });
+      throw error;
+    }
   },
   // ─── Auth ───
   login: async (email, password) => {
@@ -344,7 +351,8 @@ export const useStore = create<StoreType>()(
       sessionStorage.setItem('2kb_auth', storeUserId);
       set({ isAuthenticated: true, authUser: storeUserId, currentUserId: storeUserId });
       // Load persisted project data from Supabase in background
-      loadAllData().then(remote => set(remote as Partial<StoreType>)).catch(console.error);
+      const store = useStore.getState();
+      store.loadFromSupabase().catch(console.error);
       return true;
     } catch (err) {
       console.error('Login error:', err);
