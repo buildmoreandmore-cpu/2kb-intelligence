@@ -18,6 +18,7 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
   const projects = useStore(state => state.projects);
   const lockRecords = useStore(state => state.lockRecords);
 
+  const updateBuilding = useStore(state => state.updateBuilding);
   const addImportRecord = useStore(state => state.addImportRecord);
   const customColumns = useStore(state => state.customColumns);
   const addUtilityBillsBatch = useStore(state => state.addUtilityBillsBatch);
@@ -42,6 +43,8 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
   const currentUser = users.find(u => u.id === currentUserId);
   const [deletingBatchId, setDeletingBatchId] = useState<string | null>(null);
   const [replacingBatchId, setReplacingBatchId] = useState<string | null>(null);
+  const [editingSqft, setEditingSqft] = useState(false);
+  const [sqftInput, setSqftInput] = useState('');
 
   const addBatch = useStore(state => state.addBatch);
 
@@ -248,18 +251,44 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                   <span className="text-4xl font-bold text-white animate-stat-pop">{eui}</span>
                   <span className="text-sm text-[#7A8BA8] mb-1">kBtu/sqft/yr</span>
                 </div>
-                {buildingBills.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-[#1E2A45] space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#7A8BA8]">Building Size</span>
-                      <span className="text-white font-medium">{selectedBuilding?.sqft.toLocaleString()} sqft</span>
-                    </div>
+                <div className="mt-4 pt-4 border-t border-[#1E2A45] space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-[#7A8BA8]">Building Size</span>
+                    {editingSqft ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          value={sqftInput}
+                          onChange={e => setSqftInput(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && selectedBuilding) {
+                              updateBuilding(selectedBuilding.id, { sqft: parseInt(sqftInput) || 0 });
+                              setEditingSqft(false);
+                            }
+                            if (e.key === 'Escape') setEditingSqft(false);
+                          }}
+                          className="w-24 px-2 py-0.5 bg-[#0F1829] border border-[#0D918C] rounded text-white text-xs focus:outline-none"
+                          autoFocus
+                        />
+                        <button onClick={() => { if (selectedBuilding) { updateBuilding(selectedBuilding.id, { sqft: parseInt(sqftInput) || 0 }); setEditingSqft(false); } }} className="text-[#37BB26] text-xs font-medium hover:underline">Save</button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setSqftInput(String(selectedBuilding?.sqft || '')); setEditingSqft(true); }}
+                        className={cn("font-medium hover:underline cursor-pointer", (!selectedBuilding?.sqft) ? "text-amber-400" : "text-white")}
+                        title="Click to edit building size"
+                      >
+                        {selectedBuilding?.sqft ? selectedBuilding.sqft.toLocaleString() + ' sqft' : '⚠ Set sqft'}
+                      </button>
+                    )}
+                  </div>
+                  {buildingBills.length > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-[#7A8BA8]">Months of Data</span>
                       <span className="text-[#9AA5B8] font-medium">{buildingBills.length}</span>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               <div className="kpi-card bg-[#121C35] border border-[#1E2A45] rounded-xl p-6">
@@ -322,9 +351,11 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
               <h3 className="text-sm font-semibold text-white mb-6">Monthly Consumption (kWh)</h3>
               {buildingBills.length > 0 ? (
                 <div className="h-56 flex items-end gap-2 pb-6 relative">
-                  {buildingBills.map((bill, i) => {
-                    const maxKwh = Math.max(...buildingBills.map(b => b.electricKwh));
+                  {buildingBills.slice(-12).map((bill, i) => {
+                    const last12 = buildingBills.slice(-12);
+                    const maxKwh = Math.max(...last12.map(b => b.electricKwh), 1);
                     const height = (bill.electricKwh / maxKwh) * 100;
+                    const label = bill.month ? String(bill.month).slice(0, 3) : months[i] || '';
                     return (
                       <div key={bill.id} className="flex-1 flex flex-col items-center gap-2 group relative">
                         <div
@@ -339,7 +370,7 @@ export function Benchmarking({ projectId }: { projectId?: string }) {
                             {bill.electricKwh.toLocaleString()} kWh
                           </div>
                         </div>
-                        <span className="text-[10px] text-[#7A8BA8] uppercase absolute -bottom-6">{months[i]}</span>
+                        <span className="text-[10px] text-[#7A8BA8] uppercase absolute -bottom-6">{label}</span>
                       </div>
                     );
                   })}

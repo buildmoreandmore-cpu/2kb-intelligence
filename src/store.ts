@@ -105,6 +105,7 @@ type StoreType = typeof seedData & {
   addProject: (project: any) => void;
   addAsset: (asset: any) => void;
   updateAsset: (id: string, asset: any) => void;
+  updateBuilding: (id: string, patch: any) => void;
   addUtilityBill: (bill: any) => void;
   addECM: (ecm: any) => void;
   updateECM: (id: string, ecm: any) => void;
@@ -166,6 +167,7 @@ export const useStore = create<StoreType>()(
   },
   addAsset: (asset) => set((state) => ({ assets: [...state.assets, { ...asset, id: `a${Date.now()}` }] })),
   updateAsset: (id, asset) => set((state) => ({ assets: state.assets.map(a => a.id === id ? { ...a, ...asset } : a) })),
+  updateBuilding: (id, patch) => set((state) => ({ buildings: state.buildings.map((b: any) => b.id === id ? { ...b, ...patch } : b) })),
   addUtilityBill: (bill) => set((state) => ({ utilityBills: [...state.utilityBills, { ...bill, id: `u${Date.now()}` }] })),
   addECM: (ecm) => set((state) => ({ ecms: [...state.ecms, { ...ecm, id: `e${Date.now()}` }] })),
   updateECM: (id, ecm) => set((state) => ({ ecms: state.ecms.map(e => e.id === id ? { ...e, ...ecm } : e) })),
