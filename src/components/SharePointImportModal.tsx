@@ -335,8 +335,9 @@ export function SharePointImportModal({ sectionConfig, contextFields, contextLab
   const handleFile = useCallback(async (file: File) => {
     setError(null);
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (!ext || !['xlsx', 'xls', 'csv'].includes(ext)) {
-      setError('Please upload a .xlsx, .xls, or .csv file.');
+    const supported = ['xlsx', 'xls', 'xlsm', 'xlsb', 'ods', 'csv', 'tsv', 'txt'];
+    if (!ext || !supported.includes(ext)) {
+      setError(`Unsupported file type ".${ext}". Accepted: xlsx, xls, xlsm, xlsb, ods, csv, tsv, txt.`);
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
@@ -512,11 +513,11 @@ export function SharePointImportModal({ sectionConfig, contextFields, contextLab
                   {dragOver ? 'Drop file here' : 'Drag & drop your spreadsheet'}
                 </p>
                 <p className="text-xs text-[#7A8BA8] mb-3">or click to browse</p>
-                <p className="text-[10px] text-[#5A6B88]">.xlsx, .xls, or .csv — max 10MB</p>
+                <p className="text-[10px] text-[#5A6B88]">xlsx, xls, xlsm, xlsb, ods, csv, tsv, txt — max 10MB</p>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".xlsx,.xls,.csv"
+                  accept=".xlsx,.xls,.xlsm,.xlsb,.ods,.csv,.tsv,.txt"
                   className="hidden"
                   onChange={onFileSelect}
                 />
