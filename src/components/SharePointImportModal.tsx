@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, FileSpreadsheet, CheckCircle2, ChevronRight, AlertCircle, Brain, AlertTriangle, Plus } from 'lucide-react';
+import { X, Upload, FileSpreadsheet, CheckCircle2, ChevronRight, AlertCircle, Brain, AlertTriangle, Plus, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { parseSpreadsheet, type ParsedSpreadsheet } from '@/lib/parseSpreadsheet';
 import { useStore, type CustomColumnDef } from '@/store';
@@ -185,6 +185,36 @@ export const SECTION_CONFIGS: Record<string, SectionImportConfig> = {
   },
 };
 
+// ─── Sample rows for downloadable CSV templates ───
+const SAMPLE_ROWS: Record<string, string[]> = {
+  utilityBills: ['January 2024', '45200', '4850.00', '320', '890.00', '125'],
+  assets: ['Chiller', 'Trane', 'RTAC150', '2008', 'Fair', 'HVAC', '5', '185000'],
+  ecms: ['ECM-01', 'LED Lighting Retrofit', 'Lighting', '42000', '8500', '15'],
+  benchmarks: ['HVAC', 'K-12 School', '18.50', '$/SF', '22', 'RSMeans 2024'],
+  milestones: ['Investment Grade Audit', '2024-06-15', 'In Progress', 'Ruthie Norton'],
+  risks: ['Equipment lead times delayed', 'High', 'Construction', 'Open', 'Martin Francis'],
+  mvData: ['2024', '125000', '131450'],
+  contractObligations: ['Energy Savings Guarantee', 'Guarantee minimum savings per contract', 'ESCO', '2025-01-01', 'Active', 'Section 4.2'],
+  inspectionFindings: ['ECM-03', '2024-03-15', 'Performance', 'Medium', 'LED driver failure in Zone B', 'Open'],
+  tasks: ['Submit M&V report', 'Ruthie Norton', '2024-07-01', 'High', 'To Do'],
+  timelineItems: ['Construction Phase', '2024-04-01', '2024-09-30', 'In Progress', 'Implementation'],
+  pricingReview: ['LED Lighting Retrofit', '48000', '35000', '44000', '56000'],
+  changeOrders: ['CO-001', 'Added emergency lighting scope', 'Owner', '12500', '5', 'Approved'],
+};
+
+function downloadSampleCSV(config: SectionImportConfig) {
+  const headers = config.knownFields.map(f => f.label);
+  const sampleRow = SAMPLE_ROWS[config.storeKey] ?? config.knownFields.map(() => '');
+  const csv = [headers.join(','), sampleRow.map(v => `"${v}"`).join(',')].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${config.storeKey}-template.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 type MappingChoice = string; // dynamic based on config
 
 interface ColumnMapping {
@@ -237,6 +267,7 @@ export function SharePointImportModal({ sectionConfig, contextFields, contextLab
   const [newCustomCols, setNewCustomCols] = useState<CustomColumnDef[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>(contextFields?.projectId || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showFieldGuide, setShowFieldGuide] = useState(false);
 
   // AI Analysis: detect missing/extra fields after mapping
   const aiAnalysis = useMemo(() => {
@@ -496,6 +527,35 @@ export function SharePointImportModal({ sectionConfig, contextFields, contextLab
                   {error}
                 </div>
               )}
+
+              {/* Field guide + sample download */}
+              <div className="space-y-2">
+                <button
+                  onClick={() => setShowFieldGuide(v => !v)}
+                  className="flex items-center gap-2 text-xs text-[#7A8BA8] hover:text-white transition-colors w-full text-left"
+                >
+                  <ChevronDown className={cn("w-3.5 h-3.5 transition-transform flex-shrink-0", showFieldGuide && "rotate-180")} />
+                  What columns do I need?
+                </button>
+                {showFieldGuide && (
+                  <div className="bg-[#0F1829] border border-[#1E2A45] rounded-lg p-3 space-y-1">
+                    <p className="text-[10px] text-[#5A6B88] uppercase tracking-wider font-medium mb-2">Expected column names for {sectionName}</p>
+                    {knownFields.map(f => (
+                      <div key={f.key} className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-[#CBD2DF]">{f.label}</span>
+                        {f.type === 'number' && <span className="text-[10px] text-[#5A6B88]">numeric</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => downloadSampleCSV(sectionConfig)}
+                  className="flex items-center gap-2 px-3 py-2 w-full bg-[#0D918C]/10 border border-[#0D918C]/30 text-[#0D918C] text-xs font-medium rounded-lg hover:bg-[#0D918C]/20 transition-colors"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 flex-shrink-0" />
+                  Download Sample CSV — {sectionName}
+                </button>
+              </div>
             </div>
           )}
 
@@ -553,6 +613,19 @@ export function SharePointImportModal({ sectionConfig, contextFields, contextLab
                   <p className="text-[10px] text-[#5A6B88] pl-6">Warnings won't block import — data will be imported as-is.</p>
                 </div>
               )}
+
+              {/* Mapping tip */}
+              <div className="flex items-center gap-2 text-[11px] text-[#5A6B88]">
+                <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                Tip: If columns aren&apos;t matching,{' '}
+                <button
+                  onClick={() => downloadSampleCSV(sectionConfig)}
+                  className="text-[#0D918C] hover:underline"
+                >
+                  download the sample template
+                </button>
+                {' '}and reformat your file.
+              </div>
 
               {/* Project Assignment */}
               <div className="flex items-center gap-3 bg-[#0F1829] border border-[#1E2A45] rounded-lg px-3 py-2">
